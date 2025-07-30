@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Happy Birthday My Love ❤️</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Birthday Surprise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <audio id="bgMusic" autoplay loop>
-  <source src="yourmusic.mp3" type="audio/mpeg">
-  Your browser does not support the audio tag.
-</audio>
-<button id="muteBtn">🔊</button>
-  <script>
-  if (window.location.hash === "") {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-  }
-</script>
-  <div id="container">
-    <div id="message"></div>
-    <div id="image-collage"></div>
+
+  <div id="splash" class="center-screen">
+    <h1>Happy Birthday ❤️</h1>
+    <button id="startBtn">Start the Journey</button>
+  </div>
+
+  <div id="gallery" class="hidden">
+    <div class="image-frame">
+      <img id="slide-image" src="" alt="Slide Image" />
+      <div class="caption"></div>
+    </div>
     <button id="nextBtn">Next ➡️</button>
   </div>
+
+  <audio id="bgMusic" loop>
+    <source src="music/your-romantic-subtle-track.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <button id="muteBtn" title="Mute/Unmute Music">🔊</button>
+
+  <canvas id="particles"></canvas>
 
   <script src="script.js"></script>
 </body>
