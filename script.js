@@ -1,179 +1,128 @@
 const sections = [
   {
-    theme: "Kid",
+    name: "kid",
     images: [
-      "assets/kid1.jpg",
-      "assets/kid2.jpg",
-      "assets/kid3.jpg"
+      "images/kid/1.jpg",
+      "images/kid/2.jpg",
+      "images/kid/3.jpg",
+      "images/kid/4.jpg"
     ],
-    title: "Your Little Spark",
-    poem: `In giggles bright and eyes so wide,<br>
-           You danced like stars across the tide.<br>
-           A heart so pure, a soul so free,<br>
-           A world of wonder, you gave to me.`
+    poem: "From baby giggles to eyes so wide,<br>In every picture, innocence hides.<br>My little sunshine, oh so bright,<br>You lit my world with just your light."
   },
   {
-    theme: "Dreamer",
+    name: "bossy",
     images: [
-      "assets/dreamer1.jpg",
-      "assets/dreamer2.jpg"
+      "images/bossy/1.jpg",
+      "images/bossy/2.jpg",
+      "images/bossy/3.jpg",
+      "images/bossy/4.jpg",
+      "images/bossy/5.jpg"
     ],
-    title: "The Dream in Your Eyes",
-    poem: `With books and stars you used to talk,<br>
-           Through skies of thought, you'd freely walk.<br>
-           Your dreams took flight like paper swans,<br>
-           On moonlight wings and hopeful dawns.`
+    poem: "With every stance and hands on hips,<br>You rule my world with those witty quips.<br>A queen in her own, fearless and fine,<br>Even your anger is a poetic sign."
   },
   {
-    theme: "Fighter",
+    name: "teeth",
     images: [
-      "assets/fighter1.jpg",
-      "assets/fighter2.jpg"
+      "images/teeth/1.jpg",
+      "images/teeth/2.jpg"
     ],
-    title: "Strength in Your Stride",
-    poem: `Life tried to weigh your spirit down,<br>
-           But you, my love, you claimed the crown.<br>
-           A warrior wrapped in silk and grace,<br>
-           You faced the storms with fierce embrace.`
+    poem: "Your laugh is my melody,<br>That crooked smile, my remedy.<br>Each tooth a tale, a memory so sweet,<br>Your grin alone makes my day complete."
   },
   {
-    theme: "Lover",
+    name: "saree",
     images: [
-      "assets/lover1.jpg",
-      "assets/lover2.jpg"
+      "images/saree/1.jpg",
+      "images/saree/2.jpg",
+      "images/saree/3.jpg",
+      "images/saree/4.jpg"
     ],
-    title: "The Way You Love",
-    poem: `In every touch, a quiet flame,<br>
-           In whispered names, a sacred name.<br>
-           You love like fire wrapped in snow,<br>
-           A tender warmth the heavens know.`
+    poem: "Wrapped in elegance, you shine and sway,<br>A saree queen who takes breath away.<br>Grace in folds, charm in every line,<br>How did I get this love divine?"
   },
   {
-    theme: "Queen",
+    name: "final",
     images: [
-      "assets/queen1.jpg",
-      "assets/queen2.jpg"
+      "images/final/1.jpg",
+      "images/final/2.jpg",
+      "images/final/3.jpg",
+      "images/final/4.jpg"
     ],
-    title: "My Forever Queen",
-    poem: `Crowned not by gold but by your light,<br>
-           You rule my heart with gentle might.<br>
-           No throne compares, no jewel as rare,<br>
-           As you—my soul’s eternal heir.`
+    poem: "Through every frame, you’re my art,<br>A canvas etched deep in my heart.<br>This journey ends but love remains,<br>Forever flowing in our veins."
   }
 ];
 
-let current = 0;
+const startBtn = document.getElementById("startBtn");
+const splash = document.getElementById("splash");
+const mainContent = document.getElementById("mainContent");
+const sectionTitle = document.querySelector(".section-title");
+const poetry = document.querySelector(".poetry");
+const background = document.querySelector(".background");
+const nextBtn = document.getElementById("nextBtn");
+const muteBtn = document.getElementById("muteBtn");
+const music = document.getElementById("bgMusic");
+const endMessage = document.querySelector(".end-message");
+const balloonContainer = document.getElementById("balloons");
+
+let sectionIndex = 0;
 let imageIndex = 0;
-let bgSlide, overlay, poemBox;
-
-// DOM Ready
-window.onload = () => {
-  bgSlide = document.getElementById("bgSlide");
-  overlay = document.getElementById("overlay");
-  poemBox = document.getElementById("poemBox");
-
-  document.getElementById("startBtn").onclick = startJourney;
-};
-
-function startJourney() {
-  document.getElementById("splash").classList.add("hidden");
-  document.getElementById("themed").classList.remove("hidden");
-  playMusic();
-  showSection(current);
-}
 
 function showSection(index) {
   const section = sections[index];
+  sectionTitle.innerHTML = section.name.toUpperCase();
+  poetry.innerHTML = section.poem;
   imageIndex = 0;
   updateBackground(section.images[imageIndex]);
-  updatePoem(section.title, section.poem);
 }
 
-function updatePoem(title, poem) {
-  poemBox.innerHTML = `
-    <h1>${title}</h1>
-    <p>${poem}</p>
-    <button onclick="nextSection()">Next ➡️</button>
-  `;
+function updateBackground(imagePath) {
+  background.style.backgroundImage = `url(${imagePath})`;
 }
 
-function updateBackground(img) {
-  bgSlide.style.backgroundImage = `url(${img})`;
-}
+startBtn.addEventListener("click", () => {
+  splash.classList.add("hidden");
+  mainContent.classList.remove("hidden");
+  music.play().catch(() => {});
+  showSection(sectionIndex);
+});
 
-function nextSection() {
-  const section = sections[current];
+nextBtn.addEventListener("click", () => {
+  const current = sections[sectionIndex];
   imageIndex++;
-
-  if (imageIndex < section.images.length) {
-    updateBackground(section.images[imageIndex]);
+  if (imageIndex < current.images.length) {
+    updateBackground(current.images[imageIndex]);
   } else {
-    current++;
-    if (current < sections.length) {
-      showSection(current);
+    sectionIndex++;
+    if (sectionIndex < sections.length) {
+      showSection(sectionIndex);
     } else {
-      finishJourney();
+      showFinalMessage();
     }
   }
-}
+});
 
-function finishJourney() {
-  document.getElementById("themed").classList.add("hidden");
-  document.getElementById("conclusion").classList.remove("hidden");
-  startBalloons();
-}
-
-// Music control
-function playMusic() {
-  const music = document.getElementById("bgMusic");
-  const muteBtn = document.getElementById("muteBtn");
-  music.play();
-
-  muteBtn.onclick = () => {
-    music.muted = !music.muted;
-    muteBtn.textContent = music.muted ? "🔇" : "🔊";
-  };
-}
-
-// Balloon logic (basic floating animation)
-function startBalloons() {
-  const canvas = document.getElementById("balloonsCanvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const balloons = Array.from({ length: 20 }, () => createBalloon());
-
-  function createBalloon() {
-    return {
-      x: Math.random() * canvas.width,
-      y: canvas.height + Math.random() * 200,
-      speed: 1 + Math.random() * 2,
-      size: 30 + Math.random() * 40,
-      color: `hsl(${Math.random() * 360}, 80%, 70%)`
-    };
+muteBtn.addEventListener("click", () => {
+  if (music.paused) {
+    music.play();
+    muteBtn.textContent = "🔊";
+  } else {
+    music.pause();
+    muteBtn.textContent = "🔇";
   }
+});
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    balloons.forEach((b) => {
-      ctx.beginPath();
-      ctx.fillStyle = b.color;
-      ctx.moveTo(b.x, b.y);
-      ctx.arc(b.x, b.y, b.size / 2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Heart-shape curve effect
-      ctx.beginPath();
-      ctx.moveTo(b.x, b.y);
-      ctx.lineTo(b.x, b.y + 30);
-      ctx.stroke();
-
-      b.y -= b.speed;
-    });
-    requestAnimationFrame(draw);
-  }
-
-  draw();
+function showFinalMessage() {
+  mainContent.classList.add("hidden");
+  endMessage.classList.remove("hidden");
+  createFloatingImages();
 }
 
+function createFloatingImages() {
+  const allImages = sections.flatMap(s => s.images);
+  allImages.forEach((src, idx) => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.className = "balloon";
+    img.style.left = `${Math.random() * 90}%`;
+    img.style.animationDelay = `${idx * 0.3}s`;
+    balloonContainer.appendChild(img);
+  });
+}
