@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffeef2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#container {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  padding: 20px;
+}
+
+#message {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  min-height: 80px;
+  color: #d6336c;
+}
+
+#image-collage {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#image-collage img {
+  width: 45%;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+#nextBtn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #d6336c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
