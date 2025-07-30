@@ -2,34 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Birthday Surprise</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Journey</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div id="splash" class="center-screen">
+  <!-- Splash Screen -->
+  <section id="splash" class="center-screen">
     <h1>Happy Birthday ❤️</h1>
     <button id="startBtn">Start the Journey</button>
-  </div>
+  </section>
 
-  <div id="gallery" class="hidden">
-    <div class="image-frame">
-      <img id="slide-image" src="" alt="Slide Image" />
-      <div class="caption"></div>
+  <!-- Themed Sections -->
+  <section id="kid" class="themed-section hidden" data-images="kid">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>My Little Star 🌟</h1>
+        <p>
+          Once so small with eyes so wide,<br>
+          A world of wonder you held inside.<br>
+          Laughter soft, a glowing face,<br>
+          You filled the world with warmth and grace.<br><br>
+          Your tiny steps, your fearless heart,<br>
+          A masterpiece, a living art.<br>
+          Before I knew you, I somehow knew —<br>
+          I’d fall for the kid who grew into you. ❤️
+        </p>
+        <button class="nextBtn">Next ➡️</button>
+      </div>
     </div>
-    <button id="nextBtn">Next ➡️</button>
-  </div>
+    <div class="bg-slide" id="bg-kid"></div>
+  </section>
 
-  <audio id="bgMusic" loop>
-    <source src="music/your-romantic-subtle-track.mp3" type="audio/mpeg" />
-    Your browser does not support the audio element.
-  </audio>
+  <section id="bossy" class="themed-section hidden" data-images="bossy">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>The Queen Within 👑</h1>
+        <p>
+          In every glance, a spark of fire,<br>
+          A voice that dares, a will that’s higher.<br>
+          You walk with purpose, bold and free,<br>
+          A boss in bloom — and that’s all *you*, not me.<br><br>
+          Grace and grit, you lead with flair,<br>
+          I’m left in awe, caught in your stare.
+        </p>
+        <button class="nextBtn">Next ➡️</button>
+      </div>
+    </div>
+    <div class="bg-slide" id="bg-bossy"></div>
+  </section>
 
-  <button id="muteBtn" title="Mute/Unmute Music">🔊</button>
+  <section id="teeth" class="themed-section hidden" data-images="teeth">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>That Smile 😄</h1>
+        <p>
+          That dimpled laugh, that silly grin,<br>
+          It pulls me out, it draws me in.<br>
+          In every smile, a secret spell,<br>
+          That only my heart can truly tell.<br><br>
+          You light the world with just your teeth,<br>
+          A joy so raw, so sweet beneath.
+        </p>
+        <button class="nextBtn">Next ➡️</button>
+      </div>
+    </div>
+    <div class="bg-slide" id="bg-teeth"></div>
+  </section>
 
-  <canvas id="particles"></canvas>
+  <section id="saree" class="themed-section hidden" data-images="saree">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>Grace Draped in Threads 💫</h1>
+        <p>
+          Saree drapes, like moonlight soft,<br>
+          You carry poise that lifts me aloft.<br>
+          Every fold, a story told,<br>
+          Of beauty timeless, brave and bold.<br><br>
+          You’re elegance in every sway,<br>
+          A living poem in display.
+        </p>
+        <button class="nextBtn">Next ➡️</button>
+      </div>
+    </div>
+    <div class="bg-slide" id="bg-saree"></div>
+  </section>
+
+  <section id="final" class="themed-section hidden" data-images="final">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>Forever Yours 💖</h1>
+        <p>
+          In all these frames, one truth remains,<br>
+          My love for you defies all chains.<br>
+          A thousand words may never do,<br>
+          To say how much I cherish you.<br><br>
+          Through every page, each memory's hue —<br>
+          All roads in life lead back to you.
+        </p>
+        <button class="nextBtn">Final Message ➡️</button>
+      </div>
+    </div>
+    <div class="bg-slide" id="bg-final"></div>
+  </section>
+
+  <!-- Conclusion Page -->
+  <section id="conclusion" class="themed-section hidden">
+    <div class="overlay">
+      <div class="poem-box">
+        <h1>This Is My Heart 🎈</h1>
+        <p id="personalMessage">
+          You’ve just walked through pieces of you…<br>
+          But what you may not see, is that you’ve made<br>
+          a permanent home in me.<br><br>
+          Thank you for being my light, my fight, my everything.<br>
+          Happy Birthday, love. I’ll never stop celebrating you. 💞
+        </p>
+      </div>
+    </div>
+    <canvas id="balloonsCanvas"></canvas>
+  </section>
 
   <script src="script.js"></script>
 </body>
