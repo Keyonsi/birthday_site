@@ -1,129 +1,124 @@
-/* Base Reset & Font */
+/* General Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-body, html {
-  font-family: 'Great Vibes', cursive;
-  height: 100%;
-  overflow: hidden;
-  background: black;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Splash */
-.center-screen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #f8cdd6, #e3bdf3);
-  text-align: center;
-  padding: 20px;
-  color: white;
-}
-.center-screen h1 {
-  font-size: 3rem;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-}
-.center-screen button {
-  background: rgba(255,255,255,0.3);
-  border: none;
-  padding: 12px 30px;
-  font-size: 1.3rem;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 20px;
-}
-.center-screen button:hover {
-  background: rgba(255,255,255,0.5);
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
 }
 
 .hidden {
   display: none;
 }
 
-/* Themed Sections */
-.themed-section {
+/* Section Layout */
+.section {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 2;
-}
-
-/* Background Slideshow Image */
-.bg-slide {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
+  justify-content: center;
+  flex-direction: column;
   background-size: cover;
   background-position: center;
-  filter: blur(8px) brightness(0.6);
-  z-index: 1;
-  transition: background-image 1s ease-in-out;
+  background-repeat: no-repeat;
+  filter: blur(5px);
 }
 
-/* Overlay & Poem Box */
-.overlay {
+/* Foreground Text Layer */
+.content {
+  position: absolute;
   z-index: 2;
-  max-width: 700px;
-  padding: 20px;
+  padding: 2rem;
   text-align: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
+  max-width: 80%;
 }
 
-.poem-box {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 30px;
-  color: white;
-  font-size: 1.5rem;
-  text-shadow: 1px 1px 3px black;
-  box-shadow: 0 0 30px rgba(255,255,255,0.1);
-  animation: fadeIn 1.5s ease;
-}
-.poem-box h1 {
+.content h1 {
   font-size: 2.5rem;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  color: #ffc0cb;
 }
-.poem-box p {
-  line-height: 1.6;
-}
-.poem-box button {
-  margin-top: 30px;
-  padding: 10px 30px;
+
+.content p {
   font-size: 1.2rem;
-  border-radius: 12px;
-  background: rgba(255 255 255 / 0.25);
+  line-height: 1.6;
+  color: #fff;
+}
+
+/* Button Styling */
+button {
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
   border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  background: #ff69b4;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  transition: background 0.3s ease;
-}
-.poem-box button:hover {
-  background: rgba(255 255 255 / 0.45);
+  transition: background 0.3s;
 }
 
-/* Fade In */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+button:hover {
+  background: #ff85c1;
 }
 
-/* Balloon Canvas */
-#balloonsCanvas {
+/* Final Heart Background */
+.heart-bg {
+  animation: pulse 2s infinite ease-in-out;
+  background-image: url('images/final/1.jpg');
+  background-size: cover;
+  filter: blur(3px);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* Balloon Animation */
+.balloon {
   position: absolute;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 3;
-  pointer-events: none;
+  width: 80px;
+  height: 100px;
+  background: url('images/final/4.jpg') no-repeat center/cover;
+  animation: floatUp 6s ease-in forwards;
+  z-index: 10;
 }
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Music Mute Button */
+#muteBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 1.5rem;
+  background: transparent;
+  border: none;
+  color: white;
+}
+
