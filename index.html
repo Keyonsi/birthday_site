@@ -3,121 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For Her, With Love ❤️</title>
+  <title>For You ❤️</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Background Music -->
-  <audio id="bgMusic" src="yourmusic.mp3" autoplay loop></audio>
-  <button id="muteBtn">🔊</button>
+  <audio id="bgMusic" loop autoplay>
+    <source src="music/soft-love.mp3" type="audio/mpeg" />
+  </audio>
 
-  <!-- Content Container for Each Page -->
-  <div id="content-container">
-    <!-- Dynamic sections will load here -->
-  </div>
+  <!-- Splash Page -->
+  <section id="splash" class="full-page center">
+    <h1 class="fade-in">Hey Love ❤️</h1>
+    <p class="fade-in delay">Ready to take a little journey?</p>
+    <button id="startBtn" class="fade-in delay2">Start the Journey</button>
+  </section>
 
-  <!-- Navigation Button -->
-  <button id="nextBtn">Next ➡️</button>
-
-  <script>
-    const pages = [
-      {
-        name: "kid",
-        images: ["images/kid/1.jpg", "images/kid/2.jpg", "images/kid/3.jpg", "images/kid/4.jpg"],
-        poem: `Your laughter, pure like a child's dream,<br>Moments with you, a magical stream,<br>Every sparkle in your eye,<br>Brings stars to my sky.`
-      },
-      {
-        name: "bossy",
-        images: ["images/bossy/1.jpg", "images/bossy/2.jpg", "images/bossy/3.jpg", "images/bossy/4.jpg", "images/bossy/5.jpg"],
-        poem: `You command with such flair,<br>Grace and fire in your stare,<br>Strong, bold, my guiding light,<br>You make everything feel right.`
-      },
-      {
-        name: "teeth",
-        images: ["images/teeth/1.jpg", "images/teeth/2.jpg"],
-        poem: `Your smile, a crooked spell,<br>In your giggles, I dwell,<br>Even your quirks are divine,<br>I’m so glad you're mine.`
-      },
-      {
-        name: "saree",
-        images: ["images/saree/1.jpg", "images/saree/2.jpg", "images/saree/3.jpg", "images/saree/4.jpg"],
-        poem: `Elegance in every fold,<br>You wear tradition bold,<br>Every drape, a story anew,<br>I lose myself looking at you.`
-      },
-      {
-        name: "final",
-        images: ["images/final/1.jpg", "images/final/2.jpg", "images/final/3.jpg", "images/final/4.jpg"],
-        poem: `From every glance to every touch,<br>You’ve given me more than much,<br>This journey, these pages, this song,<br>In my heart, you’ve always belonged.`
-      }
-    ];
-
-    let currentPage = 0;
-    const contentContainer = document.getElementById("content-container");
-    const nextBtn = document.getElementById("nextBtn");
-
-    function createPageContent({ images, poem }) {
-      const slide = document.createElement("div");
-      slide.className = "page";
-
-      const bgContainer = document.createElement("div");
-      bgContainer.className = "slideshow";
-
-      images.forEach((src, index) => {
-        const img = document.createElement("img");
-        img.src = src;
-        img.style.animationDelay = `${index * 5}s`;
-        bgContainer.appendChild(img);
-      });
-
-      const poemDiv = document.createElement("div");
-      poemDiv.className = "poem";
-      poemDiv.innerHTML = poem;
-
-      slide.appendChild(bgContainer);
-      slide.appendChild(poemDiv);
-      contentContainer.innerHTML = "";
-      contentContainer.appendChild(slide);
-    }
-
-    function showFinalAnimation() {
-      nextBtn.style.display = "none";
-      contentContainer.innerHTML = `
-        <div class="final-page">
-          <div class="heart-bg"></div>
-          <div class="poem">Thank you for being born. You are my blessing, my light, my forever. 🌸</div>
-          <div class="balloons"></div>
+  <!-- Main Content Wrapper -->
+  <section id="content" class="hidden">
+    <div id="slide" class="slide">
+      <div class="overlay">
+        <div class="poem" id="poemText"></div>
+        <div class="nav-buttons">
+          <button id="backBtn" class="nav hidden">⟵</button>
+          <button id="nextBtn" class="nav hidden">⟶</button>
         </div>
-      `;
+      </div>
+      <img id="bgImage" class="background" />
+    </div>
+  </section>
 
-      const balloons = document.querySelector(".balloons");
-      pages.flatMap(p => p.images).forEach((imgSrc, i) => {
-        const balloon = document.createElement("img");
-        balloon.src = imgSrc;
-        balloon.className = "balloon";
-        balloon.style.left = `${Math.random() * 80 + 10}%`;
-        balloon.style.animationDelay = `${i * 0.5}s`;
-        balloons.appendChild(balloon);
-      });
-    }
+  <!-- Final Page -->
+  <section id="final" class="hidden full-page center">
+    <h1 class="balloon-rise">Love You ❤️</h1>
+    <div class="balloons"></div>
+  </section>
 
-    nextBtn.addEventListener("click", () => {
-      if (currentPage < pages.length) {
-        createPageContent(pages[currentPage]);
-        currentPage++;
-        if (currentPage === pages.length) nextBtn.textContent = "💌 Finish";
-      } else {
-        showFinalAnimation();
-      }
-    });
-
-    // Start with first page
-    createPageContent(pages[currentPage]);
-    currentPage++;
-
-    // Music Mute Toggle
-    const bgMusic = document.getElementById("bgMusic");
-    const muteBtn = document.getElementById("muteBtn");
-    muteBtn.onclick = () => {
-      bgMusic.muted = !bgMusic.muted;
-      muteBtn.textContent = bgMusic.muted ? "🔇" : "🔊";
-    };
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
