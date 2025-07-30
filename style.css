@@ -1,3 +1,50 @@
+#image-collage img {
+  width: 45%;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 4px solid #fff;        /* white border */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+}
+
+#image-collage img:hover {
+  transform: scale(1.05);
+}
+
+#message.final {
+  font-size: 1.4rem;
+  color: #b71c1c;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+.message p {
+  margin: 12px 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #aa1c55;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  font-weight: 500;
+  transition: all 0.4s ease;
+}
+
+.line.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -56,4 +103,13 @@ body {
   border-radius: 50%;
   font-size: 18px;
   cursor: pointer;
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
