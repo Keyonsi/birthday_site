@@ -1,82 +1,82 @@
-const slides = [
-  {
-    bg: 'assets/kid.jpg',
-    message: "In your giggles I found my peace,\nA kid with dreams that never cease.",
-  },
-  {
-    bg: 'assets/teen.jpg',
-    message: "Through teenage storms and rebel cries,\nYou bloomed beneath the open skies.",
-  },
-  {
-    bg: 'assets/adult.jpg',
-    message: "With fire and grace, you chase your way,\nA woman fierce, who lights my day.",
-  },
-  {
-    bg: 'assets/us.jpg',
-    message: "We laughed, we fell, we rose anew,\nThis love I live because of you.",
-  },
-  {
-    bg: 'assets/heart.jpg',
-    message: "I love you.\nMore than poems, more than skies.\nLet every moment whisper why.",
-    isFinal: true
-  }
-];
+const sections = ['kid', 'teeth', 'saree', 'bossy', 'final'];
+let current = 0;
 
-let currentSlide = 0;
-const container = document.querySelector('.container');
-const text = document.getElementById('poem');
-const nav = document.getElementById('nav-buttons');
 const nextBtn = document.getElementById('next');
 const backBtn = document.getElementById('back');
 
-function showSlide(index) {
-  const slide = slides[index];
-  container.style.backgroundImage = `url(${slide.bg})`;
-  text.textContent = slide.message;
+const imageCounts = {
+  kid: 4,
+  teeth: 2,
+  saree: 4,
+  bossy: 5,
+  final: 4
+};
 
-  // Handle final slide separately
-  if (slide.isFinal) {
-    launchBalloons();
-  }
+function showSection(index) {
+  document.querySelectorAll('.section').forEach((sec, i) => {
+    sec.classList.remove('active');
+    if (i === index) sec.classList.add('active');
+  });
 
-  // Button control
-  backBtn.disabled = index === 0;
-  nextBtn.disabled = index === slides.length - 1;
+  backBtn.hidden = index === 0;
+  nextBtn.hidden = true;
 
-  // Delayed nav visibility
-  nav.classList.remove('show');
-  setTimeout(() => nav.classList.add('show'), 2000);
+  setTimeout(() => {
+    if (index < sections.length - 1) nextBtn.hidden = false;
+  }, 3000);
+
+  if (sections[index] === 'final') spawnBalloons();
 }
 
-function launchBalloons() {
-  for (let i = 0; i < 10; i++) {
-    const balloon = document.createElement('div');
-    balloon.classList.add('balloon');
-    balloon.style.left = `${Math.random() * 100}%`;
-    balloon.style.animationDelay = `${Math.random() * 2}s`;
-    container.appendChild(balloon);
-
-    setTimeout(() => {
-      balloon.remove();
-    }, 6000); // Clean up after animation
+function spawnBalloons() {
+  const final = document.getElementById('final');
+  final.innerHTML += `<p class="poem">You are the love I never knew I needed,<br>In your arms, my soul is completed.</p>`;
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'balloon';
+    b.style.left = `${Math.random() * 90 + 5}%`;
+    b.style.animationDelay = `${Math.random() * 5}s`;
+    b.style.background = `hsl(${Math.random() * 360}, 80%, 70%)`;
+    final.appendChild(b);
   }
 }
 
 nextBtn.addEventListener('click', () => {
-  if (currentSlide < slides.length - 1) {
-    currentSlide++;
-    showSlide(currentSlide);
+  if (current < sections.length - 1) {
+    current++;
+    showSection(current);
   }
 });
 
 backBtn.addEventListener('click', () => {
-  if (currentSlide > 0) {
-    currentSlide--;
-    showSlide(currentSlide);
+  if (current > 0) {
+    current--;
+    showSection(current);
   }
 });
 
-// Auto start
-window.addEventListener('load', () => {
-  showSlide(currentSlide);
+sections.forEach((id, index) => {
+  const sec = document.getElementById(id);
+  const poem = {
+    kid: "To the silly smile that melts my soul,<br>You're my forever mischief, my little foal.",
+    teeth: "Each laugh that flashes those teeth so bright,<br>Lights up my day like morning light.",
+    saree: "Wrapped in grace, you take my breath,<br>A vision in silk, more than I could ever guess.",
+    bossy: "You rule my world with gentle might,<br>Even your scoldings feel so right.",
+    final: ""
+  }[id];
+
+  if (poem) {
+    sec.innerHTML = `<div class="poem">${poem}</div>`;
+  }
+
+  let imgIndex = 1;
+  const total = imageCounts[id];
+  sec.style.backgroundImage = `url('images/${id}/1.jpg')`;
+
+  setInterval(() => {
+    imgIndex = (imgIndex % total) + 1;
+    sec.style.backgroundImage = `url('images/${id}/${imgIndex}.jpg')`;
+  }, 5000);
 });
+
+showSection(0);
