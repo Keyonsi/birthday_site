@@ -1,3 +1,26 @@
+.section {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 1s ease;
+  padding: 1rem;
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4); /* dark overlay to soften noise */
+  backdrop-filter: blur(2px);    /* gentle blur for elegance */
+  z-index: 0;
+}
+
 body, html {
   margin: 0;
   padding: 0;
