@@ -3,41 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For You ❤️</title>
+  <title>For You, My Love</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <audio id="bgMusic" loop autoplay>
-    <source src="music/soft-love.mp3" type="audio/mpeg" />
+  <div id="heart-overlay"></div>
+  <div id="container">
+    <div class="section" id="kid"></div>
+    <div class="section" id="teeth"></div>
+    <div class="section" id="saree"></div>
+    <div class="section" id="bossy"></div>
+    <div class="section" id="final"></div>
+  </div>
+  <div id="nav">
+    <button id="back" hidden>&larr; Back</button>
+    <button id="next" hidden>Next &rarr;</button>
+  </div>
+  <audio autoplay loop hidden>
+    <source src="yourmusic.mp3" type="audio/mpeg">
   </audio>
-
-  <!-- Splash Page -->
-  <section id="splash" class="full-page center">
-    <h1 class="fade-in">Hey Love ❤️</h1>
-    <p class="fade-in delay">Ready to take a little journey?</p>
-    <button id="startBtn" class="fade-in delay2">Start the Journey</button>
-  </section>
-
-  <!-- Main Content Wrapper -->
-  <section id="content" class="hidden">
-    <div id="slide" class="slide">
-      <div class="overlay">
-        <div class="poem" id="poemText"></div>
-        <div class="nav-buttons">
-          <button id="backBtn" class="nav hidden">⟵</button>
-          <button id="nextBtn" class="nav hidden">⟶</button>
-        </div>
-      </div>
-      <img id="bgImage" class="background" />
-    </div>
-  </section>
-
-  <!-- Final Page -->
-  <section id="final" class="hidden full-page center">
-    <h1 class="balloon-rise">Love You ❤️</h1>
-    <div class="balloons"></div>
-  </section>
-
   <script src="script.js"></script>
 </body>
 </html>
