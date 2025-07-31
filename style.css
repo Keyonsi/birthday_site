@@ -1,134 +1,90 @@
-/* Reset and Base Styles */
-* {
+body, html {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
   height: 100%;
   font-family: 'Great Vibes', cursive;
-  background: linear-gradient(135deg, #ffdde1, #ee9ca7);
-  overflow-x: hidden;
-  color: white;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  overflow: hidden;
 }
 
-/* Layout */
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 16px;
-  text-align: center;
-  background-size: cover;
-  background-position: center;
-  transition: background-image 1s ease-in-out;
-}
-
-/* Love Theme Typography */
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
-}
-
-p {
-  font-size: 1.2rem;
-  margin: 10px 0;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.2);
-  line-height: 1.6;
-}
-
-button {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  margin: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.hidden {
-  display: none;
-}
-
-/* Responsive Text */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 2rem;
-  }
-
-  p {
-    font-size: 1rem;
-  }
-
-  button {
-    font-size: 0.9rem;
-    padding: 10px 20px;
-  }
-}
-
-/* Heart Background Overlay */
-.heart-overlay::before {
-  content: "";
+#heart-overlay {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-image: url('assets/hearts-bg.png');
-  background-size: cover;
-  background-repeat: no-repeat;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg></svg>');
   opacity: 0.1;
-  z-index: 0;
-}
-
-/* Balloon Animation (for Final Slide) */
-@keyframes floatUp {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-100vh); opacity: 0; }
-}
-
-.balloon {
-  position: absolute;
-  bottom: 0;
-  width: 40px;
-  height: 60px;
-  background: radial-gradient(circle at 30% 30%, #ff5a92, #e60073);
-  border-radius: 50% 50% 45% 45%;
-  animation: floatUp 6s ease-in-out forwards;
   z-index: 1;
   pointer-events: none;
 }
 
-/* Slide Transition */
-.fade {
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
-
-.fade.active {
-  opacity: 1;
-}
-
-/* Delayed Nav Buttons */
-#nav-buttons {
+#container {
   display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 20px;
-  opacity: 0;
-  transition: opacity 1s ease-in;
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+  overflow: hidden;
+  position: relative;
 }
 
-#nav-buttons.show {
+.section {
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 1s ease;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  backdrop-filter: blur(4px);
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  padding: 1rem;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.section.active {
   opacity: 1;
+  visibility: visible;
+  z-index: 3;
+}
+
+#nav {
+  position: absolute;
+  bottom: 1rem;
+  width: 100%;
+  text-align: center;
+  z-index: 5;
+}
+
+button {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  margin: 0 0.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-family: sans-serif;
+}
+
+#final .balloon {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  background: red;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: floatUp 5s infinite ease-in;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100vh); opacity: 0; }
 }
