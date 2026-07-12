@@ -4,313 +4,216 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0a0a1a" />
-  <meta name="description" content="Ek khaas birthday experience — sirf tumhare liye." />
+  <meta name="description" content="Pranu ke liye — ek khaas birthday experience." />
   <meta property="og:title" content="Pranu ke liye ❤️" />
   <meta property="og:description" content="Ek khaas birthday experience — sirf tumhare liye." />
   <title>Pranu ke liye ❤️</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&family=Noto+Sans+Devanagari:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
 
-  <!-- GSAP CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Config -->
   <script src="config.js"></script>
-
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════
-       LOADING SCREEN
-  ═══════════════════════════════════════════ -->
-  <div id="loader">
-    <div class="loader-heart">❤️</div>
-    <p class="loader-text">Kuch khaas aa raha hai...</p>
+  <!-- ═══ LOADER — Tap to begin ═══ -->
+  <div id="loader" role="button" tabindex="0" aria-label="Tap to begin the experience">
+    <canvas id="loader-canvas"></canvas>
+    <div class="loader-inner">
+      <div class="loader-heart" aria-hidden="true">❤️</div>
+      <p class="loader-name">Pranu</p>
+      <p class="loader-tap">Tap karo shuruu karne ke liye...</p>
+    </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════
-       MUSIC PLAYER (floating)
-  ═══════════════════════════════════════════ -->
-  <div id="music-player" class="hidden" aria-label="Music controls">
-    <button id="music-btn" aria-label="Play/pause music">
-      <span id="music-icon">▶</span>
+  <!-- ═══ MUSIC PLAYER ═══ -->
+  <div id="music-player" class="ui-hidden" aria-label="Music controls">
+    <button id="music-btn" aria-label="Play or pause music">
+      <span id="music-icon">❚❚</span>
     </button>
     <div class="music-info">
-      <span class="music-note">♪</span>
+      <span class="music-note" aria-hidden="true">♪</span>
       <span id="music-label">For Pranu</span>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════
-       CHAPTER PROGRESS (storybook dots)
-  ═══════════════════════════════════════════ -->
-  <nav id="chapter-nav" class="hidden" aria-label="Chapter navigation">
+  <!-- ═══ CHAPTER NAV ═══ -->
+  <nav id="chapter-nav" class="ui-hidden" aria-label="Story chapters">
     <div class="chapter-dots">
-      <button class="chapter-dot active" data-chapter="0" aria-label="Chapter 1">
-        <span class="dot-inner"></span>
-        <span class="dot-label">I</span>
-      </button>
-      <div class="dot-connector"></div>
-      <button class="chapter-dot" data-chapter="1" aria-label="Chapter 2">
-        <span class="dot-inner"></span>
-        <span class="dot-label">II</span>
-      </button>
-      <div class="dot-connector"></div>
-      <button class="chapter-dot" data-chapter="2" aria-label="Chapter 3">
-        <span class="dot-inner"></span>
-        <span class="dot-label">III</span>
-      </button>
-      <div class="dot-connector"></div>
-      <button class="chapter-dot" data-chapter="3" aria-label="Chapter 4">
-        <span class="dot-inner"></span>
-        <span class="dot-label">IV</span>
-      </button>
-      <div class="dot-connector"></div>
-      <button class="chapter-dot" data-chapter="4" aria-label="Chapter 5">
-        <span class="dot-inner"></span>
-        <span class="dot-label">V</span>
-      </button>
+      <button class="chapter-dot active" data-chapter="0" aria-label="Chapter 1: Pehle"><span class="dot-inner"></span><span class="dot-label">I</span></button>
+      <div class="dot-line"></div>
+      <button class="chapter-dot" data-chapter="1" aria-label="Chapter 2: Teri Kahani"><span class="dot-inner"></span><span class="dot-label">II</span></button>
+      <div class="dot-line"></div>
+      <button class="chapter-dot" data-chapter="2" aria-label="Chapter 3: Baarish Mein"><span class="dot-inner"></span><span class="dot-label">III</span></button>
+      <div class="dot-line"></div>
+      <button class="chapter-dot" data-chapter="3" aria-label="Chapter 4: Doori"><span class="dot-inner"></span><span class="dot-label">IV</span></button>
+      <div class="dot-line"></div>
+      <button class="chapter-dot" data-chapter="4" aria-label="Chapter 5: Aaj Aur Hamesha"><span class="dot-inner"></span><span class="dot-label">V</span></button>
     </div>
   </nav>
 
-  <!-- ═══════════════════════════════════════════
-       MAIN EXPERIENCE WRAPPER
-  ═══════════════════════════════════════════ -->
   <main id="experience">
 
-    <!-- CHAPTER 1: PEHLE (Before Her) -->
-    <section id="ch1" class="chapter chapter--dark" data-chapter="0" aria-label="Chapter 1: Pehle">
-      <canvas id="ch1-canvas" class="chapter-canvas"></canvas>
+    <!-- ═══ CHAPTER 1: PEHLE ═══ -->
+    <section id="ch1" class="chapter" data-chapter="0" aria-label="Chapter 1">
+      <canvas id="ch1-canvas" class="bg-canvas"></canvas>
+      <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
+      <div class="fog" aria-hidden="true"></div>
 
-      <!-- Rain overlay -->
-      <div class="rain-container" id="rain1" aria-hidden="true"></div>
-
-      <!-- Fog layer -->
-      <div class="fog-layer" aria-hidden="true"></div>
-
-      <div class="chapter-content ch1-content">
-        <div class="chapter-badge" id="ch1-badge">
-          <span class="chapter-num">Chapter I</span>
-          <div class="badge-line"></div>
-        </div>
-
-        <h1 class="ch1-title" id="ch1-title">
-          <span class="title-word">Pehle...</span>
-        </h1>
-
-        <div class="typewriter-block" id="ch1-typewriter" aria-live="polite">
-          <p class="typewriter-line" id="tw-line"></p>
-        </div>
-
-        <div class="ch1-poem" id="ch1-poem">
+      <div class="ch-content">
+        <div class="ch-badge"><span>Chapter I</span><div class="badge-rule"></div></div>
+        <h1 class="ch1-title">Pehle...</h1>
+        <p class="ch1-typewriter" id="tw" aria-live="polite"></p>
+        <div class="ch1-poem" id="poem">
           <p>Roz uthna,</p>
           <p>Roz so jaana,</p>
           <p>Koi rang nahi tha zindagi mein.</p>
-          <p class="poem-pause">Tab tum nahi the.</p>
+          <p class="poem-emphasis">Tab tum nahi the.</p>
         </div>
-
-        <button class="begin-btn" id="begin-btn" aria-label="Begin the journey">
-          <span class="btn-text">Kahani Shuruu Karo</span>
-          <span class="btn-sparkle">✨</span>
-        </button>
-
-        <!-- Floating particles injected by JS -->
-      </div>
-    </section>
-
-    <!-- CHAPTER 2: JAB TUM MILE (How it began) -->
-    <section id="ch2" class="chapter chapter--golden hidden" data-chapter="1" aria-label="Chapter 2: Jab Tum Mile">
-      <div class="ch2-bg-gradient" aria-hidden="true"></div>
-      <div class="floating-petals-container" id="petals2" aria-hidden="true"></div>
-
-      <div class="chapter-content ch2-content">
-        <div class="chapter-badge">
-          <span class="chapter-num">Chapter II</span>
-          <div class="badge-line"></div>
-        </div>
-        <h2 class="section-title ch2-title">Jab Tum Mile</h2>
-        <p class="section-subtitle">Ek galti ne sab badal diya...</p>
-
-        <!-- Memory cards grid -->
-        <div class="memory-grid" id="memory-grid" role="list" aria-label="Our memories">
-          <!-- Injected by JS -->
-        </div>
-
-        <!-- Memory detail modal -->
-        <div class="memory-modal hidden" id="memory-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div class="modal-inner">
-            <button class="modal-close" id="modal-close" aria-label="Close memory">✕</button>
-            <div class="modal-photo-frame">
-              <img id="modal-photo" src="" alt="" loading="lazy" />
-              <div class="photo-tape photo-tape--top"></div>
-              <div class="photo-tape photo-tape--bottom"></div>
-            </div>
-            <div class="modal-text">
-              <h3 id="modal-title" class="modal-title"></h3>
-              <p id="modal-desc" class="modal-desc"></p>
-            </div>
-            <div class="modal-confetti" id="modal-confetti" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <button class="chapter-next-btn" id="ch2-next" aria-label="Next chapter">
-          Aage Chalein →
+        <button class="begin-btn" id="begin-btn">
+          <span>Kahani Shuruu Karo</span>
+          <span class="btn-spark" aria-hidden="true">✨</span>
         </button>
       </div>
     </section>
 
-    <!-- CHAPTER 3: BAARISH MEIN (Monsoon love) -->
-    <section id="ch3" class="chapter chapter--monsoon hidden" data-chapter="2" aria-label="Chapter 3: Baarish Mein">
-      <canvas id="ch3-canvas" class="chapter-canvas"></canvas>
-      <div class="rain-container heavy" id="rain3" aria-hidden="true"></div>
-      <div class="ch3-warm-glow" aria-hidden="true"></div>
+    <!-- ═══ CHAPTER 2: TERI KAHANI (Photo Story) ═══ -->
+    <section id="ch2" class="chapter ch-hidden" data-chapter="1" aria-label="Chapter 2: Teri Kahani">
+      <!-- Ken Burns photo layers -->
+      <div class="ps-bg" id="ps-bg">
+        <div class="ps-layer" id="ps-layer-a"></div>
+        <div class="ps-layer" id="ps-layer-b"></div>
+      </div>
 
-      <div class="chapter-content ch3-content">
-        <div class="chapter-badge">
-          <span class="chapter-num">Chapter III</span>
-          <div class="badge-line"></div>
+      <!-- Era-specific particle canvas -->
+      <canvas class="bg-canvas" id="ps-canvas"></canvas>
+
+      <!-- Dramatic color overlay -->
+      <div class="ps-color-overlay" id="ps-overlay"></div>
+
+      <!-- Era content -->
+      <div class="ps-content" id="ps-content">
+        <div class="ps-era-badge" id="ps-era-badge">
+          <span class="ps-era-emoji" id="ps-emoji"></span>
+          <span class="ps-era-name" id="ps-era-name"></span>
         </div>
-        <h2 class="section-title ch3-title">Baarish Mein</h2>
+        <p class="ps-subtitle" id="ps-subtitle"></p>
+        <div class="ps-progress-dots" id="ps-progress-dots" aria-hidden="true"></div>
+        <p class="ps-tap-hint" id="ps-tap-hint">tap to continue</p>
+      </div>
 
-        <!-- Main rainy memory -->
-        <div class="rain-memory-card" id="rain-memory">
-          <div class="rain-memory-inner">
-            <div class="rain-memory-icon">🌧️</div>
-            <h3>Woh Garden, Woh Baarish</h3>
-            <p id="rain-memory-text"></p>
-          </div>
+      <!-- Special "married" dream frame (last era) -->
+      <div class="dream-frame ui-hidden" id="dream-frame" aria-label="A dream of the future">
+        <div class="dream-inner">
+          <div class="dream-ring" aria-hidden="true">💍</div>
+          <p class="dream-title">Ek Din...</p>
+          <p class="dream-sub">Yeh sapna sach hoga.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CHAPTER 3: BAARISH MEIN ═══ -->
+    <section id="ch3" class="chapter ch-hidden" data-chapter="2" aria-label="Chapter 3: Baarish Mein">
+      <canvas class="bg-canvas" id="ch3-canvas"></canvas>
+      <div class="rain-wrap heavy" id="rain3" aria-hidden="true"></div>
+      <div class="warm-glow" aria-hidden="true"></div>
+
+      <div class="ch-content">
+        <div class="ch-badge"><span>Chapter III</span><div class="badge-rule"></div></div>
+        <h2 class="sec-title">Baarish Mein</h2>
+
+        <div class="rain-card">
+          <span class="rain-card-icon" aria-hidden="true">🌧️</span>
+          <h3>Woh Garden, Woh Baarish</h3>
+          <p id="rain-text"></p>
         </div>
 
-        <!-- Moment tiles -->
-        <div class="moments-list" id="moments-list" aria-label="Special moments">
-          <!-- Injected by JS -->
-        </div>
+        <div class="moments-list" id="moments-list" aria-label="Moments together"></div>
 
-        <!-- Floating hearts with reasons -->
         <div class="hearts-section">
-          <p class="hearts-instruction">❤️ Dil chhuo aur jaano...</p>
-          <div class="hearts-container" id="hearts-container" aria-label="Reasons I love you">
-            <!-- Injected by JS -->
-          </div>
-          <p class="hearts-progress" id="hearts-progress" aria-live="polite"></p>
+          <p class="hearts-hint">❤️ Dil chhuo, raaz khulengi...</p>
+          <div class="hearts-wrap" id="hearts-wrap" aria-label="Reasons I love you"></div>
+          <p class="hearts-count" id="hearts-count" aria-live="polite"></p>
         </div>
 
-        <button class="chapter-next-btn" id="ch3-next" aria-label="Next chapter">
-          Aage Chalein →
-        </button>
+        <button class="next-btn" id="ch3-next">Aage Chalein →</button>
       </div>
     </section>
 
-    <!-- CHAPTER 4: JAB TUM GAYI (Distance) -->
-    <section id="ch4" class="chapter chapter--dusk hidden" data-chapter="3" aria-label="Chapter 4: Jab Tum Gayi">
-      <div class="ch4-gradient" aria-hidden="true"></div>
-      <div class="dust-particles" id="dust4" aria-hidden="true"></div>
+    <!-- ═══ CHAPTER 4: DOORI ═══ -->
+    <section id="ch4" class="chapter ch-hidden" data-chapter="3" aria-label="Chapter 4: Doori">
+      <canvas class="bg-canvas" id="ch4-canvas"></canvas>
 
-      <div class="chapter-content ch4-content">
-        <div class="chapter-badge">
-          <span class="chapter-num">Chapter IV</span>
-          <div class="badge-line"></div>
-        </div>
-        <h2 class="section-title ch4-title">Jab Tum Gayi...</h2>
+      <div class="ch-content">
+        <div class="ch-badge"><span>Chapter IV</span><div class="badge-rule"></div></div>
+        <h2 class="sec-title">Jab Tum Gayi...</h2>
         <p class="ch4-desc" id="ch4-desc"></p>
 
-        <!-- Distance moments (fade in one by one) -->
-        <div class="distance-moments" id="distance-moments" aria-label="Distance moments">
-          <!-- Injected by JS -->
-        </div>
+        <div class="dist-moments" id="dist-moments"></div>
 
-        <!-- Letter from him -->
-        <div class="distance-letter" id="distance-letter">
+        <div class="letter-wrap">
           <div class="letter-paper">
-            <div class="letter-icon">✉️</div>
-            <p id="distance-letter-text" class="letter-body"></p>
+            <span class="letter-icon" aria-hidden="true">✉️</span>
+            <p id="letter-text" class="letter-body"></p>
           </div>
         </div>
 
-        <button class="chapter-next-btn" id="ch4-next" aria-label="Next chapter">
-          Aur Aage... →
-        </button>
+        <button class="next-btn" id="ch4-next">Aur Aage... →</button>
       </div>
     </section>
 
-    <!-- CHAPTER 5: AAJ AUR HAMESHA (Present & Future) -->
-    <section id="ch5" class="chapter chapter--sunrise hidden" data-chapter="4" aria-label="Chapter 5: Aaj Aur Hamesha">
-      <canvas id="ch5-canvas" class="chapter-canvas"></canvas>
-      <div class="aurora-bg" id="aurora" aria-hidden="true"></div>
-      <div class="lanterns-container" id="lanterns" aria-hidden="true"></div>
+    <!-- ═══ CHAPTER 5: AAJ AUR HAMESHA ═══ -->
+    <section id="ch5" class="chapter ch-hidden" data-chapter="4" aria-label="Chapter 5: Aaj Aur Hamesha">
+      <canvas class="bg-canvas" id="ch5-canvas"></canvas>
+      <div class="aurora" id="aurora" aria-hidden="true"></div>
+      <div class="lanterns" id="lanterns" aria-hidden="true"></div>
 
-      <div class="chapter-content ch5-content">
-        <div class="chapter-badge">
-          <span class="chapter-num">Chapter V</span>
-          <div class="badge-line"></div>
+      <div class="ch-content ch5-content">
+        <div class="ch-badge"><span>Chapter V</span><div class="badge-rule"></div></div>
+
+        <div class="bday-block" id="bday-block">
+          <div class="bday-fireworks" id="fw5" aria-hidden="true"></div>
+          <h2 class="bday-title">Happy Birthday</h2>
+          <div class="bday-name-wrap">
+            <span class="bday-name" id="bday-name"></span>
+            <span aria-hidden="true"> 🎂</span>
+          </div>
+          <p class="anni-tag" id="anni-tag"></p>
         </div>
 
-        <!-- Birthday + Anniversary header -->
-        <div class="birthday-header" id="birthday-header">
-          <div class="bday-fireworks" id="fireworks5" aria-hidden="true"></div>
-          <h2 class="birthday-title" id="bday-title">
-            Happy Birthday<br/>
-            <span class="bday-name" id="bday-name">Pranu</span>
-            <span class="bday-emoji"> 🎂</span>
-          </h2>
-          <p class="anniversary-tag" id="anni-tag"></p>
-        </div>
-
-        <!-- Wishes balloons -->
-        <div class="wishes-section">
+        <div class="wishes-block">
           <h3 class="wishes-heading">Mere Dil Ki Duaayein...</h3>
-          <div class="wishes-container" id="wishes-container" aria-label="Birthday wishes">
-            <!-- Injected by JS -->
-          </div>
+          <div class="wishes-wrap" id="wishes-wrap"></div>
         </div>
 
-        <!-- Ending letter -->
-        <div class="ending-letter-section" id="ending-letter-section">
-          <div class="letter-reveal">
-            <div class="letter-envelope" id="letter-envelope" role="button" tabindex="0" aria-label="Open the letter" aria-expanded="false">
-              <div class="envelope-body">
-                <span class="envelope-icon">💌</span>
-                <p>Ek letter hai tumhare liye...</p>
-                <span class="envelope-tap">Tap karo</span>
-              </div>
-            </div>
-
-            <div class="full-letter hidden" id="full-letter" aria-live="polite">
-              <div class="letter-scroll">
-                <div class="letter-header-deco">❤️</div>
-                <div id="letter-content" class="letter-content-text"></div>
-              </div>
+        <div class="envelope-block">
+          <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the letter" aria-expanded="false">
+            <span class="env-icon" aria-hidden="true">💌</span>
+            <p>Ek letter hai tumhare liye...</p>
+            <span class="env-tap">Tap karo</span>
+          </div>
+          <div class="full-letter ui-hidden" id="full-letter" aria-live="polite">
+            <div class="letter-scroll">
+              <div class="letter-deco" aria-hidden="true">❤️</div>
+              <div id="letter-body-ch5" class="letter-body-text"></div>
             </div>
           </div>
         </div>
 
-        <!-- Closing lines -->
-        <div class="closing-block hidden" id="closing-block">
-          <p class="closing-line1" id="closing1"></p>
-          <p class="closing-line2" id="closing2"></p>
+        <div class="closing ui-hidden" id="closing">
+          <p class="close1" id="close1"></p>
+          <p class="close2" id="close2"></p>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Audio element -->
-  <audio id="bg-audio" loop preload="none">
-    <source src="yourmusic.mp3" type="audio/mpeg" />
-  </audio>
+  <audio id="bg-audio" loop preload="auto"><source src="yourmusic.mp3" type="audio/mpeg"/></audio>
 
-  <!-- Rain audio -->
-  <audio id="rain-audio" loop preload="none">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- Main script -->
   <script src="script.js"></script>
 </body>
 </html>
