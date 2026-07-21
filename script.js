@@ -1,5 +1,5 @@
 /* ============================================================
-   MONSOON DIARIES — Script Engine Overhaul (Thematic Audio & Polaroid)
+   MONSOON DIARIES — Overhauled Script Engine
    ============================================================ */
 
 'use strict';
@@ -17,26 +17,26 @@ let currentChapter = -1;
 let currentPlayingAudio = null;
 let bgMusicPlaying = false;
 
-// Crossfade Audio Helper
+// Crossfade Audio Logic
 function switchChapterAudio(newIdx) {
   const targetAudio = chapterAudios[newIdx];
   if (!targetAudio || !bgMusicPlaying) return;
 
   // Fade out current audio
   if (currentPlayingAudio && currentPlayingAudio !== targetAudio) {
-    fadeAudio(currentPlayingAudio, 0, 1000, true);
+    fadeAudio(currentPlayingAudio, 0, 1500, true);
   }
 
   // Fade in new audio
   currentPlayingAudio = targetAudio;
   targetAudio.volume = 0;
   targetAudio.play().then(() => {
-    fadeAudio(targetAudio, 0.4, 1500, false);
+    fadeAudio(targetAudio, 0.45, 2000, false);
   }).catch(err => console.log("Audio play blocked/failed:", err));
 }
 
 function fadeAudio(audio, targetVol, duration, pauseOnComplete) {
-  const steps = 20;
+  const steps = 25;
   const interval = duration / steps;
   const volStep = (targetVol - audio.volume) / steps;
   let count = 0;
@@ -210,14 +210,14 @@ function initChapter1() {
   };
 }
 
-// ── CHAPTER 2: TERI KAHANI (Photo Journey) ───────────────────
+// ── CHAPTER 2: TERI KAHANI (Framed Polaroid Journey) ─────────
 const ERA_PHOTOS = [
-  { name: "Bachi 🧸", desc: "Masoom savera aur cute bachpan", folder: "kid", emoji: "🧸" },
-  { name: "Chulbuli ✨", desc: "Naughty smiles aur mastiyaan", folder: "teeth", emoji: "✨" },
-  { name: "Ladki 🌸", desc: "Zindagi ko naye dhang se jeena", folder: "bossy", emoji: "🌸" },
+  { name: "Bachi 🧸", desc: "Masoom savera aur cute bachpan", folder: "bachi", emoji: "🧸" },
+  { name: "Chulbuli ✨", desc: "Naughty smiles aur mastiyaan", folder: "chulbuli", emoji: "✨" },
+  { name: "Ladki 🌸", desc: "Zindagi ko naye dhang se jeena", folder: "ladki", emoji: "🌸" },
   { name: "Saree 🥻", desc: "Graceful aur bilkul khoobsurat", folder: "saree", emoji: "🥻" },
-  { name: "Us Together 🫂", desc: "Dheere se kandhe par pehla haath", folder: "final", emoji: "🫂" },
-  { name: "Married Dream 💍", desc: "Ek din ye sapna sach hoga!", folder: "final", emoji: "💍" }
+  { name: "Us Together 🫂", desc: "Dheere se kandhe par pehla haath", folder: "us", emoji: "🫂" },
+  { name: "Married Dream 💍", desc: "Ek din ye sapna sach hoga!", folder: "married", emoji: "💍" }
 ];
 let currentEraIndex = 0;
 let currentPhotoIndexInEra = 0;
@@ -237,7 +237,7 @@ function initChapter2() {
     progressPhotoJourney();
   };
 
-  // Era Canvas Particles
+  // Era Canvas Particles (Rising petals style)
   const canvas = document.getElementById('ps-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -248,7 +248,7 @@ function initChapter2() {
     particles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 2 + 1,
+      r: Math.random() * 3 + 1,
       vy: -(Math.random() * 0.7 + 0.1),
       vx: (Math.random() - 0.5) * 0.4,
       alpha: Math.random()
@@ -331,6 +331,8 @@ function progressPhotoJourney() {
 }
 
 // ── CHAPTER 3: BAARISH MEIN ──────────────────────────────
+let activeHearts = [];
+
 function initChapter3() {
   const cfg = BIRTHDAY_CONFIG.chapter3;
   document.getElementById('rain-text').textContent = cfg.mainMemory.description;
@@ -344,26 +346,87 @@ function initChapter3() {
     list.appendChild(item);
   });
 
+  // Modal setup
+  const modal = document.getElementById('heart-popup');
+  const modalClose = document.getElementById('heart-popup-close');
+  modalClose.onclick = () => modal.classList.add('ui-hidden');
+
+  // Floating Winking Hearts logic
   const wrap = document.getElementById('hearts-wrap');
   wrap.innerHTML = "";
+  activeHearts = [];
   let count = 0;
 
   cfg.reasonsILoveYou.forEach((reason, i) => {
     const bubble = document.createElement('div');
     bubble.className = 'heart-bubble';
-    bubble.innerHTML = `❤️<div class="heart-tooltip">${reason}</div>`;
+    bubble.innerHTML = `❤️`;
+    
+    // Random placement & drift properties
+    const bubbleData = {
+      el: bubble,
+      x: Math.random() * 80 + 10, // percent
+      y: Math.random() * 100 + 100, // starting below bottom
+      speed: Math.random() * 0.8 + 0.4,
+      wobble: Math.random() * 100,
+      wobbleSpeed: Math.random() * 0.02 + 0.01,
+      reason: reason,
+      revealed: false
+    };
+
     bubble.onclick = (e) => {
       e.stopPropagation();
-      if (!bubble.classList.contains('revealed')) {
-        bubble.classList.add('revealed');
+      if (!bubbleData.revealed) {
+        bubbleData.revealed = true;
+        bubble.classList.add('revealed', 'wink');
+        bubble.innerHTML = `😉`;
         count++;
         document.getElementById('hearts-count').textContent = `${count} / ${cfg.reasonsILoveYou.length} raazein khuli...`;
+        
+        // Show reason popup modal
+        document.getElementById('heart-popup-msg').textContent = reason;
+        modal.classList.remove('ui-hidden');
+        
         burstSpark(e.clientX, e.clientY);
+
+        // Reset wink emoji back to normal heart/wink state after anim
+        setTimeout(() => {
+          bubble.innerHTML = `💖`;
+          bubble.classList.remove('wink');
+        }, 600);
+      } else {
+        // Re-show reason if already clicked
+        document.getElementById('heart-popup-msg').textContent = reason;
+        modal.classList.remove('ui-hidden');
       }
     };
+    
     wrap.appendChild(bubble);
+    activeHearts.push(bubbleData);
   });
+
   document.getElementById('hearts-count').textContent = `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
+
+  // Dynamic Floating Hearts Canvas/Frame Loop
+  function updateHearts() {
+    if (currentChapter !== 2) return;
+    activeHearts.forEach(h => {
+      h.y -= h.speed;
+      // Wobble left-to-right
+      const currentX = h.x + Math.sin(h.y * h.wobbleSpeed) * 8;
+      
+      h.el.style.left = `${currentX}%`;
+      h.el.style.top = `${h.y}px`;
+
+      // Reset to bottom if off-screen top
+      if (h.y < -50) {
+        h.y = 280; // wrap height is 250px
+        h.x = Math.random() * 80 + 10;
+      }
+    });
+    requestAnimationFrame(updateHearts);
+  }
+  updateHearts();
 
   // Fireflies Canvas Loop
   const canvas = document.getElementById('ch3-canvas');

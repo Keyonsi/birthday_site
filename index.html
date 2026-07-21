@@ -131,12 +131,21 @@
         <div class="moments-list" id="moments-list" aria-label="Moments together"></div>
 
         <div class="hearts-section">
-          <p class="hearts-hint">❤️ Dil chhuo, raaz khulengi...</p>
+          <p class="hearts-hint">❤️ Udte hue dil ko pakdo, raaz khulengi...</p>
           <div class="hearts-wrap" id="hearts-wrap" aria-label="Reasons I love you"></div>
           <p class="hearts-count" id="hearts-count" aria-live="polite"></p>
         </div>
 
         <button class="next-btn" id="ch3-next">Aage Chalein →</button>
+      </div>
+
+      <!-- Pop-up modal reveal for appreciation reasons -->
+      <div class="heart-popup ui-hidden" id="heart-popup" role="dialog" aria-modal="true">
+        <div class="heart-popup-inner">
+          <button class="heart-popup-close" id="heart-popup-close">✕</button>
+          <div class="heart-popup-icon">😉</div>
+          <p class="heart-popup-msg" id="heart-popup-msg"></p>
+        </div>
       </div>
     </section>
 
@@ -209,12 +218,9 @@
 
   </main>
 
-  <audio id="bg-audio" loop preload="auto"><source src="yourmusic.mp3" type="audio/mpeg"/></audio>
-
-  <!-- Adding dynamic audio elements for journey stages -->
   <audio id="music-sad" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"/></audio>
   <audio id="music-happy" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/></audio>
-  <audio id="music-romantic" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg"/></audio>
+  <audio id="music-romantic" loop preload="auto"><source src="yourmusic.mp3" type="audio/mpeg"/></audio>
   <audio id="music-longing" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" type="audio/mpeg"/></audio>
   <audio id="music-festive" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg"/></audio>
 
