@@ -76,12 +76,25 @@
       <canvas id="ch1-canvas" class="bg-canvas"></canvas>
       <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
       <div class="fog" aria-hidden="true"></div>
+      <svg class="ch1-silhouette" viewBox="0 0 200 300" aria-hidden="true">
+        <ellipse cx="100" cy="60" rx="26" ry="30" fill="rgba(180,170,220,0.06)" />
+        <path d="M60 300 Q60 140 100 130 Q140 140 140 300 Z" fill="rgba(180,170,220,0.06)" />
+      </svg>
 
       <div class="ch-content">
         <div class="ch-badge"><span>Chapter I</span>
           <div class="badge-rule"></div>
         </div>
         <h1 class="ch1-title">Pehle...</h1>
+        <p class="ch1-desc" id="ch1-desc"></p>
+
+        <div class="ch1-counter" id="ch1-counter">
+          <span class="counter-num" id="counter-num">0</span>
+          <span class="counter-label">din, ek jaisi subah, ek jaisi shaam...</span>
+        </div>
+
+        <div class="ch1-fragments" id="ch1-fragments" aria-hidden="true"></div>
+
         <p class="ch1-typewriter" id="tw" aria-live="polite"></p>
         <div class="ch1-poem" id="poem">
           <p data-line="1">Roz uthna,</p>

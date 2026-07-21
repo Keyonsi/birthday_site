@@ -19,6 +19,13 @@ const BIRTHDAY_CONFIG = {
     title: "Chapter I",
     subtitle: "Pehle...",
     description: "Ek waqt tha jab zindagi bahut zyada khali lagti thi.",
+    counterDays: 487,
+    memoryFragments: [
+      "Roz same office jaana, same raasta...",
+      "Akela baithke khana khana...",
+      "Phone bas scroll karte rehna, kuch samajh na aana...",
+      "Raat ko so jaana, bina kisi se baat kiye..."
+    ],
     poems: [
       "Roz uthna, roz so jaana,",
       "Koi rang nahi tha zindagi mein.",

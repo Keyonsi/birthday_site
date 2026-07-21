@@ -171,6 +171,47 @@ function showChapter(idx) {
 // CHAPTER 1 — PEHLE (Starfield + Shooting Stars)
 // ═══════════════════════════════════════════════════════════
 function initCh1() {
+  const ch1cfg = BIRTHDAY_CONFIG.chapter1;
+
+  // Description line
+  document.getElementById('ch1-desc').textContent = ch1cfg.description;
+
+  // Animated counter — counts up to counterDays
+  const counterEl = document.getElementById('counter-num');
+  const targetCount = ch1cfg.counterDays || 0;
+  let counted = 0;
+  const counterStep = Math.max(1, Math.round(targetCount / 40));
+  const counterTimer = setInterval(() => {
+    counted = Math.min(targetCount, counted + counterStep);
+    counterEl.textContent = counted;
+    if (counted >= targetCount) clearInterval(counterTimer);
+  }, 30);
+
+  // Memory fragments — soft cross-fading empty-day moments
+  const fragWrap = document.getElementById('ch1-fragments');
+  fragWrap.innerHTML = '';
+  const fragments = ch1cfg.memoryFragments || [];
+  fragments.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'fragment-line';
+    el.textContent = f;
+    fragWrap.appendChild(el);
+  });
+  let fragIdx = 0;
+  const fragEls = fragWrap.querySelectorAll('.fragment-line');
+  function cycleFragments() {
+    if (currentChapter !== 0 || !fragEls.length) return;
+    fragEls.forEach(el => el.classList.remove('visible'));
+    fragEls[fragIdx].classList.add('visible');
+    fragIdx = (fragIdx + 1) % fragEls.length;
+    setTimeout(cycleFragments, 2600);
+  }
+  setTimeout(cycleFragments, 600);
+
+  // Ambient sound cue — music stays soft/sparse-feeling until "Tum mili" moment
+  let volumeRaised = false;
+  if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.16, 1200, false);
+
   // Typewriter
   const tw = document.getElementById('tw');
   const lines = [
@@ -188,6 +229,10 @@ function initCh1() {
     if (!isDeleting) {
       tw.textContent = cur.slice(0, ++charIdx);
       if (charIdx === cur.length) {
+        if (lineIdx === 3 && !volumeRaised) {
+          volumeRaised = true;
+          if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.45, 1800, false);
+        }
         isDeleting = true;
         setTimeout(type, 2000);
         return;
