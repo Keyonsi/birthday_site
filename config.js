@@ -1,5 +1,7 @@
 // ============================================================
 //  BIRTHDAY CONFIG — Master Configuration File
+//  Photo folders: images/kid/, images/bossy/, images/teeth/,
+//                 images/saree/, images/final/
 // ============================================================
 
 const BIRTHDAY_CONFIG = {
@@ -11,11 +13,6 @@ const BIRTHDAY_CONFIG = {
   senderName: "Tumhara",
   birthday: "2003-08-02",
   anniversaryMessage: "Pehla Saal • Pehli Anniversary",
-
-  // --- Music & Soundscapes ---
-  music: {
-    rainSoundsEnabled: true
-  },
 
   // --- Chapter 1: Pehle ---
   chapter1: {
@@ -30,7 +27,9 @@ const BIRTHDAY_CONFIG = {
     openingLine: "Ek baar ki baat hai..."
   },
 
-  // --- Chapter 2: Teri Kahani (Categorized Eras) ---
+  // --- Chapter 2: Teri Kahani (Photo Journey) ---
+  // Each era maps to a folder in images/
+  // Add as many photos as you want — the site will auto-cycle through all of them
   chapter2: {
     title: "Chapter II",
     subtitle: "Teri Kahani"
@@ -122,16 +121,62 @@ Yeh sirf shuruwaat hai. ❤️
     finalLine: "Agli zindagi ke chapter mein bhi — saath. ❤️"
   },
 
-  // --- Photo Journey Categories ---
-  // Store photos in images/ folder and link them here.
-  // We specify exactly 2 photos per category/era.
-  photos: {
-    bachi: ["images/bachi/1.jpg", "images/bachi/2.jpg"],
-    chulbuli: ["images/chulbuli/1.jpg", "images/chulbuli/2.jpg"],
-    ladki: ["images/ladki/1.jpg", "images/ladki/2.jpg"],
-    saree: ["images/saree/1.jpg", "images/saree/2.jpg"],
-    us: ["images/us/1.jpg", "images/us/2.jpg"],
-    married: ["images/married/1.jpg", "images/married/2.jpg"]
+  // ============================================================
+  //  PHOTO JOURNEY — ERA DEFINITIONS
+  //  Each era has:
+  //    folder: the images/ subfolder name
+  //    name: display title
+  //    desc: caption shown on the photo
+  //    emoji: era icon
+  //    mood: controls particle color theme (pink/gold/purple/green/rose/warm)
+  //  Add as many photo files to each folder as you want!
+  //  Naming: 1.jpg, 2.jpg, 3.jpg ... (any count)
+  // ============================================================
+  eras: [
+    {
+      folder: "kid",
+      name: "Bachi 🧸",
+      desc: "Masoom savera aur cute bachpan",
+      emoji: "🧸",
+      mood: "pink"
+    },
+    {
+      folder: "bossy",
+      name: "Bossy ✨",
+      desc: "Teen spirit aur confidence",
+      emoji: "✨",
+      mood: "gold"
+    },
+    {
+      folder: "teeth",
+      name: "Chulbuli 😄",
+      desc: "Naughty smiles aur mastiyaan",
+      emoji: "😄",
+      mood: "purple"
+    },
+    {
+      folder: "saree",
+      name: "Saree 🥻",
+      desc: "Graceful aur bilkul khoobsurat",
+      emoji: "🥻",
+      mood: "rose"
+    },
+    {
+      folder: "final",
+      name: "Hum Dono 🫂",
+      desc: "Dheere se kandhe par pehla haath",
+      emoji: "🫂",
+      mood: "warm"
+    }
+  ],
+
+  // How many photos in each folder (auto-detected at runtime, but fallback counts)
+  photoCounts: {
+    kid: 4,
+    bossy: 5,
+    teeth: 2,
+    saree: 4,
+    final: 4
   }
 
 };

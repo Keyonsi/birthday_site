@@ -1,597 +1,779 @@
 /* ============================================================
-   MONSOON DIARIES — Overhauled Script Engine
+   MONSOON DIARIES — Complete Script Engine
    ============================================================ */
-
 'use strict';
 
-// Chapter to Audio elements mapping
-const chapterAudios = {
-  0: document.getElementById('music-sad'),
-  1: document.getElementById('music-happy'),
-  2: document.getElementById('music-romantic'),
-  3: document.getElementById('music-longing'),
-  4: document.getElementById('music-festive')
-};
-
+// ── AUDIO SYSTEM ─────────────────────────────────────────────
+const CHAPTER_AUDIO_IDS = ['music-ch1', 'music-ch2', 'music-ch3', 'music-ch4', 'music-ch5'];
 let currentChapter = -1;
-let currentPlayingAudio = null;
+let currentAudio = null;
 let bgMusicPlaying = false;
 
-// Crossfade Audio Logic
-function switchChapterAudio(newIdx) {
-  const targetAudio = chapterAudios[newIdx];
-  if (!targetAudio || !bgMusicPlaying) return;
+function getAudio(chIdx) {
+  return document.getElementById(CHAPTER_AUDIO_IDS[chIdx]);
+}
 
-  // Fade out current audio
-  if (currentPlayingAudio && currentPlayingAudio !== targetAudio) {
-    fadeAudio(currentPlayingAudio, 0, 1500, true);
+function fadeVolume(audio, target, ms, stopOnDone) {
+  const steps = 20;
+  const dt = ms / steps;
+  const delta = (target - audio.volume) / steps;
+  let n = 0;
+  const t = setInterval(() => {
+    audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
+    if (++n >= steps) {
+      audio.volume = target;
+      clearInterval(t);
+      if (stopOnDone && target === 0) audio.pause();
+    }
+  }, dt);
+}
+
+function switchAudio(chIdx) {
+  if (!bgMusicPlaying) return;
+  const next = getAudio(chIdx);
+  if (!next) return;
+  if (currentAudio && currentAudio !== next) {
+    fadeVolume(currentAudio, 0, 1200, true);
+  }
+  currentAudio = next;
+  next.volume = 0;
+  next.play().then(() => fadeVolume(next, 0.45, 1800, false))
+              .catch(e => console.log('Audio blocked:', e));
+}
+
+// ── LOADER ────────────────────────────────────────────────────
+(function initLoader() {
+  const canvas = document.getElementById('loader-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const particles = [];
+
+  function resizeLoader() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resizeLoader();
+  window.addEventListener('resize', resizeLoader);
+
+  // Create floating pink hearts/sparkles on loader
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * 1,
+      y: Math.random(),
+      size: Math.random() * 2.5 + 0.5,
+      speed: Math.random() * 0.0015 + 0.0005,
+      alpha: Math.random(),
+      alphaDir: Math.random() > 0.5 ? 1 : -1,
+      alphaSpeed: Math.random() * 0.008 + 0.003
+    });
   }
 
-  // Fade in new audio
-  currentPlayingAudio = targetAudio;
-  targetAudio.volume = 0;
-  targetAudio.play().then(() => {
-    fadeAudio(targetAudio, 0.45, 2000, false);
-  }).catch(err => console.log("Audio play blocked/failed:", err));
-}
+  let loaderAnimId;
+  function loaderLoop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.y -= p.speed;
+      if (p.y < 0) { p.y = 1; p.x = Math.random(); }
+      p.alpha += p.alphaDir * p.alphaSpeed;
+      if (p.alpha > 1 || p.alpha < 0) p.alphaDir = -p.alphaDir;
 
-function fadeAudio(audio, targetVol, duration, pauseOnComplete) {
-  const steps = 25;
-  const interval = duration / steps;
-  const volStep = (targetVol - audio.volume) / steps;
-  let count = 0;
+      ctx.beginPath();
+      ctx.arc(p.x * W, p.y * H, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,154,158,${Math.abs(p.alpha) * 0.5})`;
+      ctx.fill();
+    });
+    loaderAnimId = requestAnimationFrame(loaderLoop);
+  }
+  loaderLoop();
 
-  const timer = setInterval(() => {
-    audio.volume = Math.max(0, Math.min(1, audio.volume + volStep));
-    count++;
-    if (count >= steps) {
-      audio.volume = targetVol;
-      clearInterval(timer);
-      if (pauseOnComplete && targetVol === 0) {
-        audio.pause();
+  const loader = document.getElementById('loader');
+  function startExperience() {
+    cancelAnimationFrame(loaderAnimId);
+    bgMusicPlaying = true;
+    document.getElementById('music-icon').textContent = '❚❚';
+
+    gsap.to('#loader', {
+      opacity: 0, duration: 1, ease: 'power2.inOut',
+      onComplete: () => {
+        loader.style.display = 'none';
+        document.getElementById('music-player').classList.remove('ui-hidden');
+        document.getElementById('chapter-nav').classList.remove('ui-hidden');
+        showChapter(0);
       }
-    }
-  }, interval);
-}
+    });
+  }
+  loader.addEventListener('click', startExperience);
+  loader.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') startExperience(); });
+})();
 
-// ── LOADER & INITIAL AUDIO UNLOCK ───────────────────────────
-document.getElementById('loader').addEventListener('click', () => {
-  bgMusicPlaying = true;
-  document.getElementById('music-icon').textContent = '❚❚';
-
-  // Fade out loader
-  gsap.to('#loader', { opacity: 0, duration: 0.8, onComplete: () => {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('music-player').classList.remove('ui-hidden');
-    document.getElementById('chapter-nav').classList.remove('ui-hidden');
-    showChapter(0);
-  }});
-});
-
-// Play/Pause Control
+// ── MUSIC BUTTON ─────────────────────────────────────────────
 document.getElementById('music-btn').addEventListener('click', () => {
   if (bgMusicPlaying) {
-    if (currentPlayingAudio) {
-      fadeAudio(currentPlayingAudio, 0, 800, true);
-    }
+    if (currentAudio) fadeVolume(currentAudio, 0, 800, true);
     bgMusicPlaying = false;
     document.getElementById('music-icon').textContent = '▶';
   } else {
     bgMusicPlaying = true;
     document.getElementById('music-icon').textContent = '❚❚';
-    if (currentChapter >= 0) {
-      switchChapterAudio(currentChapter);
-    }
+    if (currentChapter >= 0) switchAudio(currentChapter);
   }
 });
 
-// ── NAVIGATION & CHAPTER TRANSITIONS ─────────────────────────
+// ── CHAPTER SYSTEM ────────────────────────────────────────────
 const CHAPTER_IDS = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5'];
+let animationFrameId = null;
+
 document.querySelectorAll('.chapter-dot').forEach(dot => {
   dot.addEventListener('click', () => {
-    const targetIdx = parseInt(dot.dataset.chapter);
-    if (targetIdx <= currentChapter || dot.classList.contains('done')) {
-      showChapter(targetIdx);
+    const idx = parseInt(dot.dataset.chapter);
+    if (idx <= currentChapter || dot.classList.contains('done')) {
+      showChapter(idx);
     }
   });
 });
 
 function showChapter(idx) {
-  CHAPTER_IDS.forEach((id, cIdx) => {
+  // Cancel any running canvas loops
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  CHAPTER_IDS.forEach((id, i) => {
     const el = document.getElementById(id);
-    if (cIdx === idx) {
+    if (i === idx) {
       el.classList.remove('ch-hidden');
     } else {
       el.classList.add('ch-hidden');
     }
   });
 
-  document.querySelectorAll('.chapter-dot').forEach((dot, dIdx) => {
+  document.querySelectorAll('.chapter-dot').forEach((dot, i) => {
     dot.classList.remove('active', 'done');
-    if (dIdx < idx) dot.classList.add('done');
-    if (dIdx === idx) dot.classList.add('active');
+    if (i < idx) dot.classList.add('done');
+    if (i === idx) dot.classList.add('active');
   });
 
   currentChapter = idx;
-  switchChapterAudio(idx);
-  initChapterEffects(idx);
-}
+  switchAudio(idx);
 
-let animationFrameId = null;
-
-function initChapterEffects(idx) {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
-  }
-
-  if (idx === 0) {
-    initChapter1();
-  } else if (idx === 1) {
-    initChapter2();
-  } else if (idx === 2) {
-    initChapter3();
-  } else if (idx === 3) {
-    initChapter4();
-  } else if (idx === 4) {
-    initChapter5();
+  // Chapter-specific init
+  switch (idx) {
+    case 0: initCh1(); break;
+    case 1: initCh2(); break;
+    case 2: initCh3(); break;
+    case 3: initCh4(); break;
+    case 4: initCh5(); break;
   }
 }
 
-// ── CHAPTER 1: PEHLE ─────────────────────────────────────────
-function initChapter1() {
+// ═══════════════════════════════════════════════════════════
+// CHAPTER 1 — PEHLE (Starfield + Shooting Stars)
+// ═══════════════════════════════════════════════════════════
+function initCh1() {
+  // Typewriter
   const tw = document.getElementById('tw');
   const lines = [
     "Ek waqt tha...",
     "Sab kuch boring aur khali tha.",
     "Par phir...",
-    "Tum meri life mein aayi! ❤️"
+    "Tum mili! ❤️"
   ];
   let lineIdx = 0, charIdx = 0, isDeleting = false;
   tw.textContent = "";
 
-  function handleTypewriter() {
+  function type() {
     if (currentChapter !== 0) return;
-    const current = lines[lineIdx];
+    const cur = lines[lineIdx];
     if (!isDeleting) {
-      tw.textContent = current.slice(0, ++charIdx);
-      if (charIdx === current.length) {
+      tw.textContent = cur.slice(0, ++charIdx);
+      if (charIdx === cur.length) {
         isDeleting = true;
-        setTimeout(handleTypewriter, 1800);
+        setTimeout(type, 2000);
         return;
       }
     } else {
-      tw.textContent = current.slice(0, --charIdx);
+      tw.textContent = cur.slice(0, --charIdx);
       if (charIdx === 0) {
         isDeleting = false;
         lineIdx = (lineIdx + 1) % lines.length;
       }
     }
-    setTimeout(handleTypewriter, isDeleting ? 40 : 80);
+    setTimeout(type, isDeleting ? 38 : 85);
   }
-  setTimeout(handleTypewriter, 800);
+  setTimeout(type, 800);
 
-  // Background stars
+  // Canvas: stars + occasional shooting star
   const canvas = document.getElementById('ch1-canvas');
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
+  function resizeCh1() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCh1();
+  window.addEventListener('resize', resizeCh1);
 
-  const stars = [];
-  for (let i = 0; i < 150; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5,
-      opacity: Math.random(),
-      speed: Math.random() * 0.02 + 0.005
-    });
-  }
+  // Regular stars
+  const stars = Array.from({ length: 180 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.6 + 0.3,
+    alpha: Math.random(),
+    speed: (Math.random() * 0.015 + 0.004) * (Math.random() > 0.5 ? 1 : -1)
+  }));
 
-  function loop() {
+  // Shooting stars
+  const shooters = [];
+  function spawnShooter() {
     if (currentChapter !== 0) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    shooters.push({
+      x: Math.random() * 0.6,
+      y: Math.random() * 0.4,
+      vx: (Math.random() * 0.004 + 0.003),
+      vy: (Math.random() * 0.002 + 0.001),
+      len: Math.random() * 0.08 + 0.04,
+      alpha: 1,
+      decay: Math.random() * 0.015 + 0.01
+    });
+    setTimeout(spawnShooter, 3500 + Math.random() * 4000);
+  }
+  setTimeout(spawnShooter, 2000);
+
+  function loopCh1() {
+    if (currentChapter !== 0) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
+
+    // Stars
     stars.forEach(s => {
-      s.opacity += s.speed;
-      if (s.opacity > 1 || s.opacity < 0) s.speed = -s.speed;
+      s.alpha = Math.max(0, Math.min(1, s.alpha + s.speed));
+      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(200, 200, 255, ${Math.abs(s.opacity)})`;
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(210,205,255,${s.alpha})`;
       ctx.fill();
     });
-    animationFrameId = requestAnimationFrame(loop);
-  }
-  loop();
 
-  createRain('rain1', 40);
+    // Shooting stars
+    for (let i = shooters.length - 1; i >= 0; i--) {
+      const s = shooters[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.alpha -= s.decay;
+      if (s.alpha <= 0) { shooters.splice(i, 1); continue; }
 
-  document.getElementById('begin-btn').onclick = () => {
-    showChapter(1);
-  };
-}
-
-// ── CHAPTER 2: TERI KAHANI (Framed Polaroid Journey) ─────────
-const ERA_PHOTOS = [
-  { name: "Bachi 🧸", desc: "Masoom savera aur cute bachpan", folder: "bachi", emoji: "🧸" },
-  { name: "Chulbuli ✨", desc: "Naughty smiles aur mastiyaan", folder: "chulbuli", emoji: "✨" },
-  { name: "Ladki 🌸", desc: "Zindagi ko naye dhang se jeena", folder: "ladki", emoji: "🌸" },
-  { name: "Saree 🥻", desc: "Graceful aur bilkul khoobsurat", folder: "saree", emoji: "🥻" },
-  { name: "Us Together 🫂", desc: "Dheere se kandhe par pehla haath", folder: "us", emoji: "🫂" },
-  { name: "Married Dream 💍", desc: "Ek din ye sapna sach hoga!", folder: "married", emoji: "💍" }
-];
-let currentEraIndex = 0;
-let currentPhotoIndexInEra = 0;
-
-function initChapter2() {
-  currentEraIndex = 0;
-  currentPhotoIndexInEra = 0;
-  loadEra(0);
-
-  const ch2 = document.getElementById('ch2');
-  ch2.onclick = (e) => {
-    if (!document.getElementById('dream-frame').classList.contains('ui-hidden')) {
-      document.getElementById('dream-frame').classList.add('ui-hidden');
-      showChapter(2);
-      return;
+      const grd = ctx.createLinearGradient(
+        s.x * W, s.y * H,
+        (s.x - s.len) * W, (s.y - s.len / 2) * H
+      );
+      grd.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.beginPath();
+      ctx.moveTo(s.x * W, s.y * H);
+      ctx.lineTo((s.x - s.len) * W, (s.y - s.len / 2) * H);
+      ctx.strokeStyle = grd;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
-    progressPhotoJourney();
-  };
 
-  // Era Canvas Particles (Rising petals style)
-  const canvas = document.getElementById('ps-canvas');
-  const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
-
-  const particles = [];
-  for (let i = 0; i < 35; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 3 + 1,
-      vy: -(Math.random() * 0.7 + 0.1),
-      vx: (Math.random() - 0.5) * 0.4,
-      alpha: Math.random()
-    });
+    animationFrameId = requestAnimationFrame(loopCh1);
   }
+  loopCh1();
 
-  function loop() {
-    if (currentChapter !== 1) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p => {
-      p.y += p.vy;
-      p.x += p.vx;
-      if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255, 182, 193, ${p.alpha * 0.35})`;
-      ctx.fill();
-    });
-    animationFrameId = requestAnimationFrame(loop);
-  }
-  loop();
+  createRain('rain1', 45);
+
+  document.getElementById('begin-btn').onclick = () => showChapter(1);
 }
 
-function loadEra(index) {
-  const era = ERA_PHOTOS[index];
-  if (!era) return;
+// ═══════════════════════════════════════════════════════════
+// CHAPTER 2 — TERI KAHANI (Full-Screen Photo Journey)
+// ═══════════════════════════════════════════════════════════
+const ERAS = BIRTHDAY_CONFIG.eras;
+let eraIdx = 0;
+let photoIdx = 0;
+let photoCounts = {};  // era folder -> count
+let kenBurnsToggle = false;
+let photoJourneyEnded = false;
 
-  document.getElementById('ps-era-name').textContent = era.name;
-  document.getElementById('ps-emoji').textContent = era.emoji;
-  document.getElementById('ps-subtitle').textContent = era.desc;
-
-  const photos = BIRTHDAY_CONFIG.photos[era.folder] || [];
-  const photoPath = photos[currentPhotoIndexInEra % photos.length] || "images/final/1.jpg";
-
-  const layerA = document.getElementById('ps-layer-a');
-  const layerB = document.getElementById('ps-layer-b');
-
-  if (layerA.classList.contains('active')) {
-    layerB.style.backgroundImage = `url('${photoPath}')`;
-    layerB.classList.add('active');
-    layerA.classList.remove('active');
-  } else {
-    layerA.style.backgroundImage = `url('${photoPath}')`;
-    layerA.classList.add('active');
-    layerB.classList.remove('active');
+// Discover actual photo counts by trying to load images
+function buildPhotoList(era) {
+  // Use the configured counts, try images 1..N
+  const count = (BIRTHDAY_CONFIG.photoCounts && BIRTHDAY_CONFIG.photoCounts[era.folder]) || 2;
+  const list = [];
+  for (let i = 1; i <= count; i++) {
+    list.push(`images/${era.folder}/${i}.jpg`);
   }
+  return list;
+}
 
-  // Tilt the polaroid card gently on photo change
-  const frame = document.getElementById('ps-frame');
-  const randomTilt = (Math.random() - 0.5) * 6; // between -3deg and 3deg
-  frame.style.transform = `rotate(${randomTilt}deg)`;
+function getPhotoList(era) {
+  if (!photoCounts[era.folder]) {
+    photoCounts[era.folder] = buildPhotoList(era);
+  }
+  return photoCounts[era.folder];
+}
 
-  // Dots progress
-  const dotsContainer = document.getElementById('ps-progress-dots');
-  dotsContainer.innerHTML = "";
-  ERA_PHOTOS.forEach((_, dIdx) => {
-    const dot = document.createElement('div');
-    dot.className = `ps-dot ${dIdx === index ? 'active' : ''}`;
-    dotsContainer.appendChild(dot);
+function updateEraOverlay(era) {
+  document.getElementById('era-emoji-fs').textContent = era.emoji;
+  document.getElementById('era-name-fs').textContent = era.name;
+  document.getElementById('era-desc-fs').textContent = era.desc;
+
+  // Era dots
+  const dotsEl = document.getElementById('era-dots');
+  dotsEl.innerHTML = '';
+  ERAS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = `era-dot${i < eraIdx ? ' done' : i === eraIdx ? ' active' : ''}`;
+    dotsEl.appendChild(d);
   });
 }
 
-function progressPhotoJourney() {
-  const era = ERA_PHOTOS[currentEraIndex];
-  const photos = BIRTHDAY_CONFIG.photos[era.folder] || [];
+function loadPhoto(path, isAlt) {
+  const layerA = document.getElementById('photo-layer-a');
+  const layerB = document.getElementById('photo-layer-b');
 
-  currentPhotoIndexInEra++;
-  if (currentPhotoIndexInEra >= Math.min(photos.length, 2)) {
-    currentPhotoIndexInEra = 0;
-    currentEraIndex++;
+  kenBurnsToggle = !kenBurnsToggle;
 
-    if (currentEraIndex >= ERA_PHOTOS.length) {
-      document.getElementById('dream-frame').classList.remove('ui-hidden');
-    } else {
-      loadEra(currentEraIndex);
-    }
+  if (layerA.classList.contains('active')) {
+    // Switch to B
+    layerB.style.backgroundImage = `url('${path}')`;
+    layerB.className = `photo-layer active${kenBurnsToggle ? ' kb-alt' : ''}`;
+    // Force reflow to restart animation
+    void layerB.offsetWidth;
+    layerA.className = 'photo-layer';
   } else {
-    loadEra(currentEraIndex);
+    layerA.style.backgroundImage = `url('${path}')`;
+    layerA.className = `photo-layer active${kenBurnsToggle ? ' kb-alt' : ''}`;
+    void layerA.offsetWidth;
+    layerB.className = 'photo-layer';
   }
+
+  // Update counter
+  const photos = getPhotoList(ERAS[eraIdx]);
+  document.getElementById('photo-counter').textContent = `${photoIdx + 1} / ${photos.length}`;
 }
 
-// ── CHAPTER 3: BAARISH MEIN ──────────────────────────────
+function advanceJourney() {
+  if (photoJourneyEnded) return;
+
+  // If dream frame is showing, close it and go to next chapter
+  const dreamFrame = document.getElementById('dream-frame');
+  if (!dreamFrame.classList.contains('ui-hidden')) {
+    dreamFrame.classList.add('ui-hidden');
+    showChapter(2);
+    return;
+  }
+
+  const era = ERAS[eraIdx];
+  const photos = getPhotoList(era);
+  photoIdx++;
+
+  if (photoIdx >= photos.length) {
+    // Move to next era
+    photoIdx = 0;
+    eraIdx++;
+
+    if (eraIdx >= ERAS.length) {
+      // All eras done — show dream frame
+      photoJourneyEnded = true;
+      setTimeout(() => {
+        dreamFrame.classList.remove('ui-hidden');
+        document.getElementById('ps-tap-hint').classList.add('ui-hidden');
+      }, 300);
+      return;
+    }
+
+    updateEraOverlay(ERAS[eraIdx]);
+  }
+
+  loadPhoto(getPhotoList(ERAS[eraIdx])[photoIdx], kenBurnsToggle);
+}
+
+function initCh2() {
+  eraIdx = 0;
+  photoIdx = 0;
+  photoJourneyEnded = false;
+  photoCounts = {}; // reset cache
+
+  // Load first photo of first era
+  updateEraOverlay(ERAS[0]);
+  const firstEra = ERAS[0];
+  const firstPhotos = getPhotoList(firstEra);
+  loadPhoto(firstPhotos[0], false);
+  document.getElementById('photo-counter').textContent = `1 / ${firstPhotos.length}`;
+  document.getElementById('ps-tap-hint').classList.remove('ui-hidden');
+
+  // Tap to advance
+  const ch2 = document.getElementById('ch2');
+  ch2.onclick = advanceJourney;
+
+  // Mood particle canvas — changes color per era
+  const canvas = document.getElementById('ps-canvas');
+  const ctx = canvas.getContext('2d');
+  function resizeCh2() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCh2();
+
+  const moodColors = {
+    pink:   [255, 182, 193],
+    gold:   [255, 215, 100],
+    purple: [196, 123, 255],
+    rose:   [255, 107, 157],
+    warm:   [255, 162, 100]
+  };
+
+  function getMoodColor() {
+    const era = ERAS[Math.min(eraIdx, ERAS.length - 1)];
+    return moodColors[era.mood] || [255, 182, 193];
+  }
+
+  const particles = Array.from({ length: 40 }, () => ({
+    x: Math.random(),
+    y: Math.random() + 0.5,  // start below
+    r: Math.random() * 3 + 1,
+    vy: -(Math.random() * 0.0012 + 0.0003),
+    vx: (Math.random() - 0.5) * 0.0005,
+    alpha: Math.random() * 0.4 + 0.1
+  }));
+
+  function loopCh2() {
+    if (currentChapter !== 1) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
+    const [r, g, b] = getMoodColor();
+
+    particles.forEach(p => {
+      p.y += p.vy;
+      p.x += p.vx;
+      if (p.y < -0.05) { p.y = 1.05; p.x = Math.random(); }
+      if (p.x < 0 || p.x > 1) p.vx = -p.vx;
+
+      ctx.beginPath();
+      ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha * 0.4})`;
+      ctx.fill();
+    });
+    animationFrameId = requestAnimationFrame(loopCh2);
+  }
+  loopCh2();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHAPTER 3 — BAARISH MEIN (Hearts + Fireflies + Rain)
+// ═══════════════════════════════════════════════════════════
 let activeHearts = [];
 
-function initChapter3() {
+function initCh3() {
   const cfg = BIRTHDAY_CONFIG.chapter3;
   document.getElementById('rain-text').textContent = cfg.mainMemory.description;
 
+  // Moments list with staggered animation
   const list = document.getElementById('moments-list');
-  list.innerHTML = "";
-  cfg.moments.forEach(m => {
+  list.innerHTML = '';
+  cfg.moments.forEach((m, i) => {
     const item = document.createElement('div');
     item.className = 'moment-item';
+    item.style.animationDelay = `${i * 0.08}s`;
     item.innerHTML = `<span class="moment-icon">${m.icon}</span><span>${m.text}</span>`;
     list.appendChild(item);
   });
 
   // Modal setup
   const modal = document.getElementById('heart-popup');
-  const modalClose = document.getElementById('heart-popup-close');
-  modalClose.onclick = () => modal.classList.add('ui-hidden');
+  document.getElementById('heart-popup-close').onclick = () => modal.classList.add('ui-hidden');
 
-  // Floating Winking Hearts logic
+  // Floating hearts
   const wrap = document.getElementById('hearts-wrap');
-  wrap.innerHTML = "";
+  wrap.innerHTML = '';
   activeHearts = [];
-  let count = 0;
+  let revealed = 0;
 
   cfg.reasonsILoveYou.forEach((reason, i) => {
     const bubble = document.createElement('div');
     bubble.className = 'heart-bubble';
-    bubble.innerHTML = `❤️`;
-    
-    // Random placement & drift properties
-    const bubbleData = {
+    bubble.innerHTML = '❤️';
+
+    const hData = {
       el: bubble,
-      x: Math.random() * 80 + 10, // percent
-      y: Math.random() * 100 + 100, // starting below bottom
-      speed: Math.random() * 0.8 + 0.4,
-      wobble: Math.random() * 100,
-      wobbleSpeed: Math.random() * 0.02 + 0.01,
-      reason: reason,
-      revealed: false
+      x: 10 + Math.random() * 75,
+      y: 60 + Math.random() * 150,
+      speed: Math.random() * 0.7 + 0.3,
+      wobble: Math.random() * 200,
+      wobbleAmp: 8 + Math.random() * 10,
+      wobbleSpeed: 0.008 + Math.random() * 0.012,
+      reason,
+      done: false
     };
 
-    bubble.onclick = (e) => {
+    bubble.addEventListener('click', e => {
       e.stopPropagation();
-      if (!bubbleData.revealed) {
-        bubbleData.revealed = true;
+      if (!hData.done) {
+        hData.done = true;
         bubble.classList.add('revealed', 'wink');
-        bubble.innerHTML = `😉`;
-        count++;
-        document.getElementById('hearts-count').textContent = `${count} / ${cfg.reasonsILoveYou.length} raazein khuli...`;
-        
-        // Show reason popup modal
+        bubble.innerHTML = '😉';
+        revealed++;
+        document.getElementById('hearts-count').textContent =
+          `${revealed} / ${cfg.reasonsILoveYou.length} raazein khuli...`;
         document.getElementById('heart-popup-msg').textContent = reason;
         modal.classList.remove('ui-hidden');
-        
         burstSpark(e.clientX, e.clientY);
-
-        // Reset wink emoji back to normal heart/wink state after anim
         setTimeout(() => {
-          bubble.innerHTML = `💖`;
+          bubble.innerHTML = '💖';
           bubble.classList.remove('wink');
-        }, 600);
+        }, 550);
       } else {
-        // Re-show reason if already clicked
         document.getElementById('heart-popup-msg').textContent = reason;
         modal.classList.remove('ui-hidden');
       }
-    };
-    
+    });
+
     wrap.appendChild(bubble);
-    activeHearts.push(bubbleData);
+    activeHearts.push(hData);
   });
 
-  document.getElementById('hearts-count').textContent = `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
+  document.getElementById('hearts-count').textContent =
+    `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
 
-  // Dynamic Floating Hearts Canvas/Frame Loop
-  function updateHearts() {
+  // Float animation loop
+  function floatHearts() {
     if (currentChapter !== 2) return;
     activeHearts.forEach(h => {
-      h.y -= h.speed;
-      // Wobble left-to-right
-      const currentX = h.x + Math.sin(h.y * h.wobbleSpeed) * 8;
-      
-      h.el.style.left = `${currentX}%`;
+      h.wobble += h.wobbleSpeed;
+      h.y -= h.speed * 0.4;
+      const curX = h.x + Math.sin(h.wobble) * h.wobbleAmp;
+      h.el.style.left = `${curX}%`;
       h.el.style.top = `${h.y}px`;
-
-      // Reset to bottom if off-screen top
-      if (h.y < -50) {
-        h.y = 280; // wrap height is 250px
-        h.x = Math.random() * 80 + 10;
+      if (h.y < -55) {
+        h.y = 270;
+        h.x = 10 + Math.random() * 75;
       }
     });
-    requestAnimationFrame(updateHearts);
+    requestAnimationFrame(floatHearts);
   }
-  updateHearts();
+  floatHearts();
 
-  // Fireflies Canvas Loop
+  // Firefly canvas
   const canvas = document.getElementById('ch3-canvas');
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
+  function resizeCh3() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCh3();
 
-  const fireflies = [];
-  for (let i = 0; i < 25; i++) {
-    fireflies.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 2 + 1,
-      angle: Math.random() * Math.PI * 2,
-      speed: Math.random() * 0.4 + 0.1
-    });
-  }
+  const flies = Array.from({ length: 30 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 2.5 + 1,
+    angle: Math.random() * Math.PI * 2,
+    speed: Math.random() * 0.003 + 0.001,
+    alpha: Math.random()
+  }));
 
-  function loop() {
+  // Monsoon drops on ch3 canvas
+  const drops = Array.from({ length: 80 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    len: Math.random() * 0.06 + 0.02,
+    speed: Math.random() * 0.006 + 0.003,
+    alpha: Math.random() * 0.25 + 0.05
+  }));
+
+  function loopCh3() {
     if (currentChapter !== 2) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    fireflies.forEach(f => {
-      f.angle += (Math.random() - 0.5) * 0.2;
-      f.x += Math.cos(f.angle) * f.speed;
-      f.y += Math.sin(f.angle) * f.speed;
-      if (f.x < 0 || f.x > canvas.width) f.angle = Math.PI - f.angle;
-      if (f.y < 0 || f.y > canvas.height) f.angle = -f.angle;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
 
+    // Rain drops
+    drops.forEach(d => {
+      d.y += d.speed;
+      if (d.y > 1.05) { d.y = -0.05; d.x = Math.random(); }
       ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(244, 162, 97, ${0.4 + Math.random()*0.5})`;
+      ctx.moveTo(d.x * W, d.y * H);
+      ctx.lineTo(d.x * W + W * 0.004, (d.y + d.len) * H);
+      ctx.strokeStyle = `rgba(174,220,180,${d.alpha})`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+
+    // Fireflies
+    flies.forEach(f => {
+      f.angle += (Math.random() - 0.5) * 0.15;
+      f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed));
+      f.y = Math.max(0, Math.min(1, f.y + Math.sin(f.angle) * f.speed));
+      f.alpha = 0.4 + Math.random() * 0.6;
+      ctx.beginPath();
+      ctx.arc(f.x * W, f.y * H, f.r, 0, Math.PI * 2);
+      const glow = ctx.createRadialGradient(f.x * W, f.y * H, 0, f.x * W, f.y * H, f.r * 4);
+      glow.addColorStop(0, `rgba(244,220,80,${f.alpha})`);
+      glow.addColorStop(1, 'rgba(244,162,97,0)');
+      ctx.fillStyle = glow;
       ctx.fill();
     });
-    animationFrameId = requestAnimationFrame(loop);
-  }
-  loop();
 
-  createRain('rain3', 75);
+    animationFrameId = requestAnimationFrame(loopCh3);
+  }
+  loopCh3();
+
+  createRain('rain3', 80);
   document.getElementById('ch3-next').onclick = () => showChapter(3);
 }
 
-// ── CHAPTER 4: DOORI ─────────────────────────────────────
-function initChapter4() {
+// ═══════════════════════════════════════════════════════════
+// CHAPTER 4 — DOORI (Dust + Longing)
+// ═══════════════════════════════════════════════════════════
+function initCh4() {
   const cfg = BIRTHDAY_CONFIG.chapter4;
   document.getElementById('ch4-desc').textContent = cfg.description;
   document.getElementById('letter-text').textContent = cfg.letter;
 
   const distWrap = document.getElementById('dist-moments');
-  distWrap.innerHTML = "";
-  cfg.moments.forEach(m => {
+  distWrap.innerHTML = '';
+  cfg.moments.forEach((m, i) => {
     const item = document.createElement('div');
     item.className = 'dist-item';
+    item.style.animationDelay = `${i * 0.12}s`;
     item.textContent = m;
     distWrap.appendChild(item);
   });
 
   const canvas = document.getElementById('ch4-canvas');
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
+  function resizeCh4() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCh4();
 
-  const dust = [];
-  for (let i = 0; i < 30; i++) {
-    dust.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.3,
-      alpha: Math.random() * 0.4 + 0.1,
-      speed: Math.random() * 0.004 + 0.001
-    });
-  }
+  // Dust motes + slow falling petals
+  const dust = Array.from({ length: 45 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.8 + 0.3,
+    alpha: Math.random() * 0.35 + 0.05,
+    alphaDir: Math.random() > 0.5 ? 1 : -1,
+    alphaSpeed: Math.random() * 0.005 + 0.001,
+    vy: Math.random() * 0.0006 + 0.0001,
+    vx: (Math.random() - 0.5) * 0.0002
+  }));
 
-  function loop() {
+  // Longing orbs (slow, hazy circles)
+  const orbs = Array.from({ length: 5 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: 30 + Math.random() * 60,
+    alpha: 0.02 + Math.random() * 0.04,
+    vx: (Math.random() - 0.5) * 0.0003,
+    vy: (Math.random() - 0.5) * 0.0002
+  }));
+
+  function loopCh4() {
     if (currentChapter !== 3) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    dust.forEach(d => {
-      d.alpha += d.speed;
-      if (d.alpha > 0.6 || d.alpha < 0.1) d.speed = -d.speed;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
+
+    // Hazy orbs
+    orbs.forEach(o => {
+      o.x = Math.max(0, Math.min(1, o.x + o.vx));
+      o.y = Math.max(0, Math.min(1, o.y + o.vy));
+      if (o.x <= 0 || o.x >= 1) o.vx = -o.vx;
+      if (o.y <= 0 || o.y >= 1) o.vy = -o.vy;
+      const grd = ctx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r);
+      grd.addColorStop(0, `rgba(212,132,154,${o.alpha})`);
+      grd.addColorStop(1, 'rgba(212,132,154,0)');
       ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(212, 132, 154, ${Math.abs(d.alpha)})`;
+      ctx.arc(o.x * W, o.y * H, o.r, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
       ctx.fill();
     });
-    animationFrameId = requestAnimationFrame(loop);
+
+    // Dust motes
+    dust.forEach(d => {
+      d.x = Math.max(0, Math.min(1, d.x + d.vx));
+      d.y += d.vy;
+      if (d.y > 1.02) { d.y = -0.02; d.x = Math.random(); }
+      d.alpha += d.alphaDir * d.alphaSpeed;
+      if (d.alpha > 0.45 || d.alpha < 0.03) d.alphaDir = -d.alphaDir;
+
+      ctx.beginPath();
+      ctx.arc(d.x * W, d.y * H, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240,210,200,${d.alpha})`;
+      ctx.fill();
+    });
+
+    animationFrameId = requestAnimationFrame(loopCh4);
   }
-  loop();
+  loopCh4();
 
   document.getElementById('ch4-next').onclick = () => showChapter(4);
 }
 
-// ── CHAPTER 5: AAJ & FOREVER ────────────────────────────────
-function initChapter5() {
+// ═══════════════════════════════════════════════════════════
+// CHAPTER 5 — AAJ AUR HAMESHA (Celebration)
+// ═══════════════════════════════════════════════════════════
+function initCh5() {
   const cfg = BIRTHDAY_CONFIG.chapter5;
   document.getElementById('bday-name').textContent = BIRTHDAY_CONFIG.name;
   document.getElementById('anni-tag').textContent = BIRTHDAY_CONFIG.anniversaryMessage;
 
   const wishesWrap = document.getElementById('wishes-wrap');
-  wishesWrap.innerHTML = "";
-  cfg.wishes.forEach(w => {
-    const bubble = document.createElement('div');
-    bubble.className = 'wish-bubble';
-    bubble.textContent = w;
-    wishesWrap.appendChild(bubble);
+  wishesWrap.innerHTML = '';
+  cfg.wishes.forEach((w, i) => {
+    const b = document.createElement('div');
+    b.className = 'wish-bubble';
+    b.style.animationDelay = `${i * 0.1}s`;
+    b.textContent = w;
+    wishesWrap.appendChild(b);
   });
 
   const envelope = document.getElementById('envelope');
   const fullLetter = document.getElementById('full-letter');
-  const letterBody = document.getElementById('letter-body-ch5');
-
   envelope.onclick = () => {
     envelope.classList.add('ui-hidden');
     fullLetter.classList.remove('ui-hidden');
-    letterBody.textContent = cfg.endingLetter;
-
+    document.getElementById('letter-body-ch5').textContent = cfg.endingLetter;
     setTimeout(() => {
       document.getElementById('close1').textContent = cfg.closingLine;
       document.getElementById('close2').textContent = cfg.finalLine;
       document.getElementById('closing').classList.remove('ui-hidden');
-      triggerCelebrationFireworks();
-    }, 2500);
+      launchFireworks();
+    }, 2200);
   };
 
+  // Sky stars canvas
   const canvas = document.getElementById('ch5-canvas');
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
+  function resizeCh5() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCh5();
 
-  const stars = [];
-  for (let i = 0; i < 40; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5,
-      alpha: Math.random()
-    });
-  }
+  const stars = Array.from({ length: 60 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.6,
+    alpha: Math.random(),
+    speed: (Math.random() * 0.012 + 0.003) * (Math.random() > 0.5 ? 1 : -1)
+  }));
 
-  function loop() {
+  function loopCh5() {
     if (currentChapter !== 4) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
     stars.forEach(s => {
-      s.alpha += 0.01;
+      s.alpha += s.speed;
+      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255, 215, 0, ${Math.abs(Math.sin(s.alpha))})`;
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,215,0,${Math.abs(s.alpha) * 0.7})`;
       ctx.fill();
     });
-    animationFrameId = requestAnimationFrame(loop);
+    animationFrameId = requestAnimationFrame(loopCh5);
   }
-  loop();
+  loopCh5();
 
   createLanterns();
+  launchFireworks();
 }
 
-function createRain(containerId, count) {
-  const wrap = document.getElementById(containerId);
+// ── UTILITIES ────────────────────────────────────────────────
+
+function createRain(id, count) {
+  const wrap = document.getElementById(id);
   if (!wrap) return;
-  wrap.innerHTML = "";
+  wrap.innerHTML = '';
   for (let i = 0; i < count; i++) {
     const drop = document.createElement('div');
     drop.className = 'drop';
     drop.style.left = `${Math.random() * 100}%`;
-    drop.style.height = `${12 + Math.random() * 18}px`;
-    drop.style.animationDuration = `${0.7 + Math.random() * 0.9}s`;
-    drop.style.animationDelay = `${Math.random() * 1.5}s`;
+    drop.style.height = `${14 + Math.random() * 20}px`;
+    drop.style.animationDuration = `${0.65 + Math.random() * 0.85}s`;
+    drop.style.animationDelay = `${Math.random() * 1.8}s`;
     wrap.appendChild(drop);
   }
 }
@@ -599,67 +781,66 @@ function createRain(containerId, count) {
 function createLanterns() {
   const container = document.getElementById('lanterns');
   if (!container) return;
-  container.innerHTML = "";
-  const items = ['🏮', '🪔', '✨', '💛'];
-  setInterval(() => {
+  container.innerHTML = '';
+  const items = ['🏮', '🪔', '✨', '💛', '🌟', '🎇'];
+  const spawn = () => {
     if (currentChapter !== 4) return;
     const l = document.createElement('div');
     l.className = 'lantern';
     l.textContent = items[Math.floor(Math.random() * items.length)];
-    l.style.left = `${Math.random() * 90 + 5}%`;
-    l.style.fontSize = `${1.1 + Math.random() * 0.7}rem`;
-    l.style.animationDuration = `${7 + Math.random() * 6}s`;
+    l.style.left = `${Math.random() * 88 + 6}%`;
+    l.style.fontSize = `${1 + Math.random() * 0.8}rem`;
+    const dur = 8 + Math.random() * 7;
+    l.style.animationDuration = `${dur}s`;
     container.appendChild(l);
-    setTimeout(() => l.remove(), 12000);
-  }, 2000);
+    setTimeout(() => l.remove(), dur * 1000);
+    setTimeout(spawn, 1200 + Math.random() * 1500);
+  };
+  setTimeout(spawn, 500);
 }
 
-function triggerCelebrationFireworks() {
-  for (let i = 0; i < 5; i++) {
-    setTimeout(launchSingleFirework, i * 400);
+function launchFireworks() {
+  for (let i = 0; i < 6; i++) {
+    setTimeout(singleFirework, i * 350);
   }
 }
 
-function launchSingleFirework() {
+function singleFirework() {
   const container = document.getElementById('fw5');
   if (!container) return;
   const x = Math.random() * 80 + 10;
-  const y = Math.random() * 40 + 10;
-  const colors = ['#ffd700', '#ff6b9d', '#8b6fff', '#52b788', '#f4a261'];
-  const burstCount = 18;
-
-  for (let i = 0; i < burstCount; i++) {
+  const y = Math.random() * 45 + 5;
+  const colors = ['#ffd700', '#ff6b9d', '#8b6fff', '#52b788', '#f4a261', '#fff'];
+  const count = 22;
+  for (let i = 0; i < count; i++) {
     const s = document.createElement('div');
     s.className = 'spark';
     s.style.left = `${x}%`;
     s.style.top = `${y}%`;
     s.style.background = colors[Math.floor(Math.random() * colors.length)];
-    const angle = (i / burstCount) * Math.PI * 2;
-    const dist = 30 + Math.random() * 50;
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 35 + Math.random() * 55;
     s.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
     s.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
-    s.style.animationDuration = `${0.6 + Math.random() * 0.4}s`;
+    s.style.animationDuration = `${0.65 + Math.random() * 0.5}s`;
     container.appendChild(s);
-    setTimeout(() => s.remove(), 1000);
+    setTimeout(() => s.remove(), 1200);
   }
 }
 
-function burstSpark(x, y) {
-  const container = document.body;
-  const colors = ['#ff6b9d', '#ffd700', '#8b6fff'];
-  for (let i = 0; i < 10; i++) {
+function burstSpark(cx, cy) {
+  const colors = ['#ff6b9d', '#ffd700', '#8b6fff', '#fff'];
+  for (let i = 0; i < 12; i++) {
     const s = document.createElement('div');
     s.className = 'spark';
-    s.style.position = 'fixed';
-    s.style.left = `${x}px`;
-    s.style.top = `${y}px`;
+    s.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;z-index:9999;`;
     s.style.background = colors[Math.floor(Math.random() * colors.length)];
     const angle = Math.random() * Math.PI * 2;
-    const dist = 20 + Math.random() * 30;
+    const dist = 25 + Math.random() * 40;
     s.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
     s.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
-    s.style.animationDuration = `${0.5 + Math.random() * 0.3}s`;
-    container.appendChild(s);
-    setTimeout(() => s.remove(), 800);
+    s.style.animationDuration = `${0.5 + Math.random() * 0.35}s`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 900);
   }
 }

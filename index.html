@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="theme-color" content="#030308" />
   <meta name="description" content="Pranu ke liye — ek khaas birthday experience." />
   <meta property="og:title" content="Pranu ke liye ❤️" />
   <meta property="og:description" content="Ek khaas birthday experience — sirf tumhare liye." />
@@ -20,12 +20,17 @@
 <body>
 
   <!-- ═══ LOADER — Tap to begin ═══ -->
-  <div id="loader" role="button" tabindex="0" aria-label="Tap to begin the experience">
+  <div id="loader" role="button" tabindex="0" aria-label="Tap to begin">
     <canvas id="loader-canvas"></canvas>
     <div class="loader-inner">
-      <div class="loader-heart" aria-hidden="true">❤️</div>
+      <span class="loader-heart" aria-hidden="true">❤️</span>
       <p class="loader-name">Pranu</p>
-      <p class="loader-tap">Tap karo shuruu karne ke liye...</p>
+      <p class="loader-sub">Sirf tumhare liye...</p>
+      <p class="loader-tap">
+        <span>✨</span>
+        <span>Tap karo shuruu karne ke liye</span>
+        <span>✨</span>
+      </p>
     </div>
   </div>
 
@@ -58,7 +63,7 @@
   <main id="experience">
 
     <!-- ═══ CHAPTER 1: PEHLE ═══ -->
-    <section id="ch1" class="chapter" data-chapter="0" aria-label="Chapter 1">
+    <section id="ch1" class="chapter" data-chapter="0" aria-label="Chapter 1: Pehle">
       <canvas id="ch1-canvas" class="bg-canvas"></canvas>
       <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
       <div class="fog" aria-hidden="true"></div>
@@ -80,34 +85,42 @@
       </div>
     </section>
 
-    <!-- ═══ CHAPTER 2: TERI KAHANI (Framed Polaroid Journey) ═══ -->
+    <!-- ═══ CHAPTER 2: TERI KAHANI (Full-Screen Photo Story) ═══ -->
     <section id="ch2" class="chapter ch-hidden" data-chapter="1" aria-label="Chapter 2: Teri Kahani">
-      <canvas class="bg-canvas" id="ps-canvas"></canvas>
 
-      <div class="ps-frame-container" id="ps-frame">
-        <div class="ps-washi-tape" aria-hidden="true"></div>
-        <div class="ps-image-holder">
-          <div class="ps-layer" id="ps-layer-a"></div>
-          <div class="ps-layer" id="ps-layer-b"></div>
-        </div>
-        <div class="ps-polaroid-caption">
-          <div class="ps-era-badge">
-            <span class="ps-era-emoji" id="ps-emoji">🧸</span>
-            <span class="ps-era-name" id="ps-era-name">Bachi</span>
-          </div>
-          <p class="ps-subtitle" id="ps-subtitle"></p>
-        </div>
-        <div class="ps-progress-dots" id="ps-progress-dots" aria-hidden="true"></div>
+      <!-- Full-screen background photo layers -->
+      <div class="photo-bg" id="photo-bg" aria-hidden="true">
+        <div class="photo-layer" id="photo-layer-a"></div>
+        <div class="photo-layer" id="photo-layer-b"></div>
+        <div class="photo-tint"></div>
       </div>
 
-      <p class="ps-tap-hint">tap anywhere to continue</p>
+      <!-- Particle canvas over photos -->
+      <canvas class="bg-canvas" id="ps-canvas"></canvas>
 
-      <!-- Special "married" dream frame (last era) -->
-      <div class="dream-frame ui-hidden" id="dream-frame" aria-label="A dream of the future">
+      <!-- Photo counter -->
+      <div class="photo-counter" id="photo-counter" aria-live="polite">1 / 1</div>
+
+      <!-- Era overlay — bottom info -->
+      <div class="era-overlay" id="era-overlay">
+        <div class="era-badge-fs" id="era-badge-fs">
+          <span class="era-emoji-fs" id="era-emoji-fs">🧸</span>
+          <span class="era-name-fs" id="era-name-fs">Bachi</span>
+        </div>
+        <span class="era-desc-fs" id="era-desc-fs">Masoom savera aur cute bachpan</span>
+        <div class="era-dots" id="era-dots" aria-hidden="true"></div>
+      </div>
+
+      <!-- Tap hint -->
+      <p class="ps-tap-hint" id="ps-tap-hint">tap anywhere to continue →</p>
+
+      <!-- Dream Frame (last era climax) -->
+      <div class="dream-frame ui-hidden" id="dream-frame" role="dialog" aria-modal="true">
         <div class="dream-inner">
           <div class="dream-ring" aria-hidden="true">💍</div>
           <p class="dream-title">Ek Din...</p>
-          <p class="dream-sub">Yeh sapna sach hoga.</p>
+          <p class="dream-sub">Yeh sapna sach hoga. ✨</p>
+          <p class="dream-cta">tap to continue</p>
         </div>
       </div>
     </section>
@@ -139,11 +152,11 @@
         <button class="next-btn" id="ch3-next">Aage Chalein →</button>
       </div>
 
-      <!-- Pop-up modal reveal for appreciation reasons -->
+      <!-- Pop-up modal for heart reasons -->
       <div class="heart-popup ui-hidden" id="heart-popup" role="dialog" aria-modal="true">
         <div class="heart-popup-inner">
-          <button class="heart-popup-close" id="heart-popup-close">✕</button>
-          <div class="heart-popup-icon">😉</div>
+          <button class="heart-popup-close" id="heart-popup-close" aria-label="Close">✕</button>
+          <div class="heart-popup-icon" aria-hidden="true">😉</div>
           <p class="heart-popup-msg" id="heart-popup-msg"></p>
         </div>
       </div>
@@ -218,11 +231,27 @@
 
   </main>
 
-  <audio id="music-sad" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"/></audio>
-  <audio id="music-happy" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/></audio>
-  <audio id="music-romantic" loop preload="auto"><source src="yourmusic.mp3" type="audio/mpeg"/></audio>
-  <audio id="music-longing" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" type="audio/mpeg"/></audio>
-  <audio id="music-festive" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg"/></audio>
+  <!-- Music tracks — use yourmusic.mp3 for romantic chapter; other chapters use royalty-free links -->
+  <audio id="music-ch1" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_2dde668d05.mp3" type="audio/mpeg"/>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"/>
+  </audio>
+  <audio id="music-ch2" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3" type="audio/mpeg"/>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/>
+  </audio>
+  <audio id="music-ch3" loop preload="auto">
+    <source src="yourmusic.mp3" type="audio/mpeg"/>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg"/>
+  </audio>
+  <audio id="music-ch4" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3" type="audio/mpeg"/>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" type="audio/mpeg"/>
+  </audio>
+  <audio id="music-ch5" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2023/10/13/audio_6bab93b4bb.mp3" type="audio/mpeg"/>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg"/>
+  </audio>
 
   <script src="script.js"></script>
 </body>

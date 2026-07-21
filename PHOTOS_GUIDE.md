@@ -1,37 +1,59 @@
-# Photos Folder Structure & Count Guide
+# 📸 Photo Guide — Monsoon Diaries
 
-Apni photos ko high quality me load karne ke liye `images/` directory me niche diye gaye folders me replace karein:
+## Folder Structure
 
-## Folders & Recommended Counts:
+Sabhi photos `images/` folder ke andar rakho:
 
-1. **`images/kid/`** (Bachi 🧸 Era)
-   - *Photos count*: 2
-   - *File names*: `1.jpg`, `2.jpg`
+```
+images/
+  kid/       → Bachi era (bachpan ki photos)
+  bossy/     → Bossy era (confident phase)
+  teeth/     → Chulbuli era (smiling/naughty photos)
+  saree/     → Saree era (graceful, traditional)
+  final/     → Hum Dono (tumhare saath ki photos)
+```
 
-2. **`images/teeth/`** (Chulbuli ✨ Era)
-   - *Photos count*: 2
-   - *File names*: `1.jpg`, `2.jpg`
+## Photo Count Update
 
-3. **`images/bossy/`** (Ladki 🌸 Era)
-   - *Photos count*: 2
-   - *File names*: `1.jpg`, `2.jpg`
+Jab bhi naye photos add karo, `config.js` mein `photoCounts` object update karo:
 
-4. **`images/saree/`** (Saree 🥻 Era)
-   - *Photos count*: 2
-   - *File names*: `1.jpg`, `2.jpg`
+```js
+photoCounts: {
+  kid: 4,      // images/kid/ mein 4 photos hain (1.jpg to 4.jpg)
+  bossy: 5,    // images/bossy/ mein 5 photos hain
+  teeth: 2,    // images/teeth/ mein 2 photos hain
+  saree: 4,    // images/saree/ mein 4 photos hain
+  final: 4     // images/final/ mein 4 photos hain
+}
+```
 
-5. **`images/final/`** (Us Together 🫂 & Married Dream 💍)
-   - *Photos count*: 4
-   - *File names*: `1.jpg`, `2.jpg`, `3.jpg`, `4.jpg`
+## Naming Convention
 
----
+Photos ka naam sirf numbers mein rakho:
+- `1.jpg`, `2.jpg`, `3.jpg`, ...
 
-### Note:
-- Agar kisi folder me aap photos badhana chahte hain, to simply us folder me photo daalein (e.g. `images/kid/3.jpg`) aur use `config.js` ki corresponding list me append kar dein:
-  ```javascript
-  photos: {
-    kid: ["images/kid/1.jpg", "images/kid/2.jpg", "images/kid/3.jpg"],
-    ...
-  }
-  ```
-- **Image Resolution Tip**: Quality kharab na ho isliye polaroid borders coordinate kiye gaye hain taaki image responsive fit ho. Fir bhi behtar clarity ke liye images ka size 800x800 px se zyada rakhein!
+## Image Tips (Quality)
+
+- **Phone pe acchi dikhne ke liye:** Portrait orientation (vertical) photos zyada achhi lagti hain
+- **Compress karo:** https://squoosh.app use karo to compress without quality loss
+- **Minimum resolution:** 800×1000px ya usse zyada
+
+## Journey Order
+
+Site pe jo journey dikhegi:
+1. 🧸 **Bachi** — kid folder
+2. ✨ **Bossy** — bossy folder  
+3. 😄 **Chulbuli** — teeth folder
+4. 🥻 **Saree** — saree folder
+5. 🫂 **Hum Dono** — final folder
+6. 💍 **Dream Frame** (auto, koi photo nahi chahiye)
+
+## After Adding Photos
+
+```bash
+git add images/
+git commit -m "✨ Add new photos"
+git push origin main
+```
+
+GitHub Pages pe 1-2 minute mein live ho jaayega!
