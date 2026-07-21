@@ -351,15 +351,16 @@ function loadPhoto(path, isAlt) {
 }
 
 function advanceJourney() {
-  if (photoJourneyEnded) return;
-
-  // If dream frame is showing, close it and go to next chapter
   const dreamFrame = document.getElementById('dream-frame');
+  
+  // If dream frame is showing, close it and go to next chapter (regardless of photoJourneyEnded state)
   if (!dreamFrame.classList.contains('ui-hidden')) {
     dreamFrame.classList.add('ui-hidden');
     showChapter(2);
     return;
   }
+
+  if (photoJourneyEnded) return;
 
   const era = ERAS[eraIdx];
   const photos = getPhotoList(era);
