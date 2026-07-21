@@ -271,7 +271,7 @@ function initCh1() {
   window.addEventListener('resize', resizeCh1);
 
   // Regular stars
-  const stars = Array.from({ length: 180 }, () => ({
+  const stars = Array.from({ length: 260 }, () => ({
     x: Math.random(),
     y: Math.random(),
     r: Math.random() * 1.6 + 0.3,

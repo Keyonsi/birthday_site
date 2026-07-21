@@ -415,6 +415,37 @@ body {
   animation: heartbeat 3.4s ease-in-out infinite;
 }
 
+.ch1-moon {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(150, 120, 220, 0.28) 0%, rgba(94, 75, 139, 0.12) 45%, transparent 75%);
+  z-index: 1;
+  pointer-events: none;
+  animation: moonPulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes moonPulse {
+  from {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+#ch1 .ch-content {
+  gap: 1.3rem;
+  padding-top: 4rem;
+}
+
 @keyframes heartbeat {
 
   0%,
@@ -536,12 +567,27 @@ body {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 45vw;
-  max-width: 260px;
+  width: 58vw;
+  max-width: 340px;
   height: auto;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.95;
+}
+
+.ch1-panel {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(150, 120, 220, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.3rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 30px rgba(94, 75, 139, 0.12);
 }
 
 .ch1-desc {
