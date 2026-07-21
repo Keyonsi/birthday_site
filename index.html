@@ -76,9 +76,13 @@
       <canvas id="ch1-canvas" class="bg-canvas"></canvas>
       <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
       <div class="fog" aria-hidden="true"></div>
+      <div class="heartbeat-vignette" aria-hidden="true"></div>
       <svg class="ch1-silhouette" viewBox="0 0 200 300" aria-hidden="true">
         <ellipse cx="100" cy="60" rx="26" ry="30" fill="rgba(180,170,220,0.06)" />
         <path d="M60 300 Q60 140 100 130 Q140 140 140 300 Z" fill="rgba(180,170,220,0.06)" />
+        <path id="hollow-heart"
+          d="M100 108 C93 98 78 98 72 110 C66 122 74 134 100 152 C126 134 134 122 128 110 C122 98 107 98 100 108 Z"
+          fill="none" stroke="rgba(180,170,220,0.25)" stroke-width="1.5" />
       </svg>
 
       <div class="ch-content">

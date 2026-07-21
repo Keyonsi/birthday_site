@@ -398,6 +398,55 @@ body {
 ═══════════════════════════════════════════════════════════ */
 #ch1 {
   background: radial-gradient(ellipse at 30% 20%, #0d0921 0%, #04040d 60%, #010104 100%);
+  filter: grayscale(0.85) saturate(0.6) brightness(0.92);
+  transition: filter 2.4s ease;
+}
+
+#ch1.color-bloom {
+  filter: grayscale(0) saturate(1.05) brightness(1);
+}
+
+.heartbeat-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 55%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
+  animation: heartbeat 3.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  8% {
+    opacity: 0.8;
+  }
+
+  16% {
+    opacity: 0.55;
+  }
+
+  24% {
+    opacity: 0.72;
+  }
+
+  32% {
+    opacity: 0.55;
+  }
+}
+
+#hollow-heart {
+  transition: stroke 2.2s ease, fill 2.2s ease, filter 2.2s ease;
+}
+
+#ch1.color-bloom #hollow-heart {
+  stroke: rgba(255, 200, 120, 0.9);
+  fill: rgba(255, 180, 110, 0.35);
+  filter: drop-shadow(0 0 12px rgba(255, 180, 110, 0.6));
 }
 
 .rain-wrap {

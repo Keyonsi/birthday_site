@@ -232,6 +232,7 @@ function initCh1() {
         if (lineIdx === 3 && !volumeRaised) {
           volumeRaised = true;
           if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.45, 1800, false);
+          document.getElementById('ch1').classList.add('color-bloom');
         }
         isDeleting = true;
         setTimeout(type, 2000);
