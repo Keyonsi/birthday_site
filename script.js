@@ -203,7 +203,21 @@ function initCh1() {
   }
   setTimeout(type, 800);
 
-  // Canvas: stars + occasional shooting star
+  // Staggered poem line reveal — the last line ("Tab tum nahi the") dims the stars
+  const poemLines = document.querySelectorAll('#poem p');
+  let dimTarget = 1; // 1 = full brightness, lower = dimmed
+  poemLines.forEach((p, i) => {
+    setTimeout(() => {
+      if (currentChapter !== 0) return;
+      p.classList.add('visible');
+      if (p.classList.contains('poem-emphasis')) {
+        dimTarget = 0.45;
+        setTimeout(() => { if (currentChapter === 0) startConstellation(); }, 2200);
+      }
+    }, 1800 + i * 900);
+  });
+
+  // Canvas: stars + occasional shooting star + constellation + parallax
   const canvas = document.getElementById('ch1-canvas');
   const ctx = canvas.getContext('2d');
   function resizeCh1() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -218,6 +232,23 @@ function initCh1() {
     alpha: Math.random(),
     speed: (Math.random() * 0.015 + 0.004) * (Math.random() > 0.5 ? 1 : -1)
   }));
+
+  // Parallax offset — follows pointer/touch, subtle
+  let px = 0, py = 0, targetPx = 0, targetPy = 0;
+  function handlePointer(e) {
+    if (currentChapter !== 0) return;
+    const point = e.touches ? e.touches[0] : e;
+    targetPx = (point.clientX / window.innerWidth - 0.5) * 18;
+    targetPy = (point.clientY / window.innerHeight - 0.5) * 18;
+  }
+  window.addEventListener('pointermove', handlePointer);
+  window.addEventListener('touchmove', handlePointer, { passive: true });
+
+  // Tap-to-wish: tap near a star, it sparkles and bursts
+  canvas.addEventListener('click', e => {
+    if (currentChapter !== 0) return;
+    burstSpark(e.clientX, e.clientY);
+  });
 
   // Shooting stars
   const shooters = [];
@@ -236,18 +267,45 @@ function initCh1() {
   }
   setTimeout(spawnShooter, 2000);
 
+  // Constellation — a small heart shape that quietly draws itself into the sky
+  const heartPoints = [
+    { x: 0.5, y: 0.16 }, { x: 0.44, y: 0.10 }, { x: 0.37, y: 0.09 }, { x: 0.31, y: 0.13 },
+    { x: 0.30, y: 0.20 }, { x: 0.34, y: 0.27 }, { x: 0.43, y: 0.35 }, { x: 0.5, y: 0.43 },
+    { x: 0.57, y: 0.35 }, { x: 0.66, y: 0.27 }, { x: 0.70, y: 0.20 }, { x: 0.69, y: 0.13 },
+    { x: 0.63, y: 0.09 }, { x: 0.56, y: 0.10 }, { x: 0.5, y: 0.16 }
+  ];
+  let constellationProgress = 0; // how many segments drawn
+  let constellationActive = false;
+  function startConstellation() {
+    if (constellationActive) return;
+    constellationActive = true;
+    document.getElementById('ch1-hint').classList.remove('ui-hidden');
+    let seg = 0;
+    const timer = setInterval(() => {
+      seg++;
+      constellationProgress = seg;
+      if (seg >= heartPoints.length) {
+        clearInterval(timer);
+        document.getElementById('begin-btn').classList.add('intensify');
+      }
+    }, 130);
+  }
+
   function loopCh1() {
     if (currentChapter !== 0) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const W = canvas.width, H = canvas.height;
+
+    px += (targetPx - px) * 0.06;
+    py += (targetPy - py) * 0.06;
 
     // Stars
     stars.forEach(s => {
       s.alpha = Math.max(0, Math.min(1, s.alpha + s.speed));
       if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
       ctx.beginPath();
-      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(210,205,255,${s.alpha})`;
+      ctx.arc(s.x * W + px, s.y * H + py, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(210,205,255,${s.alpha * dimTarget})`;
       ctx.fill();
     });
 
@@ -260,17 +318,42 @@ function initCh1() {
       if (s.alpha <= 0) { shooters.splice(i, 1); continue; }
 
       const grd = ctx.createLinearGradient(
-        s.x * W, s.y * H,
-        (s.x - s.len) * W, (s.y - s.len / 2) * H
+        s.x * W + px, s.y * H + py,
+        (s.x - s.len) * W + px, (s.y - s.len / 2) * H + py
       );
       grd.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
       grd.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.beginPath();
-      ctx.moveTo(s.x * W, s.y * H);
-      ctx.lineTo((s.x - s.len) * W, (s.y - s.len / 2) * H);
+      ctx.moveTo(s.x * W + px, s.y * H + py);
+      ctx.lineTo((s.x - s.len) * W + px, (s.y - s.len / 2) * H + py);
       ctx.strokeStyle = grd;
       ctx.lineWidth = 1.5;
       ctx.stroke();
+    }
+
+    // Constellation — glowing connected points, drawn progressively
+    if (constellationProgress > 0) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(200,170,255,0.5)';
+      ctx.lineWidth = 1.2;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(200,170,255,0.6)';
+      ctx.beginPath();
+      for (let i = 0; i < Math.min(constellationProgress, heartPoints.length); i++) {
+        const pt = heartPoints[i];
+        const cx = pt.x * W + px * 0.6, cy = pt.y * H + py * 0.6;
+        if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+      for (let i = 0; i < Math.min(constellationProgress, heartPoints.length); i++) {
+        const pt = heartPoints[i];
+        const cx = pt.x * W + px * 0.6, cy = pt.y * H + py * 0.6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(230,210,255,0.9)';
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     animationFrameId = requestAnimationFrame(loopCh1);

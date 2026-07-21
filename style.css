@@ -500,11 +500,46 @@ body {
   line-height: 2;
 }
 
+.ch1-poem p {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.ch1-poem p.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .poem-emphasis {
   font-size: 1.35rem;
   color: rgba(223, 216, 252, 1);
   margin-top: 0.5rem;
   text-shadow: 0 0 20px rgba(94, 75, 139, 0.5);
+}
+
+.ch1-hint {
+  font-family: var(--font-script);
+  font-size: 0.85rem;
+  color: rgba(223, 216, 252, 0.35);
+  text-align: center;
+  margin-top: -0.4rem;
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+.begin-btn.intensify {
+  animation: btnGlowStrong 1.8s ease-in-out infinite alternate;
+  border-color: rgba(150, 120, 255, 0.8);
+}
+
+@keyframes btnGlowStrong {
+  from {
+    box-shadow: 0 0 30px rgba(150, 120, 255, 0.3), 0 0 60px rgba(94, 75, 139, 0.2);
+  }
+
+  to {
+    box-shadow: 0 0 55px rgba(150, 120, 255, 0.6), 0 0 110px rgba(94, 75, 139, 0.35);
+  }
 }
 
 .begin-btn {

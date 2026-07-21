@@ -111,7 +111,7 @@ const BIRTHDAY_CONFIG = {
       { text: "Teri cute smile jo poora din roshan kar deti hai.", emoji: "😄" },
       { text: "Tera vo mere liye bina kahe hi sab samajh jana.", emoji: "🥹" },
       { text: "Jab bhi main stress me hota hu, teri aawaz sunke sukoon milta hai.", emoji: "😌" },
-      { text: "Periods ke time tera chid-chida hona aur mera tujhe comfort karna.", emoji: "🫂" },
+      { text: "Periods ke time tumhara chid-chida hona aur mera tumhe comfort karna.", emoji: "🫂" },
       { text: "Deleted chats ke waqt hamara vo ek doosre ke liye rona.", emoji: "🥺" },
       { text: "Pineapple juice me chatpata masala daal ke pina.", emoji: "🍍" },
       { text: "Birla Mandir ki seedhiyon pe bitaaye vo peaceful pal.", emoji: "🕊️" },
@@ -131,7 +131,7 @@ const BIRTHDAY_CONFIG = {
       "Tumhare liye Yojee's Net app banwaya — taaki padh sako achhe se",
       "Dheere dheere — hum phir wahi aa gaye"
     ],
-    letter: "Yeh waqt mushkil tha. Par tu jaanti hai — teri mushkil meri mushkil hai. Jab tujhe padhai par dhyan dena tha, maine teri taraf se ek kadam uthaya. Net app isliye banwaya kyunki main chahta tha ki tu apna sapna poora kare. Tera sapna, mera sapna hai."
+    letter: "Yeh waqt mushkil tha. Par tum jaanti ho — tumhari mushkil meri mushkil hai. Jab tumhe padhai par dhyan dena tha, maine tumhari taraf se ek kadam uthaya. Net app isliye banwaya kyunki main chahta tha ki tum apna sapna poora karo. Tumhara sapna, mera sapna hai."
   },
 
   // --- Chapter 5: Aaj Aur Hamesha ---
@@ -164,7 +164,7 @@ Main yeh wada karta hoon: chahe koi bhi waqt aaye, main wahi rahoon ga. Tumhare 
 
 Tumhari hasi meri sabse badi kamzori hai. Aur main chahta hoon ki yeh kamzori hamesha bani rahe.
 
-Pranu — tu meri jaan hai. Literally. Pran + U = Pranu. Tu meri saans hai.
+Pranu — tum meri jaan ho. Literally. Pran + U = Pranu. Tum meri saans ho.
 
 Happy Birthday. Happy Anniversary.
 
