@@ -38,7 +38,7 @@ function switchAudio(chIdx) {
   currentAudio = next;
   next.volume = 0;
   next.play().then(() => fadeVolume(next, 0.45, 1800, false))
-              .catch(e => console.log('Audio blocked:', e));
+    .catch(e => console.log('Audio blocked:', e));
 }
 
 // ── LOADER ────────────────────────────────────────────────────
@@ -352,7 +352,7 @@ function loadPhoto(path, isAlt) {
 
 function advanceJourney() {
   const dreamFrame = document.getElementById('dream-frame');
-  
+
   // If dream frame is showing, close it and go to next chapter (regardless of photoJourneyEnded state)
   if (!dreamFrame.classList.contains('ui-hidden')) {
     dreamFrame.classList.add('ui-hidden');
@@ -412,11 +412,11 @@ function initCh2() {
   resizeCh2();
 
   const moodColors = {
-    pink:   [255, 182, 193],
-    gold:   [255, 215, 100],
+    pink: [255, 182, 193],
+    gold: [255, 215, 100],
     purple: [196, 123, 255],
-    rose:   [255, 107, 157],
-    warm:   [255, 162, 100]
+    rose: [255, 107, 157],
+    warm: [255, 162, 100]
   };
 
   function getMoodColor() {
@@ -464,90 +464,20 @@ function initCh3() {
   const cfg = BIRTHDAY_CONFIG.chapter3;
   document.getElementById('rain-text').textContent = cfg.mainMemory.description;
 
-  // Moments list with staggered animation
-  const list = document.getElementById('moments-list');
-  list.innerHTML = '';
-  cfg.moments.forEach((m, i) => {
-    const item = document.createElement('div');
-    item.className = 'moment-item';
-    item.style.animationDelay = `${i * 0.08}s`;
-    item.innerHTML = `<span class="moment-icon">${m.icon}</span><span>${m.text}</span>`;
-    list.appendChild(item);
-  });
+  // Shayari lines (animated, staggered)
+  const shayariWrap = document.querySelector('.rain-shayari');
+  if (shayariWrap && cfg.mainMemory.shayari) {
+    shayariWrap.innerHTML = cfg.mainMemory.shayari.map(l => `<p>${l}</p>`).join('');
+  }
+
+  // ── PART 1: Quiz game ─────────────────────────────────────
+  runQuiz(cfg);
+
+  // ── PART 2 setup happens after quiz completes (see revealHeartsSection) ──
 
   // Modal setup
   const modal = document.getElementById('heart-popup');
   document.getElementById('heart-popup-close').onclick = () => modal.classList.add('ui-hidden');
-
-  // Floating hearts
-  const wrap = document.getElementById('hearts-wrap');
-  wrap.innerHTML = '';
-  activeHearts = [];
-  let revealed = 0;
-
-  cfg.reasonsILoveYou.forEach((reason, i) => {
-    const bubble = document.createElement('div');
-    bubble.className = 'heart-bubble';
-    bubble.innerHTML = '❤️';
-
-    const hData = {
-      el: bubble,
-      x: 10 + Math.random() * 75,
-      y: 60 + Math.random() * 150,
-      speed: Math.random() * 0.7 + 0.3,
-      wobble: Math.random() * 200,
-      wobbleAmp: 8 + Math.random() * 10,
-      wobbleSpeed: 0.008 + Math.random() * 0.012,
-      reason,
-      done: false
-    };
-
-    bubble.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!hData.done) {
-        hData.done = true;
-        bubble.classList.add('revealed', 'wink');
-        bubble.innerHTML = '😉';
-        revealed++;
-        document.getElementById('hearts-count').textContent =
-          `${revealed} / ${cfg.reasonsILoveYou.length} raazein khuli...`;
-        document.getElementById('heart-popup-msg').textContent = reason;
-        modal.classList.remove('ui-hidden');
-        burstSpark(e.clientX, e.clientY);
-        setTimeout(() => {
-          bubble.innerHTML = '💖';
-          bubble.classList.remove('wink');
-        }, 550);
-      } else {
-        document.getElementById('heart-popup-msg').textContent = reason;
-        modal.classList.remove('ui-hidden');
-      }
-    });
-
-    wrap.appendChild(bubble);
-    activeHearts.push(hData);
-  });
-
-  document.getElementById('hearts-count').textContent =
-    `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
-
-  // Float animation loop
-  function floatHearts() {
-    if (currentChapter !== 2) return;
-    activeHearts.forEach(h => {
-      h.wobble += h.wobbleSpeed;
-      h.y -= h.speed * 0.4;
-      const curX = h.x + Math.sin(h.wobble) * h.wobbleAmp;
-      h.el.style.left = `${curX}%`;
-      h.el.style.top = `${h.y}px`;
-      if (h.y < -55) {
-        h.y = 270;
-        h.x = 10 + Math.random() * 75;
-      }
-    });
-    requestAnimationFrame(floatHearts);
-  }
-  floatHearts();
 
   // Firefly canvas
   const canvas = document.getElementById('ch3-canvas');
@@ -572,6 +502,19 @@ function initCh3() {
     alpha: Math.random() * 0.25 + 0.05
   }));
 
+  // Garden petals — slow drifting, gentle sway
+  const petals = Array.from({ length: 14 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 3 + 2.5,
+    vy: Math.random() * 0.00035 + 0.00015,
+    sway: Math.random() * 200,
+    swaySpeed: 0.006 + Math.random() * 0.006,
+    swayAmp: 0.015 + Math.random() * 0.015,
+    rot: Math.random() * Math.PI * 2,
+    rotSpeed: (Math.random() - 0.5) * 0.01,
+    hue: Math.random() > 0.5 ? '255,182,193' : '212,237,218'
+  }));
+
   function loopCh3() {
     if (currentChapter !== 2) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -587,6 +530,24 @@ function initCh3() {
       ctx.strokeStyle = `rgba(174,220,180,${d.alpha})`;
       ctx.lineWidth = 0.8;
       ctx.stroke();
+    });
+
+    // Garden petals — drifting down with a gentle sway and rotation
+    petals.forEach(p => {
+      p.sway += p.swaySpeed;
+      p.y += p.vy;
+      p.rot += p.rotSpeed;
+      if (p.y > 1.05) { p.y = -0.05; p.x = Math.random(); }
+      const px = (p.x + Math.sin(p.sway) * p.swayAmp) * W;
+      const py = p.y * H;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(p.rot);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.hue},0.35)`;
+      ctx.fill();
+      ctx.restore();
     });
 
     // Fireflies
@@ -610,6 +571,208 @@ function initCh3() {
 
   createRain('rain3', 80);
   document.getElementById('ch3-next').onclick = () => showChapter(3);
+}
+
+// ── QUIZ GAME (Part 1) ──────────────────────────────────────
+function runQuiz(cfg) {
+  const questions = cfg.quiz;
+  const scores = {};
+  let qIdx = 0;
+
+  const stepEl = document.getElementById('quiz-step');
+  const barEl = document.getElementById('quiz-progress-bar');
+  const cardEl = document.getElementById('quiz-question-card');
+
+  function renderQuestion() {
+    const q = questions[qIdx];
+    stepEl.textContent = `Sawal ${qIdx + 1} / ${questions.length}`;
+    barEl.style.width = `${((qIdx) / questions.length) * 100 + (100 / questions.length) * 0.15}%`;
+
+    cardEl.classList.remove('leaving');
+    cardEl.innerHTML = `
+      <p class="quiz-q-text">${q.q}</p>
+      <div class="quiz-options">
+        ${q.options.map((o, i) => `
+          <button class="quiz-option" data-idx="${i}" style="animation-delay:${i * 0.06}s">
+            <span class="quiz-option-icon">${o.icon}</span><span>${o.text}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    cardEl.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (cardEl.classList.contains('leaving')) return;
+        const opt = q.options[parseInt(btn.dataset.idx)];
+        btn.classList.add('chosen');
+        scores[opt.tag] = (scores[opt.tag] || 0) + 1;
+        barEl.style.width = `${((qIdx + 1) / questions.length) * 100}%`;
+
+        setTimeout(() => {
+          cardEl.classList.add('leaving');
+          setTimeout(() => {
+            qIdx++;
+            if (qIdx < questions.length) {
+              renderQuestion();
+            } else {
+              finishQuiz(cfg, scores);
+            }
+          }, 250);
+        }, 280);
+      });
+    });
+  }
+
+  renderQuestion();
+}
+
+function finishQuiz(cfg, scores) {
+  document.getElementById('quiz-wrap').classList.add('ui-hidden');
+
+  // Rank tags by score, take top 3, map each to its moment
+  const rankedTags = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([tag]) => tag);
+  const usedTags = new Set();
+  const topMoments = [];
+  rankedTags.forEach(tag => {
+    if (topMoments.length >= 3) return;
+    const moment = cfg.moments.find(m => m.tag === tag && !usedTags.has(m.tag));
+    if (moment) { topMoments.push(moment); usedTags.add(tag); }
+  });
+  // Fallback: fill from remaining moments if fewer than 3 tags scored
+  cfg.moments.forEach(m => {
+    if (topMoments.length < 3 && !topMoments.includes(m)) topMoments.push(m);
+  });
+
+  const resultWrap = document.getElementById('quiz-result');
+  const cardsWrap = document.getElementById('result-cards');
+  cardsWrap.innerHTML = topMoments.slice(0, 3).map(m => `
+    <div class="result-card">
+      <span class="result-card-icon">${m.icon}</span>
+      <span>${m.text}</span>
+    </div>
+  `).join('');
+  resultWrap.classList.remove('ui-hidden');
+
+  setTimeout(revealHeartsSection, 1800);
+}
+
+function revealHeartsSection() {
+  const heartsWrap = document.getElementById('hearts-section');
+  heartsWrap.classList.remove('ui-hidden');
+  heartsWrap.innerHTML = `
+    <p class="hearts-hint">❤️ Udte hue dil ko pakdo, raaz khulengi...</p>
+    <div class="hearts-wrap" id="hearts-wrap" aria-label="Reasons I love you"></div>
+    <p class="hearts-count" id="hearts-count" aria-live="polite"></p>
+  `;
+  initHearts();
+}
+
+// ── HEARTS (Part 2) ─────────────────────────────────────────
+function initHearts() {
+  const cfg = BIRTHDAY_CONFIG.chapter3;
+  const modal = document.getElementById('heart-popup');
+  const wrap = document.getElementById('hearts-wrap');
+  wrap.innerHTML = '';
+  activeHearts = [];
+  let revealed = 0;
+
+  cfg.reasonsILoveYou.forEach((reason, i) => {
+    const bubble = document.createElement('div');
+    bubble.className = 'heart-bubble';
+    bubble.innerHTML = '❤️';
+
+    const hData = {
+      el: bubble,
+      x: 10 + Math.random() * 75,
+      y: 60 + Math.random() * 150,
+      speed: Math.random() * 0.7 + 0.3,
+      wobble: Math.random() * 200,
+      wobbleAmp: 8 + Math.random() * 10,
+      wobbleSpeed: 0.008 + Math.random() * 0.012,
+      reason: reason.text,
+      emoji: reason.emoji,
+      done: false
+    };
+
+    bubble.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!hData.done) {
+        hData.done = true;
+        revealed++;
+        document.getElementById('hearts-count').textContent =
+          `${revealed} / ${cfg.reasonsILoveYou.length} raazein khuli...`;
+
+        // Detach the heart from its confined box and let it fly free across the screen
+        const rect = bubble.getBoundingClientRect();
+        bubble.classList.add('flying', 'wink');
+        bubble.innerHTML = hData.emoji;
+        bubble.style.left = `${rect.left}px`;
+        bubble.style.top = `${rect.top}px`;
+
+        burstEmojiEffect(e.clientX, e.clientY, hData.emoji);
+
+        requestAnimationFrame(() => {
+          bubble.style.left = `${window.innerWidth / 2 - 30}px`;
+          bubble.style.top = `${window.innerHeight * 0.28}px`;
+        });
+
+        setTimeout(() => {
+          document.getElementById('heart-popup-icon').textContent = hData.emoji;
+          document.getElementById('heart-popup-msg').textContent = hData.reason;
+          modal.classList.remove('ui-hidden');
+          bubble.classList.add('fading');
+          setTimeout(() => bubble.remove(), 650);
+        }, 500);
+      } else {
+        document.getElementById('heart-popup-icon').textContent = hData.emoji;
+        document.getElementById('heart-popup-msg').textContent = hData.reason;
+        modal.classList.remove('ui-hidden');
+      }
+    });
+
+    wrap.appendChild(bubble);
+    activeHearts.push(hData);
+  });
+
+  document.getElementById('hearts-count').textContent =
+    `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
+
+  // Float animation loop
+  function floatHearts() {
+    if (currentChapter !== 2) return;
+    activeHearts.forEach(h => {
+      if (h.el.classList.contains('flying')) return;
+      h.wobble += h.wobbleSpeed;
+      h.y -= h.speed * 0.4;
+      const curX = h.x + Math.sin(h.wobble) * h.wobbleAmp;
+      h.el.style.left = `${curX}%`;
+      h.el.style.top = `${h.y}px`;
+      if (h.y < -55) {
+        h.y = 270;
+        h.x = 10 + Math.random() * 75;
+      }
+    });
+    requestAnimationFrame(floatHearts);
+  }
+  floatHearts();
+}
+
+function burstEmojiEffect(cx, cy, emoji) {
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement('div');
+    s.className = 'emoji-burst';
+    s.textContent = emoji;
+    s.style.left = `${cx}px`;
+    s.style.top = `${cy}px`;
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 30 + Math.random() * 60;
+    s.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    s.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+    s.style.setProperty('--rot', `${(Math.random() - 0.5) * 120}deg`);
+    s.style.animationDelay = `${i * 0.03}s`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
