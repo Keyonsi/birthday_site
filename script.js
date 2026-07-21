@@ -1,48 +1,63 @@
 /* ============================================================
-   MONSOON DIARIES — Script Engine Overhaul
+   MONSOON DIARIES — Script Engine Overhaul (Thematic Audio & Polaroid)
    ============================================================ */
 
 'use strict';
 
-const bgAudio = document.getElementById('bg-audio');
+// Chapter to Audio elements mapping
+const chapterAudios = {
+  0: document.getElementById('music-sad'),
+  1: document.getElementById('music-happy'),
+  2: document.getElementById('music-romantic'),
+  3: document.getElementById('music-longing'),
+  4: document.getElementById('music-festive')
+};
+
 let currentChapter = -1;
+let currentPlayingAudio = null;
 let bgMusicPlaying = false;
 
-// ── PHOTO JOURNEY SEQUENCE CONFIG ───────────────────────────
-const ERA_PHOTOS = [
-  { id: 1, name: "Bachi 🧸", desc: "Zindagi ka sabse pehla aur masoom savera", folder: "kid", emoji: "🧸" },
-  { id: 2, name: "Chulbuli ✨", desc: "Masti, hasi aur thodi natkhat shararatein", folder: "teeth", emoji: "✨" },
-  { id: 3, name: "Ladki 🌸", desc: "Dheere dheere bade hona aur khud ko pehchanna", folder: "bossy", emoji: "🌸" },
-  { id: 4, name: "Saree 🥻", desc: "Pehli baar saree mein ek khoobsurat ehsaas", folder: "saree", emoji: "🥻" },
-  { id: 5, name: "Us Together 🫂", desc: "Mera haath, tumhare kandhe par pehli baar", folder: "final", emoji: "🫂" },
-  { id: 6, name: "Married Dream 💍", desc: "Ek din ye sapna sach hoga, hamesha ke liye", folder: "final", emoji: "💍" }
-];
+// Crossfade Audio Helper
+function switchChapterAudio(newIdx) {
+  const targetAudio = chapterAudios[newIdx];
+  if (!targetAudio || !bgMusicPlaying) return;
 
-let currentEraIndex = 0;
-let currentPhotoIndexInEra = 0;
+  // Fade out current audio
+  if (currentPlayingAudio && currentPlayingAudio !== targetAudio) {
+    fadeAudio(currentPlayingAudio, 0, 1000, true);
+  }
 
-// Fade music helpers
-function fadeAudio(audio, target, duration = 1000) {
-  const step = (target - audio.volume) / (duration / 50);
-  const timer = setInterval(() => {
-    audio.volume = Math.max(0, Math.min(1, audio.volume + step));
-    if ((step > 0 && audio.volume >= target) || (step < 0 && audio.volume <= target)) {
-      audio.volume = target;
-      clearInterval(timer);
-      if (target === 0) audio.pause();
-    }
-  }, 50);
+  // Fade in new audio
+  currentPlayingAudio = targetAudio;
+  targetAudio.volume = 0;
+  targetAudio.play().then(() => {
+    fadeAudio(targetAudio, 0.4, 1500, false);
+  }).catch(err => console.log("Audio play blocked/failed:", err));
 }
 
-// ── LOADER AND GESTURE TO START MUSIC ─────────────────────────
+function fadeAudio(audio, targetVol, duration, pauseOnComplete) {
+  const steps = 20;
+  const interval = duration / steps;
+  const volStep = (targetVol - audio.volume) / steps;
+  let count = 0;
+
+  const timer = setInterval(() => {
+    audio.volume = Math.max(0, Math.min(1, audio.volume + volStep));
+    count++;
+    if (count >= steps) {
+      audio.volume = targetVol;
+      clearInterval(timer);
+      if (pauseOnComplete && targetVol === 0) {
+        audio.pause();
+      }
+    }
+  }, interval);
+}
+
+// ── LOADER & INITIAL AUDIO UNLOCK ───────────────────────────
 document.getElementById('loader').addEventListener('click', () => {
-  // Autoplay workaround: start music on user gesture
-  bgAudio.volume = 0;
-  bgAudio.play().then(() => {
-    fadeAudio(bgAudio, 0.5, 2000);
-    bgMusicPlaying = true;
-    document.getElementById('music-icon').textContent = '❚❚';
-  }).catch(err => console.log("Audio autoplay fail:", err));
+  bgMusicPlaying = true;
+  document.getElementById('music-icon').textContent = '❚❚';
 
   // Fade out loader
   gsap.to('#loader', { opacity: 0, duration: 0.8, onComplete: () => {
@@ -53,21 +68,24 @@ document.getElementById('loader').addEventListener('click', () => {
   }});
 });
 
-// Music controls
+// Play/Pause Control
 document.getElementById('music-btn').addEventListener('click', () => {
   if (bgMusicPlaying) {
-    fadeAudio(bgAudio, 0, 800);
+    if (currentPlayingAudio) {
+      fadeAudio(currentPlayingAudio, 0, 800, true);
+    }
     bgMusicPlaying = false;
     document.getElementById('music-icon').textContent = '▶';
   } else {
-    bgAudio.play();
-    fadeAudio(bgAudio, 0.5, 1000);
     bgMusicPlaying = true;
     document.getElementById('music-icon').textContent = '❚❚';
+    if (currentChapter >= 0) {
+      switchChapterAudio(currentChapter);
+    }
   }
 });
 
-// ── NAVIGATION DOTS ──────────────────────────────────────────
+// ── NAVIGATION & CHAPTER TRANSITIONS ─────────────────────────
 const CHAPTER_IDS = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5'];
 document.querySelectorAll('.chapter-dot').forEach(dot => {
   dot.addEventListener('click', () => {
@@ -95,10 +113,10 @@ function showChapter(idx) {
   });
 
   currentChapter = idx;
+  switchChapterAudio(idx);
   initChapterEffects(idx);
 }
 
-// ── INITIALIZE EFFECTS FOR CURRENT CHAPTER ───────────────────
 let animationFrameId = null;
 
 function initChapterEffects(idx) {
@@ -153,12 +171,11 @@ function initChapter1() {
   }
   setTimeout(handleTypewriter, 800);
 
-  // Background stars canvas
+  // Background stars
   const canvas = document.getElementById('ch1-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
-  window.addEventListener('resize', resize);
 
   const stars = [];
   for (let i = 0; i < 150; i++) {
@@ -186,7 +203,6 @@ function initChapter1() {
   }
   loop();
 
-  // Gentle rain
   createRain('rain1', 40);
 
   document.getElementById('begin-btn').onclick = () => {
@@ -194,18 +210,26 @@ function initChapter1() {
   };
 }
 
-// ── CHAPTER 2: TERI KAHANI (Overhauled Photo Journey) ───
+// ── CHAPTER 2: TERI KAHANI (Photo Journey) ───────────────────
+const ERA_PHOTOS = [
+  { name: "Bachi 🧸", desc: "Masoom savera aur cute bachpan", folder: "kid", emoji: "🧸" },
+  { name: "Chulbuli ✨", desc: "Naughty smiles aur mastiyaan", folder: "teeth", emoji: "✨" },
+  { name: "Ladki 🌸", desc: "Zindagi ko naye dhang se jeena", folder: "bossy", emoji: "🌸" },
+  { name: "Saree 🥻", desc: "Graceful aur bilkul khoobsurat", folder: "saree", emoji: "🥻" },
+  { name: "Us Together 🫂", desc: "Dheere se kandhe par pehla haath", folder: "final", emoji: "🫂" },
+  { name: "Married Dream 💍", desc: "Ek din ye sapna sach hoga!", folder: "final", emoji: "💍" }
+];
+let currentEraIndex = 0;
+let currentPhotoIndexInEra = 0;
+
 function initChapter2() {
   currentEraIndex = 0;
   currentPhotoIndexInEra = 0;
   loadEra(0);
 
   const ch2 = document.getElementById('ch2');
-  // Click on background to progress
   ch2.onclick = (e) => {
-    // Avoid triggering if clicked on next elements (not applicable here, screen is tap-based)
-    if (document.getElementById('dream-frame').classList.contains('ui-hidden') === false) {
-      // If dream frame is open, close it and go to next chapter
+    if (!document.getElementById('dream-frame').classList.contains('ui-hidden')) {
       document.getElementById('dream-frame').classList.add('ui-hidden');
       showChapter(2);
       return;
@@ -213,20 +237,20 @@ function initChapter2() {
     progressPhotoJourney();
   };
 
-  // Setup Era particle canvas background
+  // Era Canvas Particles
   const canvas = document.getElementById('ps-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
 
   const particles = [];
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 35; i++) {
     particles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 3 + 1,
-      vy: -(Math.random() * 0.8 + 0.2),
-      vx: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 2 + 1,
+      vy: -(Math.random() * 0.7 + 0.1),
+      vx: (Math.random() - 0.5) * 0.4,
       alpha: Math.random()
     });
   }
@@ -240,7 +264,7 @@ function initChapter2() {
       if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.4})`;
+      ctx.fillStyle = `rgba(255, 182, 193, ${p.alpha * 0.35})`;
       ctx.fill();
     });
     animationFrameId = requestAnimationFrame(loop);
@@ -252,16 +276,13 @@ function loadEra(index) {
   const era = ERA_PHOTOS[index];
   if (!era) return;
 
-  // Set text
   document.getElementById('ps-era-name').textContent = era.name;
   document.getElementById('ps-emoji').textContent = era.emoji;
   document.getElementById('ps-subtitle').textContent = era.desc;
 
-  // Get active photo file from config based on folder mapping
   const photos = BIRTHDAY_CONFIG.photos[era.folder] || [];
   const photoPath = photos[currentPhotoIndexInEra % photos.length] || "images/final/1.jpg";
 
-  // Double layer transition for smooth fade
   const layerA = document.getElementById('ps-layer-a');
   const layerB = document.getElementById('ps-layer-b');
 
@@ -275,16 +296,10 @@ function loadEra(index) {
     layerB.classList.remove('active');
   }
 
-  // Adjust background overlays to change color mood per era
-  const overlays = [
-    "linear-gradient(rgba(12,12,30,0.4), rgba(12,12,30,0.85))", // Bachi
-    "linear-gradient(rgba(43,24,0,0.3), rgba(43,24,0,0.85))",    // Chulbuli
-    "linear-gradient(rgba(26,10,0,0.4), rgba(26,10,0,0.9))",     // Ladki
-    "linear-gradient(rgba(13,36,22,0.3), rgba(13,36,22,0.85))",   // Saree
-    "linear-gradient(rgba(20,10,40,0.4), rgba(20,10,40,0.9))",    // Us together
-    "linear-gradient(rgba(255,215,0,0.2), rgba(10,5,25,0.95))"   // Married dream
-  ];
-  document.getElementById('ps-overlay').style.background = overlays[index] || overlays[0];
+  // Tilt the polaroid card gently on photo change
+  const frame = document.getElementById('ps-frame');
+  const randomTilt = (Math.random() - 0.5) * 6; // between -3deg and 3deg
+  frame.style.transform = `rotate(${randomTilt}deg)`;
 
   // Dots progress
   const dotsContainer = document.getElementById('ps-progress-dots');
@@ -301,13 +316,11 @@ function progressPhotoJourney() {
   const photos = BIRTHDAY_CONFIG.photos[era.folder] || [];
 
   currentPhotoIndexInEra++;
-  // If we have viewed at least 2 photos from this folder, or reached max photos, go to next Era
   if (currentPhotoIndexInEra >= Math.min(photos.length, 2)) {
     currentPhotoIndexInEra = 0;
     currentEraIndex++;
 
     if (currentEraIndex >= ERA_PHOTOS.length) {
-      // Reached the end! Trigger dream frame
       document.getElementById('dream-frame').classList.remove('ui-hidden');
     } else {
       loadEra(currentEraIndex);
@@ -322,7 +335,6 @@ function initChapter3() {
   const cfg = BIRTHDAY_CONFIG.chapter3;
   document.getElementById('rain-text').textContent = cfg.mainMemory.description;
 
-  // Stagger reveal moments
   const list = document.getElementById('moments-list');
   list.innerHTML = "";
   cfg.moments.forEach(m => {
@@ -332,7 +344,6 @@ function initChapter3() {
     list.appendChild(item);
   });
 
-  // Hearts logic
   const wrap = document.getElementById('hearts-wrap');
   wrap.innerHTML = "";
   let count = 0;
@@ -354,20 +365,20 @@ function initChapter3() {
   });
   document.getElementById('hearts-count').textContent = `0 / ${cfg.reasonsILoveYou.length} raazein khuli...`;
 
-  // Canvas fireflies background
+  // Fireflies Canvas Loop
   const canvas = document.getElementById('ch3-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
 
   const fireflies = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 25; i++) {
     fireflies.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 2 + 1,
       angle: Math.random() * Math.PI * 2,
-      speed: Math.random() * 0.5 + 0.2
+      speed: Math.random() * 0.4 + 0.1
     });
   }
 
@@ -384,17 +395,13 @@ function initChapter3() {
       ctx.beginPath();
       ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
       ctx.fillStyle = `rgba(244, 162, 97, ${0.4 + Math.random()*0.5})`;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "#f4a261";
       ctx.fill();
     });
     animationFrameId = requestAnimationFrame(loop);
   }
   loop();
 
-  // Heavy rain
-  createRain('rain3', 80);
-
+  createRain('rain3', 75);
   document.getElementById('ch3-next').onclick = () => showChapter(3);
 }
 
@@ -413,20 +420,19 @@ function initChapter4() {
     distWrap.appendChild(item);
   });
 
-  // Canvas floating dust clouds background
   const canvas = document.getElementById('ch4-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
 
   const dust = [];
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 30; i++) {
     dust.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 1.5,
-      alpha: Math.random() * 0.5 + 0.1,
-      speed: Math.random() * 0.005 + 0.002
+      r: Math.random() * 1.2 + 0.3,
+      alpha: Math.random() * 0.4 + 0.1,
+      speed: Math.random() * 0.004 + 0.001
     });
   }
 
@@ -435,7 +441,7 @@ function initChapter4() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     dust.forEach(d => {
       d.alpha += d.speed;
-      if (d.alpha > 0.7 || d.alpha < 0.1) d.speed = -d.speed;
+      if (d.alpha > 0.6 || d.alpha < 0.1) d.speed = -d.speed;
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
       ctx.fillStyle = `rgba(212, 132, 154, ${Math.abs(d.alpha)})`;
@@ -448,13 +454,12 @@ function initChapter4() {
   document.getElementById('ch4-next').onclick = () => showChapter(4);
 }
 
-// ── CHAPTER 5: AAJ AUR HAMESHA ──────────────────────────
+// ── CHAPTER 5: AAJ & FOREVER ────────────────────────────────
 function initChapter5() {
   const cfg = BIRTHDAY_CONFIG.chapter5;
   document.getElementById('bday-name').textContent = BIRTHDAY_CONFIG.name;
   document.getElementById('anni-tag').textContent = BIRTHDAY_CONFIG.anniversaryMessage;
 
-  // Wishes
   const wishesWrap = document.getElementById('wishes-wrap');
   wishesWrap.innerHTML = "";
   cfg.wishes.forEach(w => {
@@ -464,7 +469,6 @@ function initChapter5() {
     wishesWrap.appendChild(bubble);
   });
 
-  // Letter reveal
   const envelope = document.getElementById('envelope');
   const fullLetter = document.getElementById('full-letter');
   const letterBody = document.getElementById('letter-body-ch5');
@@ -474,28 +478,25 @@ function initChapter5() {
     fullLetter.classList.remove('ui-hidden');
     letterBody.textContent = cfg.endingLetter;
 
-    // Show closing signature block after 3s
     setTimeout(() => {
       document.getElementById('close1').textContent = cfg.closingLine;
       document.getElementById('close2').textContent = cfg.finalLine;
       document.getElementById('closing').classList.remove('ui-hidden');
       triggerCelebrationFireworks();
-    }, 3000);
+    }, 2500);
   };
 
-  // Sparkles canvas & lanterns background
   const canvas = document.getElementById('ch5-canvas');
   const ctx = canvas.getContext('2d');
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
 
-  const particles = [];
-  for (let i = 0; i < 50; i++) {
-    particles.push({
+  const stars = [];
+  for (let i = 0; i < 40; i++) {
+    stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 1.5,
-      color: Math.random() > 0.5 ? '#8b6fff' : '#ffd700',
       alpha: Math.random()
     });
   }
@@ -503,28 +504,19 @@ function initChapter5() {
   function loop() {
     if (currentChapter !== 4) return;
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p => {
-      p.alpha += 0.01;
+    stars.forEach(s => {
+      s.alpha += 0.01;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = p.color;
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255, 215, 0, ${Math.abs(Math.sin(s.alpha))})`;
       ctx.fill();
     });
     animationFrameId = requestAnimationFrame(loop);
   }
   loop();
 
-  // Floating paper lanterns
   createLanterns();
-  // Auto burst single firework every 3s
-  setInterval(() => {
-    if (currentChapter === 4) {
-      launchSingleFirework();
-    }
-  }, 3000);
 }
-
-// ── UTILITIES & DECORATIONS ───────────────────────────────────
 
 function createRain(containerId, count) {
   const wrap = document.getElementById(containerId);
@@ -534,9 +526,9 @@ function createRain(containerId, count) {
     const drop = document.createElement('div');
     drop.className = 'drop';
     drop.style.left = `${Math.random() * 100}%`;
-    drop.style.height = `${10 + Math.random() * 15}px`;
-    drop.style.animationDuration = `${0.8 + Math.random() * 1.2}s`;
-    drop.style.animationDelay = `${Math.random() * 2}s`;
+    drop.style.height = `${12 + Math.random() * 18}px`;
+    drop.style.animationDuration = `${0.7 + Math.random() * 0.9}s`;
+    drop.style.animationDelay = `${Math.random() * 1.5}s`;
     wrap.appendChild(drop);
   }
 }
@@ -552,11 +544,17 @@ function createLanterns() {
     l.className = 'lantern';
     l.textContent = items[Math.floor(Math.random() * items.length)];
     l.style.left = `${Math.random() * 90 + 5}%`;
-    l.style.fontSize = `${1 + Math.random() * 0.8}rem`;
-    l.style.animationDuration = `${6 + Math.random() * 6}s`;
+    l.style.fontSize = `${1.1 + Math.random() * 0.7}rem`;
+    l.style.animationDuration = `${7 + Math.random() * 6}s`;
     container.appendChild(l);
     setTimeout(() => l.remove(), 12000);
-  }, 1800);
+  }, 2000);
+}
+
+function triggerCelebrationFireworks() {
+  for (let i = 0; i < 5; i++) {
+    setTimeout(launchSingleFirework, i * 400);
+  }
 }
 
 function launchSingleFirework() {
@@ -580,12 +578,6 @@ function launchSingleFirework() {
     s.style.animationDuration = `${0.6 + Math.random() * 0.4}s`;
     container.appendChild(s);
     setTimeout(() => s.remove(), 1000);
-  }
-}
-
-function triggerCelebrationFireworks() {
-  for (let i = 0; i < 6; i++) {
-    setTimeout(launchSingleFirework, i * 400);
   }
 }
 

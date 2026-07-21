@@ -80,30 +80,27 @@
       </div>
     </section>
 
-    <!-- ═══ CHAPTER 2: TERI KAHANI (Photo Story) ═══ -->
+    <!-- ═══ CHAPTER 2: TERI KAHANI (Framed Polaroid Journey) ═══ -->
     <section id="ch2" class="chapter ch-hidden" data-chapter="1" aria-label="Chapter 2: Teri Kahani">
-      <!-- Ken Burns photo layers -->
-      <div class="ps-bg" id="ps-bg">
-        <div class="ps-layer" id="ps-layer-a"></div>
-        <div class="ps-layer" id="ps-layer-b"></div>
-      </div>
-
-      <!-- Era-specific particle canvas -->
       <canvas class="bg-canvas" id="ps-canvas"></canvas>
 
-      <!-- Dramatic color overlay -->
-      <div class="ps-color-overlay" id="ps-overlay"></div>
-
-      <!-- Era content -->
-      <div class="ps-content" id="ps-content">
-        <div class="ps-era-badge" id="ps-era-badge">
-          <span class="ps-era-emoji" id="ps-emoji"></span>
-          <span class="ps-era-name" id="ps-era-name"></span>
+      <div class="ps-frame-container" id="ps-frame">
+        <div class="ps-washi-tape" aria-hidden="true"></div>
+        <div class="ps-image-holder">
+          <div class="ps-layer" id="ps-layer-a"></div>
+          <div class="ps-layer" id="ps-layer-b"></div>
         </div>
-        <p class="ps-subtitle" id="ps-subtitle"></p>
+        <div class="ps-polaroid-caption">
+          <div class="ps-era-badge">
+            <span class="ps-era-emoji" id="ps-emoji">🧸</span>
+            <span class="ps-era-name" id="ps-era-name">Bachi</span>
+          </div>
+          <p class="ps-subtitle" id="ps-subtitle"></p>
+        </div>
         <div class="ps-progress-dots" id="ps-progress-dots" aria-hidden="true"></div>
-        <p class="ps-tap-hint" id="ps-tap-hint">tap to continue</p>
       </div>
+
+      <p class="ps-tap-hint">tap anywhere to continue</p>
 
       <!-- Special "married" dream frame (last era) -->
       <div class="dream-frame ui-hidden" id="dream-frame" aria-label="A dream of the future">
@@ -213,6 +210,13 @@
   </main>
 
   <audio id="bg-audio" loop preload="auto"><source src="yourmusic.mp3" type="audio/mpeg"/></audio>
+
+  <!-- Adding dynamic audio elements for journey stages -->
+  <audio id="music-sad" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"/></audio>
+  <audio id="music-happy" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/></audio>
+  <audio id="music-romantic" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg"/></audio>
+  <audio id="music-longing" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" type="audio/mpeg"/></audio>
+  <audio id="music-festive" loop preload="auto"><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg"/></audio>
 
   <script src="script.js"></script>
 </body>
