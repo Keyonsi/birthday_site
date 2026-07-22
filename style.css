@@ -42,6 +42,122 @@ body {
 /* ═══════════════════════════════════════════════════════════
    LOADER
 ═══════════════════════════════════════════════════════════ */
+/* ── Cold open — very first thing shown ─────────────────────── */
+#cold-open {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.cold-open-line {
+  font-family: var(--font-script);
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 2;
+  max-width: 340px;
+  opacity: 0;
+  white-space: pre-line;
+}
+
+/* ── Chapter title card — cinematic transition ───────────────── */
+#title-card {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 2rem;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+#title-card.showing {
+  opacity: 1;
+}
+
+.title-card-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.35em;
+  color: rgba(200, 180, 255, 0.55);
+  text-transform: uppercase;
+}
+
+.title-card-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 2.6rem;
+  color: #f4dcaa;
+  text-shadow: 0 0 30px rgba(244, 220, 80, 0.3);
+}
+
+.title-card-tagline {
+  font-family: var(--font-script);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 300px;
+  line-height: 1.7;
+}
+
+/* ── Chapter footer — "Chapter X of 5" progress ──────────────── */
+#chapter-footer {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+
+#chapter-footer-text {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+}
+
+.chapter-footer-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.chapter-footer-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chapter-footer-dots span.filled {
+  background: rgba(244, 220, 80, 0.7);
+  box-shadow: 0 0 4px rgba(244, 220, 80, 0.5);
+}
+
+/* ── Chapter end signature ───────────────────────────────────── */
+.chapter-signature {
+  font-family: var(--font-script);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
 #loader {
   position: fixed;
   inset: 0;

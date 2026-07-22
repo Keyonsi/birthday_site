@@ -3,6 +3,37 @@
    ============================================================ */
 'use strict';
 
+// ── COLD OPEN — first thing shown, before loader ─────────────
+(function initColdOpen() {
+  const el = document.getElementById('cold-open');
+  const lineEl = document.getElementById('cold-open-line');
+  const lines = (BIRTHDAY_CONFIG.coldOpen && BIRTHDAY_CONFIG.coldOpen.length)
+    ? BIRTHDAY_CONFIG.coldOpen
+    : ["Kuch kahaniyaan likhi jaati hain...", "Kuch jee li jaati hain..."];
+
+  let i = 0;
+  function showLine() {
+    if (i >= lines.length) {
+      setTimeout(() => {
+        gsap.to(el, {
+          opacity: 0, duration: 1, ease: 'power2.inOut',
+          onComplete: () => { el.style.display = 'none'; }
+        });
+      }, 500);
+      return;
+    }
+    lineEl.textContent = lines[i];
+    gsap.fromTo(lineEl, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' });
+    setTimeout(() => {
+      gsap.to(lineEl, {
+        opacity: 0, y: -8, duration: 0.6, ease: 'power2.in',
+        onComplete: () => { i++; showLine(); }
+      });
+    }, 1700);
+  }
+  showLine();
+})();
+
 // ── AUDIO SYSTEM ─────────────────────────────────────────────
 const CHAPTER_AUDIO_IDS = ['music-ch1', 'music-ch2', 'music-ch3', 'music-ch4', 'music-ch5'];
 let currentChapter = -1;
@@ -156,6 +187,9 @@ function showChapter(idx) {
 
   currentChapter = idx;
   switchAudio(idx);
+  updateChapterFooter(idx);
+  addChapterSignature(idx);
+  showTitleCard(idx);
 
   // Chapter-specific init
   switch (idx) {
@@ -165,6 +199,48 @@ function showChapter(idx) {
     case 3: initCh4(); break;
     case 4: initCh5(); break;
   }
+}
+
+// ── Cinematic chapter title card — brief full-black overlay ─
+function showTitleCard(idx) {
+  const meta = (BIRTHDAY_CONFIG.chapterMeta && BIRTHDAY_CONFIG.chapterMeta[idx]) || null;
+  if (!meta) return;
+  const card = document.getElementById('title-card');
+  document.getElementById('title-card-roman').textContent = meta.roman;
+  document.getElementById('title-card-name').textContent = meta.name;
+  document.getElementById('title-card-tagline').textContent = meta.tagline;
+
+  card.classList.remove('ui-hidden');
+  requestAnimationFrame(() => card.classList.add('showing'));
+  setTimeout(() => {
+    card.classList.remove('showing');
+    setTimeout(() => card.classList.add('ui-hidden'), 650);
+  }, 2000);
+}
+
+// ── Chapter footer — "Chapter X of 5" + progress dots ────────
+function updateChapterFooter(idx) {
+  const footer = document.getElementById('chapter-footer');
+  footer.classList.remove('ui-hidden');
+  document.getElementById('chapter-footer-text').textContent = `Chapter ${idx + 1} of ${CHAPTER_IDS.length}`;
+  const dotsWrap = document.getElementById('chapter-footer-dots');
+  dotsWrap.innerHTML = '';
+  for (let i = 0; i < CHAPTER_IDS.length; i++) {
+    const dot = document.createElement('span');
+    if (i <= idx) dot.classList.add('filled');
+    dotsWrap.appendChild(dot);
+  }
+}
+
+// ── Chapter end signature — appended once per chapter section ─
+function addChapterSignature(idx) {
+  const chapterEl = document.getElementById(CHAPTER_IDS[idx]);
+  const content = chapterEl.querySelector('.ch-content, .ch5-content');
+  if (!content || content.querySelector('.chapter-signature')) return;
+  const sig = document.createElement('p');
+  sig.className = 'chapter-signature';
+  sig.textContent = BIRTHDAY_CONFIG.chapterSignature || '— Tumhara, Hamesha';
+  content.appendChild(sig);
 }
 
 // ═══════════════════════════════════════════════════════════

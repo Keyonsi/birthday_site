@@ -23,6 +23,24 @@
 
 <body>
 
+  <!-- ═══ COLD OPEN — very first thing shown ═══ -->
+  <div id="cold-open" aria-hidden="true">
+    <p class="cold-open-line" id="cold-open-line"></p>
+  </div>
+
+  <!-- ═══ CHAPTER TITLE CARD — cinematic transition, reused per chapter ═══ -->
+  <div id="title-card" class="ui-hidden" aria-hidden="true">
+    <p class="title-card-label">CHAPTER <span id="title-card-roman"></span></p>
+    <h2 class="title-card-name" id="title-card-name"></h2>
+    <p class="title-card-tagline" id="title-card-tagline"></p>
+  </div>
+
+  <!-- ═══ CHAPTER FOOTER — "Chapter X of 5" progress ═══ -->
+  <div id="chapter-footer" class="ui-hidden" aria-hidden="true">
+    <span id="chapter-footer-text">Chapter 1 of 5</span>
+    <span class="chapter-footer-dots" id="chapter-footer-dots"></span>
+  </div>
+
   <!-- ═══ LOADER — Tap to begin ═══ -->
   <div id="loader" role="button" tabindex="0" aria-label="Tap to begin">
     <canvas id="loader-canvas"></canvas>

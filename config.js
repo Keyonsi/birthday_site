@@ -14,6 +14,43 @@ const BIRTHDAY_CONFIG = {
   birthday: "2003-08-02",
   anniversaryMessage: "Pehla Saal • Pehli Anniversary",
 
+  // --- Cold open (very first thing shown, before the loader) ---
+  coldOpen: [
+    "Kuch kahaniyaan likhi jaati hain...",
+    "Kuch jee li jaati hain...",
+    "Yeh wali... humne jee li."
+  ],
+
+  // --- Cinematic chapter title cards, quotes, and signatures ---
+  chapterMeta: [
+    {
+      roman: "I",
+      name: "Pehle",
+      tagline: "Har kahani ki ek shuruaat hoti hai jo use khud yaad nahi rehti."
+    },
+    {
+      roman: "II",
+      name: "Teri Kahani",
+      tagline: "Har rani kabhi ek bachi thi."
+    },
+    {
+      roman: "III",
+      name: "Baarish Mein",
+      tagline: "Kuch yaadein baarish mein bhi kabhi geeli nahi hotin."
+    },
+    {
+      roman: "IV",
+      name: "Jab Tum Gayi",
+      tagline: "Doori pyaar ko test nahi karti, dil ko sabr sikhati hai."
+    },
+    {
+      roman: "V",
+      name: "Aaj Aur Hamesha",
+      tagline: "Kuch kahaniyaan khatam nahi hotin, woh bas shuruu hoti rehti hain."
+    }
+  ],
+  chapterSignature: "— Tumhara, Hamesha",
+
   // --- Chapter 1: Pehle ---
   chapter1: {
     title: "Chapter I",
