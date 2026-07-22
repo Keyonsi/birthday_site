@@ -126,6 +126,12 @@
         <div class="photo-tint"></div>
       </div>
 
+      <!-- Polaroid frame overlay — decorative border + tape, scrapbook feel -->
+      <div class="polaroid-frame" aria-hidden="true">
+        <span class="polaroid-tape tape-left"></span>
+        <span class="polaroid-tape tape-right"></span>
+      </div>
+
       <!-- Particle canvas over photos -->
       <canvas class="bg-canvas" id="ps-canvas"></canvas>
 
@@ -222,14 +228,16 @@
 
         <div class="dist-moments" id="dist-moments"></div>
 
-        <div class="letter-wrap">
+        <p class="reunion-caption ui-hidden" id="reunion-caption"></p>
+
+        <div class="letter-wrap" id="letter-wrap">
           <div class="letter-paper">
             <span class="letter-icon" aria-hidden="true">✉️</span>
             <p id="letter-text" class="letter-body"></p>
           </div>
         </div>
 
-        <button class="next-btn" id="ch4-next">Aur Aage... →</button>
+        <button class="next-btn ui-hidden" id="ch4-next">Aur Aage... →</button>
       </div>
     </section>
 
@@ -252,6 +260,11 @@
             <span aria-hidden="true"> 🎂</span>
           </div>
           <p class="anni-tag" id="anni-tag"></p>
+
+          <div class="cake-wrap" id="cake-wrap">
+            <p class="cake-hint" id="cake-hint">🕯️ candles ko tap karo...</p>
+            <div class="cake-candles" id="cake-candles"></div>
+          </div>
         </div>
 
         <div class="wishes-block">

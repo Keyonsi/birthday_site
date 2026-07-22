@@ -233,6 +233,7 @@ function initCh1() {
           volumeRaised = true;
           if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.45, 1800, false);
           document.getElementById('ch1').classList.add('color-bloom');
+          burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 20);
         }
         isDeleting = true;
         setTimeout(type, 2000);
@@ -922,6 +923,15 @@ function initCh4() {
     distWrap.appendChild(item);
   });
 
+  // Reset reveal state each time chapter is (re)entered
+  const letterWrap = document.getElementById('letter-wrap');
+  const nextBtn = document.getElementById('ch4-next');
+  const caption = document.getElementById('reunion-caption');
+  letterWrap.classList.remove('revealed');
+  nextBtn.classList.add('ui-hidden');
+  caption.classList.remove('visible');
+  caption.textContent = cfg.moments[cfg.moments.length - 1] || '';
+
   const canvas = document.getElementById('ch4-canvas');
   const ctx = canvas.getContext('2d');
   function resizeCh4() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -947,6 +957,52 @@ function initCh4() {
     vx: (Math.random() - 0.5) * 0.0003,
     vy: (Math.random() - 0.5) * 0.0002
   }));
+
+  // Two soul lights — start far apart, drift toward each other over time,
+  // and merge into one warm glow: a visual metaphor for the distance closing.
+  const soulA = { x: 0.14, y: 0.42 };
+  const soulB = { x: 0.86, y: 0.42 };
+  let merged = false;
+  const mergeStart = Date.now() + 1200;
+  const mergeDuration = 6500;
+
+  function updateSouls() {
+    if (merged) return;
+    const t = Math.max(0, Math.min(1, (Date.now() - mergeStart) / mergeDuration));
+    const eased = t * t * (3 - 2 * t); // smoothstep
+    soulA.x = 0.14 + (0.5 - 0.14) * eased;
+    soulB.x = 0.86 - (0.86 - 0.5) * eased;
+    if (t >= 1 && !merged) {
+      merged = true;
+      onSoulsMerged();
+    }
+  }
+
+  function onSoulsMerged() {
+    burstSpark(window.innerWidth / 2, window.innerHeight * 0.42);
+    burstConfetti(window.innerWidth / 2, window.innerHeight * 0.42, 22);
+    setTimeout(() => {
+      caption.classList.add('visible');
+      setTimeout(() => {
+        letterWrap.classList.add('revealed');
+        nextBtn.classList.remove('ui-hidden');
+      }, 900);
+    }, 300);
+  }
+
+  function drawSouls(ctx, W, H) {
+    const pts = merged ? [{ x: 0.5, y: 0.42 }] : [soulA, soulB];
+    pts.forEach(p => {
+      const r = merged ? 26 : 14;
+      const grd = ctx.createRadialGradient(p.x * W, p.y * H, 0, p.x * W, p.y * H, r);
+      grd.addColorStop(0, merged ? 'rgba(255,210,140,0.55)' : 'rgba(255,190,150,0.4)');
+      grd.addColorStop(1, 'rgba(255,190,150,0)');
+      ctx.beginPath();
+      ctx.arc(p.x * W, p.y * H, r, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+    });
+  }
 
   function loopCh4() {
     if (currentChapter !== 3) return;
@@ -982,6 +1038,9 @@ function initCh4() {
       ctx.fill();
     });
 
+    updateSouls();
+    drawSouls(ctx, W, H);
+
     animationFrameId = requestAnimationFrame(loopCh4);
   }
   loopCh4();
@@ -1007,12 +1066,37 @@ function initCh5() {
     wishesWrap.appendChild(b);
   });
 
+  // Candle-blow interaction — tap each candle to blow it out; all blown = confetti + hint fades
+  const candleWrap = document.getElementById('cake-candles');
+  const cakeHint = document.getElementById('cake-hint');
+  candleWrap.innerHTML = '';
+  const totalCandles = 5;
+  let blownCount = 0;
+  for (let i = 0; i < totalCandles; i++) {
+    const candle = document.createElement('div');
+    candle.className = 'candle-item';
+    candle.innerHTML = '<div class="candle-flame"></div><div class="candle-smoke"></div>';
+    candle.addEventListener('click', () => {
+      if (candle.classList.contains('blown')) return;
+      candle.classList.add('blown');
+      blownCount++;
+      const rect = candle.getBoundingClientRect();
+      burstSpark(rect.left + rect.width / 2, rect.top);
+      if (blownCount === totalCandles) {
+        cakeHint.classList.add('done');
+        burstConfetti(window.innerWidth / 2, window.innerHeight * 0.45, 30);
+      }
+    });
+    candleWrap.appendChild(candle);
+  }
+
   const envelope = document.getElementById('envelope');
   const fullLetter = document.getElementById('full-letter');
-  envelope.onclick = () => {
+  envelope.onclick = (e) => {
     envelope.classList.add('ui-hidden');
     fullLetter.classList.remove('ui-hidden');
     document.getElementById('letter-body-ch5').textContent = cfg.endingLetter;
+    burstConfetti(e.clientX, e.clientY, 24);
     setTimeout(() => {
       document.getElementById('close1').textContent = cfg.closingLine;
       document.getElementById('close2').textContent = cfg.finalLine;
@@ -1135,5 +1219,32 @@ function burstSpark(cx, cy) {
     s.style.animationDuration = `${0.5 + Math.random() * 0.35}s`;
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 900);
+  }
+}
+
+// Confetti burst — used at key emotional climax points across chapters.
+// Lightweight: fixed count, short-lived, no continuous loop (mobile-safe).
+function burstConfetti(cx, cy, count = 26) {
+  const colors = ['#ff8fab', '#ffd166', '#8b6fff', '#52b788', '#f4a261', '#fff'];
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-bit';
+    const isCircle = Math.random() > 0.5;
+    const size = 5 + Math.random() * 6;
+    c.style.cssText = `
+      position:fixed; left:${cx}px; top:${cy}px; z-index:9998;
+      width:${size}px; height:${size * (isCircle ? 1 : 1.6)}px;
+      background:${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius:${isCircle ? '50%' : '2px'};
+    `;
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 60 + Math.random() * 140;
+    c.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    c.style.setProperty('--dy', `${Math.sin(angle) * dist - 40}px`);
+    c.style.setProperty('--rot', `${(Math.random() - 0.5) * 720}deg`);
+    c.style.animationDuration = `${1 + Math.random() * 0.8}s`;
+    c.style.animationDelay = `${Math.random() * 0.1}s`;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2000);
   }
 }
