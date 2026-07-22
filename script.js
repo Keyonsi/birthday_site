@@ -34,7 +34,83 @@
   showLine();
 })();
 
-// ── AUDIO SYSTEM ─────────────────────────────────────────────
+// ── SOUND EFFECTS ENGINE ──────────────────────────────────────
+// NOTE: These are placeholder royalty-free CDN links (same Pixabay-style
+// pattern as the background music tracks). If any link doesn't load,
+// swap it for another free SFX from mixkit.co / pixabay.com/sound-effects —
+// playback is wrapped in try/catch so a broken link never breaks the site.
+const SFX_LIBRARY = {
+  firework: "https://cdn.pixabay.com/download/audio/2021/08/09/audio_dc39b45e26.mp3",
+  candleBlow: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_a3cbfd2f6a.mp3",
+  nightAmbience: "https://cdn.pixabay.com/download/audio/2021/11/25/audio_00c9c94997.mp3",
+  fireflyChime: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3",
+  rainLight: "https://cdn.pixabay.com/download/audio/2022/03/09/audio_c8e70a7f38.mp3",
+  paperRustle: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3",
+  waxSeal: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_8f0f9b1a52.mp3",
+  shutter: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3",
+  pianoTap: "https://cdn.pixabay.com/download/audio/2021/08/09/audio_88447e769f.mp3",
+  heartbeat: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0dd3c0428.mp3",
+  sparkleChime: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3"
+};
+const sfxCache = {};
+let sfxEnabled = true;
+let heartbeatAudio = null;
+
+function sfxPlay(name, volume = 0.4) {
+  if (!sfxEnabled) return;
+  try {
+    const url = SFX_LIBRARY[name];
+    if (!url) return;
+    const audio = new Audio(url);
+    audio.volume = volume;
+    audio.play().catch(() => { });
+  } catch (e) { /* silently ignore — never let a sound break the experience */ }
+}
+
+// Looping ambience/heartbeat control — used for night ambience, rain, heartbeat
+function sfxLoop(name, volume = 0.15) {
+  try {
+    if (sfxCache[name]) { sfxCache[name].volume = volume; return sfxCache[name]; }
+    const url = SFX_LIBRARY[name];
+    if (!url) return null;
+    const audio = new Audio(url);
+    audio.loop = true;
+    audio.volume = volume;
+    audio.play().catch(() => { });
+    sfxCache[name] = audio;
+    return audio;
+  } catch (e) { return null; }
+}
+
+function sfxStopLoop(name, fadeMs = 1000) {
+  const audio = sfxCache[name];
+  if (!audio) return;
+  const steps = 12;
+  const dt = fadeMs / steps;
+  const delta = audio.volume / steps;
+  let n = 0;
+  const t = setInterval(() => {
+    audio.volume = Math.max(0, audio.volume - delta);
+    if (++n >= steps) {
+      clearInterval(t);
+      audio.pause();
+      delete sfxCache[name];
+    }
+  }, dt);
+}
+
+// Heartbeat tempo engine — tempo shifts with the emotional beat of each chapter.
+// rate: 'slow' | 'normal' | 'fast' | 'off'
+function setHeartbeatTempo(rate) {
+  if (rate === 'off') { sfxStopLoop('heartbeat', 1500); return; }
+  const vol = 0.06;
+  const audio = sfxLoop('heartbeat', vol);
+  if (!audio) return;
+  const rates = { slow: 0.75, normal: 1, fast: 1.25 };
+  audio.playbackRate = rates[rate] || 1;
+}
+
+
 const CHAPTER_AUDIO_IDS = ['music-ch1', 'music-ch2', 'music-ch3', 'music-ch4', 'music-ch5'];
 let currentChapter = -1;
 let currentAudio = null;
@@ -142,9 +218,13 @@ document.getElementById('music-btn').addEventListener('click', () => {
   if (bgMusicPlaying) {
     if (currentAudio) fadeVolume(currentAudio, 0, 800, true);
     bgMusicPlaying = false;
+    sfxEnabled = false;
+    setHeartbeatTempo('off');
+    Object.keys(sfxCache).forEach(name => sfxStopLoop(name, 500));
     document.getElementById('music-icon').textContent = '▶';
   } else {
     bgMusicPlaying = true;
+    sfxEnabled = true;
     document.getElementById('music-icon').textContent = '❚❚';
     if (currentChapter >= 0) switchAudio(currentChapter);
   }
@@ -190,6 +270,10 @@ function showChapter(idx) {
   updateChapterFooter(idx);
   addChapterSignature(idx);
   showTitleCard(idx);
+
+  // Stop chapter-specific ambience loops before the next chapter's init restarts what it needs
+  if (idx !== 0) sfxStopLoop('nightAmbience', 800);
+  if (idx !== 2) sfxStopLoop('rainLight', 800);
 
   // Chapter-specific init
   switch (idx) {
@@ -248,6 +332,10 @@ function addChapterSignature(idx) {
 // ═══════════════════════════════════════════════════════════
 function initCh1() {
   const ch1cfg = BIRTHDAY_CONFIG.chapter1;
+
+  // Ambient soundscape — very low, felt not noticed
+  sfxLoop('nightAmbience', 0.05);
+  setHeartbeatTempo('slow');
 
   // Description line
   document.getElementById('ch1-desc').textContent = ch1cfg.description;
@@ -310,6 +398,9 @@ function initCh1() {
           if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.45, 1800, false);
           document.getElementById('ch1').classList.add('color-bloom');
           burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 20);
+          sfxPlay('sparkleChime', 0.35);
+          setHeartbeatTempo('fast');
+          setTimeout(() => setHeartbeatTempo('normal'), 2500);
         }
         isDeleting = true;
         setTimeout(type, 2000);
@@ -670,6 +761,10 @@ function initCh3() {
   const cfg = BIRTHDAY_CONFIG.chapter3;
   document.getElementById('rain-text').textContent = cfg.mainMemory.description;
 
+  // Adaptive rain ambience — starts full, will ease as quiz/hearts progress
+  sfxLoop('rainLight', 0.08);
+  setHeartbeatTempo('normal');
+
   // Shayari lines (animated, staggered)
   const shayariWrap = document.querySelector('.rain-shayari');
   if (shayariWrap && cfg.mainMemory.shayari) {
@@ -811,6 +906,7 @@ function runQuiz(cfg) {
         if (cardEl.classList.contains('leaving')) return;
         const opt = q.options[parseInt(btn.dataset.idx)];
         btn.classList.add('chosen');
+        sfxPlay('pianoTap', 0.2);
         scores[opt.tag] = (scores[opt.tag] || 0) + 1;
         barEl.style.width = `${((qIdx + 1) / questions.length) * 100}%`;
 
@@ -858,6 +954,9 @@ function finishQuiz(cfg, scores) {
     </div>
   `).join('');
   resultWrap.classList.remove('ui-hidden');
+
+  // Adaptive rain — eases as the emotional moment resolves
+  if (sfxCache.rainLight) sfxCache.rainLight.volume = 0.04;
 
   setTimeout(revealHeartsSection, 1800);
 }
@@ -916,6 +1015,7 @@ function initHearts() {
         bubble.style.top = `${rect.top}px`;
 
         burstEmojiEffect(e.clientX, e.clientY, hData.emoji);
+        sfxPlay('sparkleChime', 0.25);
 
         requestAnimationFrame(() => {
           bubble.style.left = `${window.innerWidth / 2 - 30}px`;
@@ -989,6 +1089,10 @@ function initCh4() {
   document.getElementById('ch4-desc').textContent = cfg.description;
   document.getElementById('letter-text').textContent = cfg.letter;
 
+  // Rain fades out as we leave the rain chapter; a slow lonely heartbeat begins
+  sfxStopLoop('rainLight', 1500);
+  setHeartbeatTempo('slow');
+
   const distWrap = document.getElementById('dist-moments');
   distWrap.innerHTML = '';
   cfg.moments.forEach((m, i) => {
@@ -1057,6 +1161,8 @@ function initCh4() {
   function onSoulsMerged() {
     burstSpark(window.innerWidth / 2, window.innerHeight * 0.42);
     burstConfetti(window.innerWidth / 2, window.innerHeight * 0.42, 22);
+    sfxPlay('sparkleChime', 0.35);
+    setHeartbeatTempo('normal');
     setTimeout(() => {
       caption.classList.add('visible');
       setTimeout(() => {
@@ -1132,6 +1238,9 @@ function initCh5() {
   document.getElementById('bday-name').textContent = BIRTHDAY_CONFIG.name;
   document.getElementById('anni-tag').textContent = BIRTHDAY_CONFIG.anniversaryMessage;
 
+  // Celebration — heartbeat rests, let the music and fireworks carry the moment
+  setHeartbeatTempo('off');
+
   const wishesWrap = document.getElementById('wishes-wrap');
   wishesWrap.innerHTML = '';
   cfg.wishes.forEach((w, i) => {
@@ -1155,6 +1264,7 @@ function initCh5() {
     candle.addEventListener('click', () => {
       if (candle.classList.contains('blown')) return;
       candle.classList.add('blown');
+      sfxPlay('candleBlow', 0.35);
       blownCount++;
       const rect = candle.getBoundingClientRect();
       burstSpark(rect.left + rect.width / 2, rect.top);
@@ -1169,15 +1279,18 @@ function initCh5() {
   const envelope = document.getElementById('envelope');
   const fullLetter = document.getElementById('full-letter');
   envelope.onclick = (e) => {
+    sfxPlay('waxSeal', 0.4);
     envelope.classList.add('ui-hidden');
     fullLetter.classList.remove('ui-hidden');
     document.getElementById('letter-body-ch5').textContent = cfg.endingLetter;
     burstConfetti(e.clientX, e.clientY, 24);
+    setTimeout(() => sfxPlay('paperRustle', 0.3), 200);
     setTimeout(() => {
       document.getElementById('close1').textContent = cfg.closingLine;
       document.getElementById('close2').textContent = cfg.finalLine;
       document.getElementById('closing').classList.remove('ui-hidden');
       launchFireworks();
+      sfxPlay('firework', 0.4);
     }, 2200);
   };
 
