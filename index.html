@@ -12,9 +12,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="config.js"></script>
@@ -37,7 +35,7 @@
     <p class="cold-open-line" id="cold-open-line"></p>
   </div>
 
-  <!-- ═══ COLLECTIBLES HUD — hidden letters + firefly catches ═══ -->
+  <!-- ═══ COLLECTIBLES HUD ═══ -->
   <div id="collectibles-hud" class="ui-hidden" aria-hidden="true">
     <span id="letters-counter">🔤 0/10</span>
     <span id="fireflies-counter">🦟 0/5</span>
@@ -58,21 +56,18 @@
     </div>
   </div>
 
-  <!-- ═══ BALLOON RELEASE — triggered after Ch5 candles+cake ═══ -->
+  <!-- ═══ BALLOON RELEASE ═══ -->
   <div id="balloon-release" aria-hidden="true"></div>
 
-  <!-- ═══ CHAPTER TITLE CARD — cinematic transition, reused per chapter ═══ -->
+  <!-- ═══ CHAPTER TITLE CARD — cinematic transition overlay ═══ -->
   <div id="title-card" class="ui-hidden" aria-hidden="true">
-    <p class="title-card-label">CHAPTER <span id="title-card-roman"></span></p>
+    <p class="title-card-label">ACT <span id="title-card-roman"></span></p>
     <h2 class="title-card-name" id="title-card-name"></h2>
     <p class="title-card-tagline" id="title-card-tagline"></p>
   </div>
 
-  <!-- ═══ CHAPTER FOOTER — "Chapter X of 5" progress ═══ -->
-  <div id="chapter-footer" class="ui-hidden" aria-hidden="true">
-    <span id="chapter-footer-text">Chapter 1 of 5</span>
-    <span class="chapter-footer-dots" id="chapter-footer-dots"></span>
-  </div>
+  <!-- ═══ ACT TRANSITION OVERLAY — black fade between acts ═══ -->
+  <div id="act-transition" class="ui-hidden" aria-hidden="true"></div>
 
   <!-- ═══ LOADER — Tap to begin ═══ -->
   <div id="loader" role="button" tabindex="0" aria-label="Tap to begin">
@@ -102,49 +97,125 @@
 
   <main id="experience">
 
-    <!-- ═══ PART 1: CINEMATIC MOVIE ENGINE ═══ -->
-    <section id="cinema-stage" class="stage-section">
+    <!-- ══════════════════════════════════════════════════════════
+         ACT 1 — PEHLE... (Cinematic Movie Slides)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="act1-cinema" class="act-section" aria-label="Act 1: Pehle">
+      <!-- Full-screen blurred photo background -->
       <div class="cinema-bg" id="cinema-bg">
-        <img id="cinema-img" src="" alt="Story photo" />
+        <img id="cinema-img-a" class="cinema-photo cinema-photo-active" src="" alt="Story photo" />
+        <img id="cinema-img-b" class="cinema-photo" src="" alt="Story photo" />
         <div class="cinema-overlay"></div>
       </div>
       <canvas id="cinema-canvas" class="bg-canvas"></canvas>
 
-      <div class="cinema-content">
+      <!-- Floating glassmorphic text card -->
+      <div class="cinema-content" id="cinema-content">
+        <p class="cinema-eyebrow" id="cinema-eyebrow">✦ Ek Safar ✦</p>
         <p class="cinema-title" id="cinema-title"></p>
         <p class="cinema-subtitle" id="cinema-subtitle"></p>
         <p class="cinema-text" id="cinema-text"></p>
         <p class="cinema-caption" id="cinema-caption"></p>
       </div>
 
-      <div class="cinema-controls">
-        <button id="cinema-prev-btn" class="cinema-btn">‹ Previous</button>
+      <!-- Scene counter -->
+      <div class="cinema-scene-counter" id="cinema-counter">
+        <div class="cinema-counter-dots" id="cinema-dots"></div>
         <div class="cinema-progress-bar"><div id="cinema-progress-fill"></div></div>
-        <button id="cinema-next-btn" class="cinema-btn">Next ›</button>
       </div>
     </section>
 
-    <!-- ═══ PART 2: PROPOSAL SCENE & HALF-MOON EMERALD RING ═══ -->
-    <section id="proposal-stage" class="stage-section ui-hidden">
+    <!-- ══════════════════════════════════════════════════════════
+         ACT 2 — BAARISH MEIN (Rain World, Rose Garden, Hearts)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="act2-rain" class="act-section ui-hidden" aria-label="Act 2: Baarish Mein">
+      <canvas id="act2-canvas" class="bg-canvas"></canvas>
+      <div id="act2-rain-drops" class="rain-wrap"></div>
+
+      <!-- Rose garden (hidden roses to find) -->
+      <div id="rose-garden" class="rose-garden-wrap" aria-label="Hidden rose garden"></div>
+      <div id="rose-counter" class="rose-counter ui-hidden" aria-live="polite"></div>
+
+      <!-- Floating hearts (reasons I love you) -->
+      <div id="hearts-section" class="ui-hidden" aria-label="Love reasons">
+        <p class="hearts-hint">❤️ Udte hue dil ko pakdo, raaz khulengi...</p>
+        <div class="hearts-wrap" id="hearts-wrap" aria-label="Reasons I love you"></div>
+        <p class="hearts-count" id="hearts-count" aria-live="polite"></p>
+      </div>
+
+      <!-- Heart reason popup -->
+      <div id="heart-popup" class="ui-hidden" role="dialog" aria-modal="true">
+        <div class="heart-popup-inner">
+          <div class="heart-popup-icon" id="heart-popup-icon">❤️</div>
+          <p class="heart-popup-msg" id="heart-popup-msg"></p>
+          <button id="heart-popup-close" class="popup-close-btn">✕</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ACT 3 — DOORI (Soul Lights + Firefly Catch)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="act3-doori" class="act-section ui-hidden" aria-label="Act 3: Doori">
+      <canvas id="ch4-canvas" class="bg-canvas"></canvas>
+
+      <div class="doori-content" id="doori-content">
+        <p class="doori-desc" id="ch4-desc"></p>
+
+        <div class="dist-moments-list" id="dist-moments"></div>
+
+        <div id="no-distance-line" class="no-distance-line">
+          "Faasle jism ke ho sakte hain, rooh ke nahi."
+        </div>
+
+        <div id="letter-wrap" class="letter-wrap">
+          <div class="letter-envelope-icon">💌</div>
+          <p class="letter-text" id="letter-text"></p>
+          <p class="reunion-caption" id="reunion-caption"></p>
+        </div>
+      </div>
+
+      <!-- Firefly catch zones (injected by JS) -->
+      <div id="act3-next-btn-wrap" class="act-next-wrap ui-hidden">
+        <button id="ch4-next" class="act-next-btn">Aage Chalein... 💍</button>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ACT 4 — EK SAPNA (Proposal + Emerald Ring)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="act4-proposal" class="act-section ui-hidden" aria-label="Act 4: Ek Sapna">
       <canvas id="proposal-canvas" class="bg-canvas"></canvas>
-      
+
+      <!-- Chibi proposer character -->
       <div class="chibi-character" id="chibi-proposer">
         <div class="chibi-head">
           <div class="chibi-eyes"></div>
           <div class="chibi-blush"></div>
+          <div class="chibi-mouth"></div>
         </div>
-        <div class="chibi-body"></div>
+        <div class="chibi-body">
+          <div class="chibi-arm chibi-arm-left"></div>
+          <div class="chibi-arm chibi-arm-right"></div>
+          <div class="chibi-legs"></div>
+        </div>
       </div>
 
+      <!-- Dialogue box -->
       <div class="proposal-dialogue-box" id="proposal-box">
         <p class="proposal-dialogue" id="proposal-dialogue-text"></p>
       </div>
 
-      <!-- Half-Moon Emerald Ring Container -->
+      <!-- Half-Moon Emerald Ring -->
       <div class="ring-box ui-hidden" id="ring-box">
+        <div class="ring-glow-aura"></div>
         <div class="half-moon-ring">
+          <div class="ring-band-left"></div>
+          <div class="ring-band-right"></div>
           <div class="emerald-gem">
+            <div class="gem-facets"></div>
             <span class="gem-initial">K</span>
+            <div class="gem-shine"></div>
           </div>
         </div>
         <p class="ring-title" id="ring-title">I love you today, tomorrow, and forever.</p>
@@ -153,37 +224,49 @@
       </div>
     </section>
 
-    <!-- ═══ PART 3: GRAND BIRTHDAY SCENE & CHARACTER CANDLE BLOW ═══ -->
-    <section id="birthday-stage" class="stage-section ui-hidden">
+    <!-- ══════════════════════════════════════════════════════════
+         ACT 5 — HAPPY BIRTHDAY PRANU! (Candles + Cake + Heart)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="act5-birthday" class="act-section ui-hidden" aria-label="Act 5: Happy Birthday">
+      <canvas id="ch5-canvas" class="bg-canvas"></canvas>
+      <div id="lanterns" aria-hidden="true"></div>
+      <div id="fw5" aria-hidden="true"></div>
+
+      <!-- Birthday header -->
       <div class="bday-hero">
-        <h1 class="bday-title">Happy Birthday Pranu 🎂</h1>
-        <p class="bday-subtitle">Pehla Saal • Pehli Anniversary</p>
+        <h1 class="bday-title" id="bday-name">Happy Birthday Pranu 🎂</h1>
+        <p class="bday-subtitle" id="anni-tag">Pehla Saal • Pehli Anniversary</p>
       </div>
+
+      <!-- Birthday wishes bubbles -->
+      <div class="wishes-wrap" id="wishes-wrap"></div>
 
       <!-- Chibi blowing buddy -->
       <div class="chibi-buddy" id="chibi-buddy">
         <div class="chibi-head"></div>
+        <div class="chibi-buddy-puff ui-hidden" id="puff-emoji">💨</div>
       </div>
 
-      <!-- 3D Birthday Cake Container -->
+      <!-- Cake section -->
       <div class="bday-cake-box">
-        <p class="candle-hint" id="candle-hint">🕯️ Candle pe tap karo, character fook marega! 💨</p>
-        
-        <div class="cake-candles-row" id="interactive-candles">
-          <div class="bday-candle" data-idx="0"><div class="flame"></div></div>
-          <div class="bday-candle" data-idx="1"><div class="flame"></div></div>
-          <div class="bday-candle" data-idx="2"><div class="flame"></div></div>
-          <div class="bday-candle" data-idx="3"><div class="flame"></div></div>
-          <div class="bday-candle" data-idx="4"><div class="flame"></div></div>
-        </div>
+        <p class="cake-hint" id="cake-hint">🕯️ Candle pe tap karo, vo fook marega! 💨</p>
 
-        <div class="cake-3d" id="cake-3d">
-          <div class="cake-frosting"></div>
-          <div class="cake-cut-line ui-hidden" id="cake-cut-line"></div>
+        <!-- Candles row (rendered by JS) -->
+        <div class="cake-candles" id="cake-candles"></div>
+
+        <!-- Cake body -->
+        <div class="cake-body" id="cake-body">
+          <div class="cake-tier cake-tier-top">
+            <div class="cake-frosting-drip"></div>
+            <span class="cake-decoration">🎂</span>
+          </div>
+          <div class="cake-tier cake-tier-mid"></div>
+          <div class="cake-tier cake-tier-bot"></div>
+          <div class="cake-slice-line ui-hidden" id="cake-slice-line"></div>
         </div>
       </div>
 
-      <!-- ═══ PART 4: 3-STAGE BREAKING HEART CORE ═══ -->
+      <!-- Heart core (revealed after cake cut) -->
       <div class="cake-heart-core ui-hidden" id="cake-heart-core">
         <div class="breaking-heart" id="breaking-heart">
           <span class="heart-emoji">❤️</span>
@@ -191,36 +274,110 @@
         </div>
         <p class="heart-break-hint" id="heart-break-hint">💔 Heart ko 3 baar tap karke todo! (0/3)</p>
       </div>
+
+      <!-- Envelope + full letter (after all candles) -->
+      <div id="envelope" class="envelope ui-hidden">
+        <div class="envelope-flap"></div>
+        <div class="envelope-body">
+          <span class="envelope-heart">💌</span>
+          <p class="envelope-label">Ek khat tumhare liye...</p>
+        </div>
+      </div>
+      <div id="full-letter" class="full-letter ui-hidden">
+        <div class="letter-inner">
+          <p id="letter-body-ch5" class="letter-body"></p>
+          <div id="closing" class="letter-closing ui-hidden">
+            <p id="close1"></p>
+            <p id="close2" class="letter-final-line"></p>
+          </div>
+        </div>
+      </div>
+
+      <button id="finale-trigger" class="finale-trigger-btn ui-hidden">✨ Aage Chalein...</button>
     </section>
 
-    <!-- ═══ PART 4 (Contd): LOVE SHOWER CATCH GAME ═══ -->
-    <section id="shower-stage" class="stage-section ui-hidden">
+    <!-- ══════════════════════════════════════════════════════════
+         LOVE SHOWER — Hearts catch game (between Act 5 & Finale)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="shower-stage" class="act-section ui-hidden" aria-label="Love Shower">
       <div class="shower-header">
-        <h2>Love Shower! ✨</h2>
-        <p>Udte hue dil ko pakdo aur raaz kholo...</p>
+        <p class="shower-title">Love Shower ✨</p>
+        <p class="shower-subtitle">Udte hue dil ko pakdo aur raaz kholo...</p>
+        <p class="shower-count" id="shower-count">0 / 13 raazein</p>
       </div>
       <div id="shower-container"></div>
+      <button id="shower-continue-btn" class="act-next-btn ui-hidden">Aage Chalein... 🌟</button>
     </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         GRAND FINALE — 6-scene sequence
+    ══════════════════════════════════════════════════════════ -->
+    <div id="grand-finale" class="ui-hidden" aria-label="Grand Finale">
+
+      <!-- Scene 1: Tiny Planet -->
+      <div id="scene-planet" class="finale-scene">
+        <canvas id="planet-canvas" class="bg-canvas"></canvas>
+        <p class="finale-line" id="planet-line"></p>
+      </div>
+
+      <!-- Scene 2: Credits -->
+      <div id="scene-credits" class="finale-scene ui-hidden">
+        <div class="credits-stars" id="credits-stars"></div>
+        <p class="credit-line" id="credit-line"></p>
+      </div>
+
+      <!-- Scene 3: Long-press heart -->
+      <div id="scene-heart" class="finale-scene ui-hidden">
+        <div id="finale-heart" class="finale-heart" role="button" aria-label="Hold to reveal">
+          <div class="finale-heart-pulse"></div>
+        </div>
+        <p class="finale-hint" id="finale-heart-hint"></p>
+        <p class="finale-reveal ui-hidden" id="finale-i-love-you"></p>
+      </div>
+
+      <!-- Scene 4: 365 Nights -->
+      <div id="scene-365" class="finale-scene ui-hidden">
+        <canvas id="dots-canvas" class="bg-canvas"></canvas>
+        <p class="finale-line finale-line-365" id="finale-365-line"></p>
+      </div>
+
+      <!-- Scene 5: Infinity loop -->
+      <div id="scene-loop" class="finale-scene ui-hidden">
+        <canvas id="loop-canvas" class="bg-canvas"></canvas>
+        <p class="finale-line" id="finale-loop-line"></p>
+      </div>
+
+      <!-- Scene 6: Secret ending -->
+      <div id="scene-secret" class="finale-scene ui-hidden">
+        <p class="secret-quote" id="secret-quote"></p>
+        <p class="secret-tagline" id="secret-tagline"></p>
+        <div id="secret-final" class="secret-final ui-hidden">
+          <p class="secret-pa">P ❤️ A</p>
+          <p class="secret-forever">Hamesha</p>
+        </div>
+      </div>
+
+    </div><!-- /#grand-finale -->
 
   </main>
 
-  <!-- Love Shower Message Toast Modal -->
-  <div id="shower-toast" class="ui-hidden">
+  <!-- ═══ GLOBAL OVERLAYS ═══ -->
+
+  <!-- Love Shower Message Toast -->
+  <div id="shower-toast" class="shower-toast ui-hidden" role="dialog">
     <div class="toast-content">
       <span class="toast-icon">💖</span>
       <p id="toast-message"></p>
-      <button id="toast-close-btn">❤️</button>
+      <button id="toast-close-btn" aria-label="Close">❤️</button>
     </div>
   </div>
 
-  <!-- Music tracks — use yourmusic.mp3 for romantic chapter; other chapters use royalty-free links -->
+  <!-- Music tracks -->
   <audio id="music-ch1" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_2dde668d05.mp3" type="audio/mpeg" />
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg" />
   </audio>
   <audio id="music-ch2" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3" type="audio/mpeg" />
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
   </audio>
   <audio id="music-ch3" loop preload="auto">
     <source src="yourmusic.mp3" type="audio/mpeg" />
@@ -228,11 +385,9 @@
   </audio>
   <audio id="music-ch4" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3" type="audio/mpeg" />
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" type="audio/mpeg" />
   </audio>
   <audio id="music-ch5" loop preload="auto">
     <source src="https://cdn.pixabay.com/download/audio/2023/10/13/audio_6bab93b4bb.mp3" type="audio/mpeg" />
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg" />
   </audio>
 
   <script src="script.js"></script>
