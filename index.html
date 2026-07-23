@@ -23,9 +23,39 @@
 
 <body>
 
+  <!-- ═══ ORIENTATION MIRROR MODE EASTER EGG ═══ -->
+  <div id="orientation-mirror" class="ui-hidden" aria-hidden="true">
+    <div class="mirror-content">
+      <div class="mirror-reflection-glow"></div>
+      <p class="mirror-quote">"Chahe zindagi kisi bhi taraf mudh jaaye... main tumhe hi chununga."</p>
+      <p class="mirror-hint">📱 Screen ko wapas seedha karein...</p>
+    </div>
+  </div>
+
   <!-- ═══ COLD OPEN — very first thing shown ═══ -->
   <div id="cold-open" aria-hidden="true">
     <p class="cold-open-line" id="cold-open-line"></p>
+  </div>
+
+  <!-- ═══ COLLECTIBLES HUD — hidden letters + firefly catches ═══ -->
+  <div id="collectibles-hud" class="ui-hidden" aria-hidden="true">
+    <span id="letters-counter">🔤 0/10</span>
+    <span id="fireflies-counter">🦟 0/5</span>
+  </div>
+
+  <!-- ═══ ACHIEVEMENT TOAST ═══ -->
+  <div id="achievement-toast" class="ui-hidden">
+    <span class="achievement-icon">🏆</span>
+    <span id="achievement-text"></span>
+  </div>
+
+  <!-- ═══ HIDDEN LETTERS FINAL MESSAGE ═══ -->
+  <div id="letters-complete-modal" class="ui-hidden">
+    <div class="letters-complete-inner">
+      <p class="letters-complete-label">Sab 10 raazein mil gaye...</p>
+      <p class="letters-complete-msg" id="letters-complete-msg"></p>
+      <button class="letters-complete-close" id="letters-complete-close">❤️</button>
+    </div>
   </div>
 
   <!-- ═══ BALLOON RELEASE — triggered after Ch5 candles+cake ═══ -->
@@ -177,6 +207,12 @@
 
       <!-- Tap hint -->
       <p class="ps-tap-hint" id="ps-tap-hint">tap anywhere to continue →</p>
+
+      <!-- Hidden memory popup, unlocked by the wandering butterfly -->
+      <div class="memory-popup ui-hidden" id="memory-popup">
+        <span class="memory-popup-icon">📸</span>
+        <p id="memory-popup-text"></p>
+      </div>
 
       <!-- Dream Frame (last era climax) -->
       <div class="dream-frame ui-hidden" id="dream-frame" role="dialog" aria-modal="true">

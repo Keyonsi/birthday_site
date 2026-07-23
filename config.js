@@ -15,6 +15,25 @@ const BIRTHDAY_CONFIG = {
   anniversaryMessage: "Pehla Saal • Pehli Anniversary",
 
   // --- Cold open (very first thing shown, before the loader) ---
+  // Multiple variations for Phase 9 Memory Engine quote rotation
+  coldOpenVariants: [
+    [
+      "Kuch kahaniyaan likhi jaati hain...",
+      "Kuch jee li jaati hain...",
+      "Yeh wali... humne jee li."
+    ],
+    [
+      "Duniya mein hazaaron shahr hain...",
+      "Par meri saari raatein...",
+      "Tumhare khayal par aakar rukti hain."
+    ],
+    [
+      "Baarish ki har ek boond ne...",
+      "Bas ek hi naam pukara...",
+      "Meri Pranu..."
+    ]
+  ],
+  // Fallback / active cold open line set
   coldOpen: [
     "Kuch kahaniyaan likhi jaati hain...",
     "Kuch jee li jaati hain...",
@@ -26,30 +45,96 @@ const BIRTHDAY_CONFIG = {
     {
       roman: "I",
       name: "Pehle",
-      tagline: "Har kahani ki ek shuruaat hoti hai jo use khud yaad nahi rehti."
+      tagline: "Har kahani ki ek shuruaat hoti hai jo use khud yaad nahi rehti.",
+      taglineVariants: [
+        "Har kahani ki ek shuruaat hoti hai jo use khud yaad nahi rehti.",
+        "Jab tum nahi the, waqt bas ghadi ki tik-tik tha.",
+        "Ujaale se pehle ki khamoshi bhi kitni gehri hoti hai."
+      ]
     },
     {
       roman: "II",
       name: "Teri Kahani",
-      tagline: "Har rani kabhi ek bachi thi."
+      tagline: "Har rani kabhi ek bachi thi.",
+      taglineVariants: [
+        "Har rani kabhi ek bachi thi.",
+        "Nanhin aakhon mein chhupa tha poora aasman.",
+        "B बचपन ki haseen yaadon ka silsila."
+      ]
     },
     {
       roman: "III",
       name: "Baarish Mein",
-      tagline: "Kuch yaadein baarish mein bhi kabhi geeli nahi hotin."
+      tagline: "Kuch yaadein baarish mein bhi kabhi geeli nahi hotin.",
+      taglineVariants: [
+        "Kuch yaadein baarish mein bhi kabhi geeli nahi hotin.",
+        "Us garden ki mehak aaj bhi fizao mein hai.",
+        "Boond boond mein base hain tumhare aur mere lamhe."
+      ]
     },
     {
       roman: "IV",
       name: "Jab Tum Gayi",
-      tagline: "Doori pyaar ko test nahi karti, dil ko sabr sikhati hai."
+      tagline: "Doori pyaar ko test nahi karti, dil ko sabr sikhati hai.",
+      taglineVariants: [
+        "Doori pyaar ko test nahi karti, dil ko sabr sikhati hai.",
+        "Faasle jism ke ho sakte hain, rooh ke nahi.",
+        "Har raat taaron se tumhare aane ki baat hoti thi."
+      ]
     },
     {
       roman: "V",
       name: "Aaj Aur Hamesha",
-      tagline: "Kuch kahaniyaan khatam nahi hotin, woh bas shuruu hoti rehti hain."
+      tagline: "Kuch kahaniyaan khatam nahi hotin, woh bas shuruu hoti rehti hain.",
+      taglineVariants: [
+        "Kuch kahaniyaan khatam nahi hotin, woh bas shuruu hoti rehti hain.",
+        "Yeh toh bas shuruaat hai humare forever ki.",
+        "Har janam mein, har mod par... tum hi ho."
+      ]
     }
   ],
   chapterSignature: "— Tumhara, Hamesha",
+
+  // --- Small hidden memories, unlocked via the Ch2 butterfly and Ch3 rain words ---
+  hiddenMemories: [
+    "Wo pehli baar jab tumne mujhe apni favourite gaana bheja tha.",
+    "Jab tumne mujhe raat ko so jaane se pehle 'good night' bola tha, pehli baar.",
+    "Wo photo jo tumne bina bataye click ki thi, aur main hass raha tha.",
+    "Jab hum dono ne ek hi cheez order ki thi bina ek dusre ko bataye.",
+    "Wo din jab tumhari hasi ne mera pura din theek kar diya tha."
+  ],
+  rainWords: ["Hope", "Love", "Pranu", "Forever", "Miss You"],
+
+  // --- Hidden collectibles (Phase 7) ---
+  starWhispers: [
+    "Aaj bhi tumhari hasi yaad aa gayi.",
+    "Yeh pal, sirf tumhare liye rukta hai.",
+    "Kahin na kahin, universe tumhari smile se jealous hai.",
+    "Tum nahi jaanti, yeh yaad meri favourite hai.",
+    "Har baar jab main upar dekhta hoon, tum yaad aati ho.",
+    "Kuch cheezein bina kahe hi samajh aati hain — tum ho unmein se ek.",
+    "Yeh tara bhi tumhari tarah chamak raha hai.",
+    "Kabhi socha nahi tha koi itna khaas ho sakta hai.",
+    "Tumhari aankhon mein woh hi roshni hai jo in taaron mein hai.",
+    "Yeh raaz sirf tumhare liye hai.",
+    "Duniya so rahi hai, bas hum jaag rahe hain is pal mein.",
+    "Kabhi kabhi lagta hai tum khud ek sitara ho.",
+    "Yeh khaamoshi bhi tumhare saath khoobsurat lagti hai.",
+    "Har din tumse milna, ek naya tohfa lagta hai.",
+    "Is duniya mein, tum meri sabse pyaari khoj ho."
+  ],
+  hiddenLetters: ["T", "U", "M", "E", "R", "I", "J", "A", "A", "N"],
+  hiddenLettersMessage: "Tum Meri Jaan Ho ❤️",
+  fireflyWishes: [
+    "Har subah tumhari muskurahat se shuru ho.",
+    "Zindagi ki har mushkil mein, main tumhare saath rahoon.",
+    "Tumhare sapne, meri zimmedari bhi bane.",
+    "Hum dono buddhe ho jayein, par pyaar wahi jawaan rahe.",
+    "Har Diwali, har Holi, har chhota moment — hum saath karein.",
+    "Tumhari hasi kabhi na ruke.",
+    "Jo bhi tum chaho, woh sab mile.",
+    "Hum jahan bhi ho, saath ho."
+  ],
 
   // --- Grand Finale sequence (after Chapter 5's letter & fireworks) ---
   finale: {

@@ -3,6 +3,42 @@
    ============================================================ */
 'use strict';
 
+// ── HAPTIC FEEDBACK UTILITY ─────────────────────────────────────
+// Soft 10-20ms vibrations for physical tactile feedback on key touch moments
+function triggerHaptic(durationMs = 15) {
+  try {
+    if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(durationMs);
+    }
+  } catch (e) {
+    // Silent catch if device/browser disables haptics
+  }
+}
+
+// ── MEMORY ENGINE VARIATION FLAG & QUOTE SELECTION (Phase 9) ───
+(function initMemoryEngine() {
+  // Session randomizer seed
+  if (!sessionStorage.getItem('birthday_session_seed')) {
+    sessionStorage.setItem('birthday_session_seed', Math.floor(Math.random() * 10000).toString());
+  }
+
+  // 1. Cold open quote rotation
+  if (BIRTHDAY_CONFIG.coldOpenVariants && BIRTHDAY_CONFIG.coldOpenVariants.length) {
+    const idx = Math.floor(Math.random() * BIRTHDAY_CONFIG.coldOpenVariants.length);
+    BIRTHDAY_CONFIG.coldOpen = BIRTHDAY_CONFIG.coldOpenVariants[idx];
+  }
+
+  // 2. Chapter taglines rotation
+  if (BIRTHDAY_CONFIG.chapterMeta && Array.isArray(BIRTHDAY_CONFIG.chapterMeta)) {
+    BIRTHDAY_CONFIG.chapterMeta.forEach(meta => {
+      if (meta.taglineVariants && meta.taglineVariants.length) {
+        const tIdx = Math.floor(Math.random() * meta.taglineVariants.length);
+        meta.tagline = meta.taglineVariants[tIdx];
+      }
+    });
+  }
+})();
+
 // ── COLD OPEN — first thing shown, before loader ─────────────
 (function initColdOpen() {
   const el = document.getElementById('cold-open');
@@ -34,6 +70,28 @@
   showLine();
 })();
 
+// ── DEVICE ORIENTATION MIRROR MODE (Phase 8) ────────────────────
+(function initOrientationMirror() {
+  const mirrorEl = document.getElementById('orientation-mirror');
+  if (!mirrorEl) return;
+
+  function checkOrientation() {
+    // Check if device is flipped to landscape on mobile viewports
+    const isMobile = window.innerWidth <= 900 || ('ontouchstart' in window);
+    const isLandscape = window.innerWidth > window.innerHeight && isMobile;
+
+    if (isLandscape) {
+      mirrorEl.classList.remove('ui-hidden');
+      triggerHaptic(20);
+    } else {
+      mirrorEl.classList.add('ui-hidden');
+    }
+  }
+
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+})();
+
 // ── SHARED WIND ENGINE ─────────────────────────────────────────
 // A single slow oscillation used across chapters so that petals, fireflies,
 // dust motes, and smoke all drift together in the same direction —
@@ -42,7 +100,203 @@ function sharedWindX() {
   return Math.sin(Date.now() / 6000) * 0.00035;
 }
 
-// ── TIME-AWARE MODE — no API, just the device clock ───────────
+// ── GLOBAL TOUCH TRAIL — tiny gold sparkles following the finger ──────
+// Kept intentionally light: max 5 concurrent particles, throttled spawn.
+(function initTouchTrail() {
+  let lastSpawn = 0;
+  const throttleMs = 90;
+
+  function spawnTrailSpark(x, y) {
+    const activeSparks = document.querySelectorAll('.touch-trail-spark').length;
+    if (activeSparks >= 5) return;
+    const s = document.createElement('div');
+    s.className = 'touch-trail-spark';
+    s.style.left = `${x}px`;
+    s.style.top = `${y}px`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 650);
+  }
+
+  function handleMove(e) {
+    const now = Date.now();
+    if (now - lastSpawn < throttleMs) return;
+    lastSpawn = now;
+    const point = e.touches ? e.touches[0] : e;
+    spawnTrailSpark(point.clientX, point.clientY);
+  }
+  window.addEventListener('pointermove', handleMove);
+  window.addEventListener('touchmove', handleMove, { passive: true });
+
+  // Bloom-on-touch — a tiny flower blooms briefly wherever the person taps
+  function spawnBloom(x, y) {
+    const b = document.createElement('div');
+    b.className = 'touch-bloom';
+    b.textContent = '🌸';
+    b.style.left = `${x}px`;
+    b.style.top = `${y}px`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 900);
+  }
+  window.addEventListener('pointerdown', (e) => {
+    // Skip blooms on interactive controls so they don't visually clash with buttons/inputs
+    if (e.target.closest('button, a, input, .quiz-option, .heart-bubble, .rose-spot, .candle-item')) return;
+    spawnBloom(e.clientX, e.clientY);
+  });
+})();
+
+// ── ACHIEVEMENT SYSTEM ─────────────────────────────────────────
+const unlockedAchievements = new Set();
+function unlockAchievement(id, label) {
+  if (unlockedAchievements.has(id)) return;
+  unlockedAchievements.add(id);
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('achievement-text').textContent = label;
+  toast.classList.remove('ui-hidden');
+  requestAnimationFrame(() => toast.classList.add('show'));
+  sfxPlay('sparkleChime', 0.25);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.classList.add('ui-hidden'), 500);
+  }, 2600);
+}
+
+// ── INVISIBLE TAP-STARS (Chapter 1) — 15 hidden zones, whispered lines ──
+let starWhispersInitialized = false;
+const seenWhisperIndices = new Set();
+
+function initStarWhispers() {
+  if (starWhispersInitialized) return; // only attach once
+  starWhispersInitialized = true;
+  const ch1 = document.getElementById('ch1');
+  const total = 15;
+  for (let i = 0; i < total; i++) {
+    const spot = document.createElement('div');
+    spot.className = 'star-whisper-spot';
+    spot.style.left = `${5 + Math.random() * 90}%`;
+    spot.style.top = `${5 + Math.random() * 65}%`;
+    spot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      triggerHaptic(15);
+      unlockAchievement('first_touch', 'First Touch');
+      const pool = BIRTHDAY_CONFIG.starWhispers || [];
+      if (!pool.length) return;
+
+      // Deduplicated whisper selection for Phase 9 Memory Engine
+      let availableIndices = pool.map((_, idx) => idx).filter(idx => !seenWhisperIndices.has(idx));
+      if (availableIndices.length === 0) {
+        seenWhisperIndices.clear(); // reset pool after all 15 seen
+        availableIndices = pool.map((_, idx) => idx);
+      }
+      const chosenIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      seenWhisperIndices.add(chosenIdx);
+
+      const line = pool[chosenIdx];
+      const toast = document.getElementById('star-whisper-toast') || createStarWhisperToast();
+      toast.textContent = line;
+      toast.classList.add('show');
+      sfxPlay('sparkleChime', 0.2);
+      burstSpark(e.clientX, e.clientY);
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    });
+    ch1.appendChild(spot);
+  }
+}
+function createStarWhisperToast() {
+  const t = document.createElement('div');
+  t.id = 'star-whisper-toast';
+  t.className = 'star-whisper-toast';
+  document.body.appendChild(t);
+  return t;
+}
+
+// ── HIDDEN LETTERS COLLECTIBLE (10 letters spread across all 5 chapters) ──
+const collectedLetterIndices = new Set();
+const LETTER_POSITIONS = [
+  // 2 spots per chapter, placed to avoid key content areas
+  { chapter: 'ch1', x: 10, y: 20 }, { chapter: 'ch1', x: 88, y: 78 },
+  { chapter: 'ch2', x: 6, y: 30 }, { chapter: 'ch2', x: 92, y: 40 },
+  { chapter: 'ch3', x: 6, y: 8 }, { chapter: 'ch3', x: 92, y: 92 },
+  { chapter: 'ch4', x: 88, y: 15 }, { chapter: 'ch4', x: 8, y: 88 },
+  { chapter: 'ch5', x: 6, y: 50 }, { chapter: 'ch5', x: 92, y: 10 }
+];
+
+function initHiddenLetters() {
+  const letters = BIRTHDAY_CONFIG.hiddenLetters || [];
+  document.getElementById('collectibles-hud').classList.remove('ui-hidden');
+  LETTER_POSITIONS.forEach((pos, i) => {
+    const chapterEl = document.getElementById(pos.chapter);
+    if (!chapterEl || letters[i] === undefined) return;
+    const spot = document.createElement('div');
+    spot.className = 'letter-spot';
+    spot.textContent = '?';
+    spot.style.left = `${pos.x}%`;
+    spot.style.top = `${pos.y}%`;
+    spot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (collectedLetterIndices.has(i)) return;
+      collectedLetterIndices.add(i);
+      spot.textContent = letters[i];
+      spot.classList.add('found');
+      sfxPlay('sparkleChime', 0.25);
+      burstSpark(e.clientX, e.clientY);
+      updateLettersCounter();
+      if (collectedLetterIndices.size === letters.length) {
+        unlockAchievement('letters_complete', 'Sab Raaz Mil Gaye!');
+        setTimeout(showLettersCompleteModal, 900);
+      }
+    });
+    chapterEl.appendChild(spot);
+  });
+  updateLettersCounter();
+}
+
+function updateLettersCounter() {
+  const total = (BIRTHDAY_CONFIG.hiddenLetters || []).length;
+  document.getElementById('letters-counter').textContent = `🔤 ${collectedLetterIndices.size}/${total}`;
+}
+
+function showLettersCompleteModal() {
+  document.getElementById('letters-complete-msg').textContent = BIRTHDAY_CONFIG.hiddenLettersMessage || '';
+  const modal = document.getElementById('letters-complete-modal');
+  modal.classList.remove('ui-hidden');
+  burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 26);
+  document.getElementById('letters-complete-close').onclick = () => modal.classList.add('ui-hidden');
+}
+
+// ── FIREFLY CATCH (Chapter 3) ──────────────────────────────────
+let firefliesCaught = new Set();
+function updateFirefliesCounter() {
+  document.getElementById('fireflies-counter').textContent = `🦟 ${firefliesCaught.size}/5`;
+}
+function tryCatchFirefly(clickXNorm, clickYNorm, flies) {
+  if (firefliesCaught.size >= 5) return;
+  for (let idx = 0; idx < flies.length; idx++) {
+    if (firefliesCaught.has(idx)) continue;
+    const f = flies[idx];
+    const dx = f.x - clickXNorm, dy = f.y - clickYNorm;
+    if (Math.sqrt(dx * dx + dy * dy) < 0.035) {
+      firefliesCaught.add(idx);
+      updateFirefliesCounter();
+      sfxPlay('fireflyChime', 0.3);
+      if (firefliesCaught.size === 5) {
+        unlockAchievement('fireflies_complete', 'Firefly Catcher!');
+        const wishes = BIRTHDAY_CONFIG.fireflyWishes || [];
+        if (wishes.length) {
+          const wish = wishes[Math.floor(Math.random() * wishes.length)];
+          setTimeout(() => {
+            document.getElementById('letters-complete-msg').textContent = wish;
+            document.getElementById('letters-complete-modal').classList.remove('ui-hidden');
+            document.getElementById('letters-complete-close').onclick = () =>
+              document.getElementById('letters-complete-modal').classList.add('ui-hidden');
+          }, 600);
+        }
+      }
+      return;
+    }
+  }
+}
+
 // Adds a subtle body class so the whole site's mood shifts gently
 // with the real time of day: night (deep/moon), morning (golden/warm),
 // day (neutral — no extra tint).
@@ -254,6 +508,9 @@ document.getElementById('music-btn').addEventListener('click', () => {
 const CHAPTER_IDS = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5'];
 let animationFrameId = null;
 
+// Hidden letters exist in the DOM from the start, spread across all chapters
+initHiddenLetters();
+
 document.querySelectorAll('.chapter-dot').forEach(dot => {
   dot.addEventListener('click', () => {
     const idx = parseInt(dot.dataset.chapter);
@@ -356,6 +613,9 @@ function initCh1() {
   // Ambient soundscape — very low, felt not noticed
   sfxLoop('nightAmbience', 0.05);
   setHeartbeatTempo('slow');
+
+  // Invisible tap-stars — 15 scattered zones, each reveals a whispered line
+  initStarWhispers();
 
   // Description line
   document.getElementById('ch1-desc').textContent = ch1cfg.description;
@@ -667,8 +927,54 @@ function loadPhoto(path, isAlt) {
   document.getElementById('photo-counter').textContent = `${photoIdx + 1} / ${photos.length}`;
 }
 
+// ── Wandering memory butterfly (Chapter 2) — tap it to unlock a memory ──
+const seenMemories = new Set();
+function scheduleMemoryButterfly() {
+  const delay = 6000 + Math.random() * 6000;
+  setTimeout(() => {
+    if (currentChapter !== 1) return; // only while still on Chapter 2
+    spawnMemoryButterfly();
+    scheduleMemoryButterfly();
+  }, delay);
+}
+
+function spawnMemoryButterfly() {
+  const el = document.createElement('div');
+  el.className = 'memory-butterfly';
+  el.textContent = '🦋';
+  el.style.left = `${15 + Math.random() * 60}%`;
+  el.style.top = `${55 + Math.random() * 25}%`;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const pool = BIRTHDAY_CONFIG.hiddenMemories || [];
+    if (!pool.length) return;
+    let idx = Math.floor(Math.random() * pool.length);
+    if (seenMemories.size < pool.length) {
+      while (seenMemories.has(idx)) idx = Math.floor(Math.random() * pool.length);
+    }
+    seenMemories.add(idx);
+    document.getElementById('memory-popup-text').textContent = pool[idx];
+    document.getElementById('memory-popup').classList.remove('ui-hidden');
+    sfxPlay('sparkleChime', 0.3);
+    burstSpark(e.clientX, e.clientY);
+    el.remove();
+    setTimeout(() => document.getElementById('memory-popup').classList.add('ui-hidden'), 3800);
+  });
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 9200);
+}
+
 function advanceJourney() {
   const dreamFrame = document.getElementById('dream-frame');
+
+  // Polaroid shake + shutter feel on every photo tap
+  const frame = document.querySelector('.polaroid-frame');
+  if (frame) {
+    frame.classList.remove('shake');
+    void frame.offsetWidth;
+    frame.classList.add('shake');
+  }
+  sfxPlay('shutter', 0.3);
 
   // If dream frame is showing, close it and go to next chapter (regardless of photoJourneyEnded state)
   if (!dreamFrame.classList.contains('ui-hidden')) {
@@ -721,6 +1027,9 @@ function initCh2() {
   // Tap to advance
   const ch2 = document.getElementById('ch2');
   ch2.onclick = advanceJourney;
+
+  // Occasional butterfly that leads to a hidden unseen memory
+  scheduleMemoryButterfly();
 
   // Mood particle canvas — changes color per era
   const canvas = document.getElementById('ps-canvas');
@@ -788,6 +1097,9 @@ function initCh3() {
   // Hidden rose garden — 6 tap-zones scattered across the chapter viewport
   initRoseGarden();
 
+  // Rain drops that occasionally spell a word — tap to dissolve
+  scheduleRainWord();
+
   // Shayari lines (animated, staggered)
   const shayariWrap = document.querySelector('.rain-shayari');
   if (shayariWrap && cfg.mainMemory.shayari) {
@@ -816,6 +1128,15 @@ function initCh3() {
     speed: Math.random() * 0.003 + 0.001,
     alpha: Math.random()
   }));
+
+  // Firefly catch — tap near a glowing firefly to catch it (5 total unlocks a wish)
+  canvas.style.pointerEvents = 'auto';
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const xNorm = (e.clientX - rect.left) / rect.width;
+    const yNorm = (e.clientY - rect.top) / rect.height;
+    tryCatchFirefly(xNorm, yNorm, flies);
+  });
 
   // Monsoon drops on ch3 canvas
   const drops = Array.from({ length: 80 }, () => ({
@@ -930,6 +1251,7 @@ function runQuiz(cfg) {
     cardEl.querySelectorAll('.quiz-option').forEach(btn => {
       btn.addEventListener('click', () => {
         if (cardEl.classList.contains('leaving')) return;
+        triggerHaptic(15);
         const opt = q.options[parseInt(btn.dataset.idx)];
         btn.classList.add('chosen');
         sfxPlay('pianoTap', 0.2);
@@ -1027,6 +1349,7 @@ function initHearts() {
 
     bubble.addEventListener('click', e => {
       e.stopPropagation();
+      triggerHaptic(15);
       if (!hData.done) {
         hData.done = true;
         revealed++;
@@ -1095,6 +1418,7 @@ function triggerCakeCut(cfg) {
   const cakeBody = document.getElementById('cake-body');
   sliceLine.classList.remove('ui-hidden');
   sliceLine.classList.add('cut');
+  triggerHaptic(25);
   sfxPlay('sparkleChime', 0.3);
 
   const wishWords = ['May your dreams always find you.', 'Joy', 'Hope', 'Forever'];
@@ -1150,6 +1474,36 @@ function releaseBalloons() {
   });
 }
 
+// ── Rain drops that spell a word (Chapter 3) — tap to dissolve ──
+function scheduleRainWord() {
+  const delay = 5000 + Math.random() * 5000;
+  setTimeout(() => {
+    if (currentChapter !== 2) return;
+    spawnRainWord();
+    scheduleRainWord();
+  }, delay);
+}
+
+function spawnRainWord() {
+  const words = BIRTHDAY_CONFIG.rainWords || ['Love'];
+  const word = words[Math.floor(Math.random() * words.length)];
+  const el = document.createElement('div');
+  el.className = 'rain-word';
+  el.textContent = word;
+  el.style.left = `${10 + Math.random() * 75}%`;
+  el.style.animationDuration = `${4 + Math.random() * 2}s`;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    triggerHaptic(15);
+    el.classList.add('dissolve');
+    sfxPlay('sparkleChime', 0.2);
+    burstSpark(e.clientX, e.clientY);
+    setTimeout(() => el.remove(), 500);
+  });
+  document.getElementById('ch3').appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 7000);
+}
+
 // ── Hidden rose garden (Chapter 3) ──────────────────────────
 function initRoseGarden() {
   const garden = document.getElementById('rose-garden');
@@ -1174,13 +1528,16 @@ function initRoseGarden() {
     spot.innerHTML = '<span class="rose-icon">🌹</span>';
     spot.addEventListener('click', () => {
       if (spot.classList.contains('found')) return;
+      triggerHaptic(15);
       spot.classList.add('found');
       found++;
       counterEl.textContent = `🌹 ${found} / ${total}`;
       sfxPlay('sparkleChime', 0.25);
+      unlockAchievement('first_rose', 'Found First Rose');
       const rect = spot.getBoundingClientRect();
       burstSpark(rect.left + rect.width / 2, rect.top + rect.height / 2);
       if (found === total) {
+        triggerHaptic(30);
         counterEl.classList.add('complete');
         counterEl.textContent = `🌹 Poora bagicha khil gaya! ✨`;
         burstConfetti(window.innerWidth / 2, window.innerHeight * 0.3, 20);
@@ -1418,15 +1775,20 @@ function initCh5() {
     const candle = document.createElement('div');
     candle.className = 'candle-item';
     candle.innerHTML = '<div class="candle-flame"></div><div class="candle-smoke"></div>';
+    const flame = candle.querySelector('.candle-flame');
+    flame.style.animationDuration = `${0.3 + Math.random() * 0.35}s`;
+    flame.style.animationDelay = `${Math.random() * 0.4}s`;
     candle.addEventListener('click', () => {
       if (candle.classList.contains('blown')) return;
       candle.classList.add('blown');
+      triggerHaptic(15);
       sfxPlay('candleBlow', 0.35);
       blownCount++;
       const rect = candle.getBoundingClientRect();
       burstSpark(rect.left + rect.width / 2, rect.top);
       if (blownCount === totalCandles) {
         cakeHint.classList.add('done');
+        triggerHaptic(30);
         burstConfetti(window.innerWidth / 2, window.innerHeight * 0.45, 30);
         setTimeout(() => triggerCakeCut(cfg), 500);
       }
@@ -1437,6 +1799,7 @@ function initCh5() {
   const envelope = document.getElementById('envelope');
   const fullLetter = document.getElementById('full-letter');
   envelope.onclick = (e) => {
+    triggerHaptic(20);
     sfxPlay('waxSeal', 0.4);
     envelope.classList.add('ui-hidden');
     fullLetter.classList.remove('ui-hidden');
@@ -1610,8 +1973,10 @@ function startGrandFinale() {
   document.getElementById('chapter-footer').classList.add('ui-hidden');
   document.getElementById('music-player').classList.add('ui-hidden');
   document.getElementById('chapter-nav').classList.add('ui-hidden');
+  document.getElementById('collectibles-hud').classList.add('ui-hidden');
   overlay.classList.remove('ui-hidden');
   setHeartbeatTempo('slow');
+  unlockAchievement('finale_reached', 'Completed Love Story');
 
   finaleScenePlanet(cfg);
 }
@@ -1708,8 +2073,10 @@ function finaleSceneHeart(cfg) {
 
   function startPress() {
     heart.classList.add('pressing');
+    triggerHaptic(10);
     setHeartbeatTempo('fast');
     pressTimer = setTimeout(() => {
+      triggerHaptic(30);
       reveal.classList.remove('ui-hidden');
       burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 24);
       hint.style.opacity = 0;

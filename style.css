@@ -1009,6 +1009,373 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
+.polaroid-frame.shake {
+  animation: polaroidShake 0.35s ease;
+}
+
+@keyframes polaroidShake {
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-2px, 1px) rotate(-0.6deg);
+  }
+
+  40% {
+    transform: translate(2px, -1px) rotate(0.6deg);
+  }
+
+  60% {
+    transform: translate(-1px, 1px) rotate(-0.4deg);
+  }
+
+  80% {
+    transform: translate(1px, -1px) rotate(0.4deg);
+  }
+}
+
+/* Wandering memory butterfly (Chapter 2) */
+.memory-butterfly {
+  position: fixed;
+  z-index: 50;
+  font-size: 1.6rem;
+  cursor: pointer;
+  filter: drop-shadow(0 0 6px rgba(255, 220, 180, 0.5));
+  animation: butterflyWander 9s ease-in-out forwards;
+}
+
+@keyframes butterflyWander {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(40px, -60px) rotate(10deg);
+  }
+
+  50% {
+    transform: translate(-30px, -120px) rotate(-8deg);
+  }
+
+  75% {
+    transform: translate(50px, -180px) rotate(6deg);
+  }
+
+  92% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(0, -240px) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+.memory-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 700;
+  background: rgba(20, 15, 10, 0.92);
+  border: 1px solid rgba(255, 220, 180, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.6rem;
+  max-width: 300px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  animation: qFadeIn 0.4s ease;
+}
+
+.memory-popup-icon {
+  font-size: 1.6rem;
+}
+
+.memory-popup p {
+  font-family: var(--font-script);
+  font-size: 0.95rem;
+  color: rgba(255, 235, 220, 0.9);
+  line-height: 1.6;
+}
+
+/* Rain-spelling words (Chapter 3) */
+.rain-word {
+  position: absolute;
+  top: -5%;
+  z-index: 4;
+  font-family: var(--font-script);
+  font-size: 1rem;
+  color: rgba(200, 225, 255, 0.55);
+  text-shadow: 0 0 8px rgba(150, 190, 255, 0.3);
+  cursor: pointer;
+  animation: rainWordFall linear forwards;
+}
+
+.rain-word.dissolve {
+  animation: rainWordDissolve 0.5s ease forwards;
+}
+
+@keyframes rainWordFall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(85vh);
+    opacity: 0;
+  }
+}
+
+@keyframes rainWordDissolve {
+  to {
+    opacity: 0;
+    transform: scale(1.6) translateY(0);
+    filter: blur(4px);
+  }
+}
+
+/* Global touch-trail sparkles */
+.touch-trail-spark {
+  position: fixed;
+  z-index: 9000;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe9a8, rgba(255, 220, 120, 0));
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: trailSparkFade 0.65s ease-out forwards;
+}
+
+@keyframes trailSparkFade {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+}
+
+/* Bloom-on-touch flower */
+.touch-bloom {
+  position: fixed;
+  z-index: 8999;
+  font-size: 1.1rem;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  animation: bloomPop 0.9s ease-out forwards;
+}
+
+@keyframes bloomPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+
+  30% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1) rotate(10deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9) rotate(-10deg);
+  }
+}
+
+/* Collectibles HUD */
+#collectibles-hud {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+#collectibles-hud span {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+}
+
+/* Invisible tap-star hit zones (Chapter 1) */
+.star-whisper-spot {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.star-whisper-toast {
+  position: fixed;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 900;
+  max-width: 280px;
+  text-align: center;
+  font-family: var(--font-script);
+  font-size: 0.9rem;
+  color: #f4dcaa;
+  background: rgba(20, 15, 30, 0.85);
+  padding: 0.7rem 1.1rem;
+  border-radius: 14px;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.star-whisper-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Hidden letter spots — glowing "?" that reveals a letter */
+.letter-spot {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: rgba(255, 220, 150, 0.5);
+  border: 1px solid rgba(255, 220, 150, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+  animation: letterSpotPulse 2.4s ease-in-out infinite;
+}
+
+.letter-spot.found {
+  color: #ffd166;
+  border-color: rgba(255, 209, 102, 0.7);
+  animation: none;
+  pointer-events: none;
+}
+
+@keyframes letterSpotPulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Achievement toast */
+#achievement-toast {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(20, 15, 10, 0.9);
+  border: 1px solid rgba(255, 209, 102, 0.3);
+  padding: 0.6rem 1.1rem;
+  border-radius: 30px;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#achievement-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.achievement-icon {
+  font-size: 1.1rem;
+}
+
+#achievement-text {
+  font-family: var(--font-script);
+  font-size: 0.85rem;
+  color: #ffd166;
+}
+
+/* Letters-complete final message modal */
+#letters-complete-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9600;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.letters-complete-inner {
+  background: rgba(25, 18, 15, 0.95);
+  border: 1px solid rgba(255, 209, 102, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.6rem;
+  text-align: center;
+  max-width: 320px;
+  animation: qFadeIn 0.5s ease;
+}
+
+.letters-complete-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.letters-complete-msg {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.6rem;
+  color: #ffd166;
+  margin-bottom: 1.2rem;
+}
+
+.letters-complete-close {
+  background: transparent;
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  color: #ffd166;
+  padding: 0.5rem 1.3rem;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
 .polaroid-tape {
   position: absolute;
   top: -12px;
@@ -1831,6 +2198,12 @@ body {
   font-size: 1rem;
   line-height: 1.8;
   color: rgba(240, 221, 208, 0.8);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 2.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.letter-wrap.revealed .letter-body {
+  clip-path: inset(0 0 0 0);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2598,4 +2971,76 @@ body {
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHASE 8 — ORIENTATION MIRROR MODE & NIGHT MOOD STYLING
+═══════════════════════════════════════════════════════════ */
+#orientation-mirror {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.95), rgba(3, 3, 8, 0.98));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  transition: opacity 0.5s ease;
+}
+
+.mirror-content {
+  position: relative;
+  max-width: 420px;
+}
+
+.mirror-reflection-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(244, 220, 170, 0.1) 50%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(20px);
+}
+
+.mirror-quote {
+  font-family: var(--font-script);
+  font-size: 1.5rem;
+  color: #f4dcaa;
+  text-shadow: 0 0 15px rgba(244, 220, 170, 0.5);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.mirror-hint {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
+}
+
+/* ── Night Mood Polish Refinement ── */
+body.night-mood #cold-open {
+  background: #010103;
+}
+
+body.night-mood #cold-open-line {
+  color: #e2e8f0;
+  text-shadow: 0 0 12px rgba(244, 220, 170, 0.25);
+}
+
+body.night-mood #loader {
+  background: radial-gradient(circle at center, #060612 0%, #010105 100%);
+}
+
+/* Touch & Mobile Interactivity Polish */
+button, .quiz-option, .heart-bubble, .rose-spot, .candle-item, .envelope {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
