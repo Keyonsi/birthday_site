@@ -309,10 +309,85 @@ function tryCatchFirefly(clickXNorm, clickYNorm, flies) {
 })();
 
 
-// NOTE: These are placeholder royalty-free CDN links (same Pixabay-style
-// pattern as the background music tracks). If any link doesn't load,
-// swap it for another free SFX from mixkit.co / pixabay.com/sound-effects —
-// playback is wrapped in try/catch so a broken link never breaks the site.
+// ── WEB AUDIO SYNTHESIZER ENGINE (100% Reliable Offline Sound FX) ───
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioCtx();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playSynthSFX(type) {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    if (type === 'candleBlow' || type === 'blow') {
+      // White noise puff + low frequency woosh
+      const bufferSize = ctx.sampleRate * 0.4;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400, now);
+      filter.frequency.exponentialRampToValueAtTime(100, now + 0.35);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start(now);
+    } else if (type === 'crack' || type === 'heartCrack') {
+      // Sudden sharp crack frequency burst
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+
+      gain.gain.setValueAtTime(0.6, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } else if (type === 'chime' || type === 'sparkleChime') {
+      // Glowing crystal chime
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.3);
+
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    }
+  } catch (e) {
+    // Silent catch
+  }
+}
+
+// NOTE: These are placeholder royalty-free CDN links with Web Audio Fallback
 const SFX_LIBRARY = {
   firework: "https://cdn.pixabay.com/download/audio/2021/08/09/audio_dc39b45e26.mp3",
   candleBlow: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_a3cbfd2f6a.mp3",
@@ -328,17 +403,18 @@ const SFX_LIBRARY = {
 };
 const sfxCache = {};
 let sfxEnabled = true;
-let heartbeatAudio = null;
 
 function sfxPlay(name, volume = 0.4) {
   if (!sfxEnabled) return;
+  // Always trigger reliable synth sound fallback
+  playSynthSFX(name);
   try {
     const url = SFX_LIBRARY[name];
     if (!url) return;
     const audio = new Audio(url);
     audio.volume = volume;
     audio.play().catch(() => { });
-  } catch (e) { /* silently ignore — never let a sound break the experience */ }
+  } catch (e) { }
 }
 
 // Looping ambience/heartbeat control — used for night ambience, rain, heartbeat
@@ -422,7 +498,7 @@ function switchAudio(chIdx) {
     .catch(e => console.log('Audio blocked:', e));
 }
 
-// ── LOADER ────────────────────────────────────────────────────
+// ── LOADER & INITIALIZATION ─────────────────────────────────────
 (function initLoader() {
   const canvas = document.getElementById('loader-canvas');
   const ctx = canvas.getContext('2d');
@@ -436,16 +512,13 @@ function switchAudio(chIdx) {
   resizeLoader();
   window.addEventListener('resize', resizeLoader);
 
-  // Create floating pink hearts/sparkles on loader
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 50; i++) {
     particles.push({
-      x: Math.random() * 1,
+      x: Math.random(),
       y: Math.random(),
-      size: Math.random() * 2.5 + 0.5,
-      speed: Math.random() * 0.0015 + 0.0005,
-      alpha: Math.random(),
-      alphaDir: Math.random() > 0.5 ? 1 : -1,
-      alphaSpeed: Math.random() * 0.008 + 0.003
+      size: Math.random() * 2 + 1,
+      speed: Math.random() * 0.001 + 0.0005,
+      alpha: Math.random()
     });
   }
 
@@ -454,13 +527,10 @@ function switchAudio(chIdx) {
     ctx.clearRect(0, 0, W, H);
     particles.forEach(p => {
       p.y -= p.speed;
-      if (p.y < 0) { p.y = 1; p.x = Math.random(); }
-      p.alpha += p.alphaDir * p.alphaSpeed;
-      if (p.alpha > 1 || p.alpha < 0) p.alphaDir = -p.alphaDir;
-
+      if (p.y < 0) p.y = 1;
       ctx.beginPath();
       ctx.arc(p.x * W, p.y * H, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,154,158,${Math.abs(p.alpha) * 0.5})`;
+      ctx.fillStyle = `rgba(244, 220, 170, ${p.alpha})`;
       ctx.fill();
     });
     loaderAnimId = requestAnimationFrame(loaderLoop);
@@ -470,755 +540,265 @@ function switchAudio(chIdx) {
   const loader = document.getElementById('loader');
   function startExperience() {
     cancelAnimationFrame(loaderAnimId);
-    bgMusicPlaying = true;
-    document.getElementById('music-icon').textContent = '❚❚';
+    triggerHaptic(20);
+    sfxPlay('sparkleChime', 0.3);
 
     gsap.to('#loader', {
       opacity: 0, duration: 1, ease: 'power2.inOut',
       onComplete: () => {
         loader.style.display = 'none';
-        document.getElementById('music-player').classList.remove('ui-hidden');
-        document.getElementById('chapter-nav').classList.remove('ui-hidden');
-        showChapter(0);
+        startMovieEngine();
       }
     });
   }
   loader.addEventListener('click', startExperience);
-  loader.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') startExperience(); });
 })();
 
-// ── MUSIC BUTTON ─────────────────────────────────────────────
-document.getElementById('music-btn').addEventListener('click', () => {
-  if (bgMusicPlaying) {
-    if (currentAudio) fadeVolume(currentAudio, 0, 800, true);
-    bgMusicPlaying = false;
-    sfxEnabled = false;
-    setHeartbeatTempo('off');
-    Object.keys(sfxCache).forEach(name => sfxStopLoop(name, 500));
-    document.getElementById('music-icon').textContent = '▶';
-  } else {
-    bgMusicPlaying = true;
-    sfxEnabled = true;
-    document.getElementById('music-icon').textContent = '❚❚';
-    if (currentChapter >= 0) switchAudio(currentChapter);
-  }
-});
+// ═══════════════════════════════════════════════════════════
+// PART 1 — MOVIE STORY ENGINE (AUTO-PLAYING FILM)
+// ═══════════════════════════════════════════════════════════
+let movieIdx = 0;
+let movieTimer = null;
 
-// ── CHAPTER SYSTEM ────────────────────────────────────────────
-const CHAPTER_IDS = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5'];
-let animationFrameId = null;
+function startMovieEngine() {
+  movieIdx = 0;
+  playMovieScene(0);
 
-// Hidden letters exist in the DOM from the start, spread across all chapters
-initHiddenLetters();
-
-document.querySelectorAll('.chapter-dot').forEach(dot => {
-  dot.addEventListener('click', () => {
-    const idx = parseInt(dot.dataset.chapter);
-    if (idx <= currentChapter || dot.classList.contains('done')) {
-      showChapter(idx);
+  document.getElementById('cinema-prev-btn').onclick = () => {
+    triggerHaptic(10);
+    if (movieIdx > 0) {
+      movieIdx--;
+      playMovieScene(movieIdx);
     }
-  });
-});
+  };
 
-function showChapter(idx) {
-  // Cancel any running canvas loops
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
-  }
-
-  CHAPTER_IDS.forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (i === idx) {
-      el.classList.remove('ch-hidden');
+  document.getElementById('cinema-next-btn').onclick = () => {
+    triggerHaptic(10);
+    movieIdx++;
+    if (movieIdx < BIRTHDAY_CONFIG.movieScenes.length) {
+      playMovieScene(movieIdx);
     } else {
-      el.classList.add('ch-hidden');
+      endMovieEngine();
     }
-  });
-
-  document.querySelectorAll('.chapter-dot').forEach((dot, i) => {
-    dot.classList.remove('active', 'done');
-    if (i < idx) dot.classList.add('done');
-    if (i === idx) dot.classList.add('active');
-  });
-
-  currentChapter = idx;
-  switchAudio(idx);
-  updateChapterFooter(idx);
-  addChapterSignature(idx);
-  showTitleCard(idx);
-
-  // Stop chapter-specific ambience loops before the next chapter's init restarts what it needs
-  if (idx !== 0) sfxStopLoop('nightAmbience', 800);
-  if (idx !== 2) sfxStopLoop('rainLight', 800);
-
-  // Chapter-specific init
-  switch (idx) {
-    case 0: initCh1(); break;
-    case 1: initCh2(); break;
-    case 2: initCh3(); break;
-    case 3: initCh4(); break;
-    case 4: initCh5(); break;
-  }
+  };
 }
 
-// ── Cinematic chapter title card — brief full-black overlay ─
-function showTitleCard(idx) {
-  const meta = (BIRTHDAY_CONFIG.chapterMeta && BIRTHDAY_CONFIG.chapterMeta[idx]) || null;
-  if (!meta) return;
-  const card = document.getElementById('title-card');
-  document.getElementById('title-card-roman').textContent = meta.roman;
-  document.getElementById('title-card-name').textContent = meta.name;
-  document.getElementById('title-card-tagline').textContent = meta.tagline;
-
-  card.classList.remove('ui-hidden');
-  requestAnimationFrame(() => card.classList.add('showing'));
-  setTimeout(() => {
-    card.classList.remove('showing');
-    setTimeout(() => card.classList.add('ui-hidden'), 650);
-  }, 2000);
-}
-
-// ── Chapter footer — "Chapter X of 5" + progress dots ────────
-function updateChapterFooter(idx) {
-  const footer = document.getElementById('chapter-footer');
-  footer.classList.remove('ui-hidden');
-  document.getElementById('chapter-footer-text').textContent = `Chapter ${idx + 1} of ${CHAPTER_IDS.length}`;
-  const dotsWrap = document.getElementById('chapter-footer-dots');
-  dotsWrap.innerHTML = '';
-  for (let i = 0; i < CHAPTER_IDS.length; i++) {
-    const dot = document.createElement('span');
-    if (i <= idx) dot.classList.add('filled');
-    dotsWrap.appendChild(dot);
-  }
-}
-
-// ── Chapter end signature — appended once per chapter section ─
-function addChapterSignature(idx) {
-  const chapterEl = document.getElementById(CHAPTER_IDS[idx]);
-  const content = chapterEl.querySelector('.ch-content, .ch5-content');
-  if (!content || content.querySelector('.chapter-signature')) return;
-  const sig = document.createElement('p');
-  sig.className = 'chapter-signature';
-  sig.textContent = BIRTHDAY_CONFIG.chapterSignature || '— Tumhara, Hamesha';
-  content.appendChild(sig);
-}
-
-// ═══════════════════════════════════════════════════════════
-// CHAPTER 1 — PEHLE (Starfield + Shooting Stars)
-// ═══════════════════════════════════════════════════════════
-function initCh1() {
-  const ch1cfg = BIRTHDAY_CONFIG.chapter1;
-
-  // Ambient soundscape — very low, felt not noticed
-  sfxLoop('nightAmbience', 0.05);
-  setHeartbeatTempo('slow');
-
-  // Invisible tap-stars — 15 scattered zones, each reveals a whispered line
-  initStarWhispers();
-
-  // Description line
-  document.getElementById('ch1-desc').textContent = ch1cfg.description;
-
-  // Animated counter — counts up to counterDays
-  const counterEl = document.getElementById('counter-num');
-  const targetCount = ch1cfg.counterDays || 0;
-  let counted = 0;
-  const counterStep = Math.max(1, Math.round(targetCount / 40));
-  const counterTimer = setInterval(() => {
-    counted = Math.min(targetCount, counted + counterStep);
-    counterEl.textContent = counted;
-    if (counted >= targetCount) clearInterval(counterTimer);
-  }, 30);
-
-  // Memory fragments — soft cross-fading empty-day moments
-  const fragWrap = document.getElementById('ch1-fragments');
-  fragWrap.innerHTML = '';
-  const fragments = ch1cfg.memoryFragments || [];
-  fragments.forEach((f, i) => {
-    const el = document.createElement('div');
-    el.className = 'fragment-line';
-    el.textContent = f;
-    fragWrap.appendChild(el);
-  });
-  let fragIdx = 0;
-  const fragEls = fragWrap.querySelectorAll('.fragment-line');
-  function cycleFragments() {
-    if (currentChapter !== 0 || !fragEls.length) return;
-    fragEls.forEach(el => el.classList.remove('visible'));
-    fragEls[fragIdx].classList.add('visible');
-    fragIdx = (fragIdx + 1) % fragEls.length;
-    setTimeout(cycleFragments, 2600);
-  }
-  setTimeout(cycleFragments, 600);
-
-  // Ambient sound cue — music stays soft/sparse-feeling until "Tum mili" moment
-  let volumeRaised = false;
-  if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.16, 1200, false);
-
-  // Typewriter
-  const tw = document.getElementById('tw');
-  const lines = [
-    "Ek waqt tha...",
-    "Sab kuch boring aur khali tha.",
-    "Par phir...",
-    "Tum mili! ❤️"
-  ];
-  let lineIdx = 0, charIdx = 0, isDeleting = false;
-  tw.textContent = "";
-
-  function type() {
-    if (currentChapter !== 0) return;
-    const cur = lines[lineIdx];
-    if (!isDeleting) {
-      tw.textContent = cur.slice(0, ++charIdx);
-      if (charIdx === cur.length) {
-        if (lineIdx === 3 && !volumeRaised) {
-          volumeRaised = true;
-          if (currentAudio && bgMusicPlaying) fadeVolume(currentAudio, 0.45, 1800, false);
-          document.getElementById('ch1').classList.add('color-bloom');
-          burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 20);
-          sfxPlay('sparkleChime', 0.35);
-          setHeartbeatTempo('fast');
-          setTimeout(() => setHeartbeatTempo('normal'), 2500);
-        }
-        isDeleting = true;
-        setTimeout(type, 2000);
-        return;
-      }
-    } else {
-      tw.textContent = cur.slice(0, --charIdx);
-      if (charIdx === 0) {
-        isDeleting = false;
-        lineIdx = (lineIdx + 1) % lines.length;
-      }
-    }
-    setTimeout(type, isDeleting ? 38 : 85);
-  }
-  setTimeout(type, 800);
-
-  // Staggered poem line reveal — the last line ("Tab tum nahi the") dims the stars
-  const poemLines = document.querySelectorAll('#poem p');
-  let dimTarget = 1; // 1 = full brightness, lower = dimmed
-  poemLines.forEach((p, i) => {
-    setTimeout(() => {
-      if (currentChapter !== 0) return;
-      p.classList.add('visible');
-      if (p.classList.contains('poem-emphasis')) {
-        dimTarget = 0.45;
-        setTimeout(() => { if (currentChapter === 0) startConstellation(); }, 2200);
-      }
-    }, 1800 + i * 900);
-  });
-
-  // Canvas: stars + occasional shooting star + constellation + parallax
-  const canvas = document.getElementById('ch1-canvas');
-  const ctx = canvas.getContext('2d');
-  function resizeCh1() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resizeCh1();
-  window.addEventListener('resize', resizeCh1);
-
-  // Regular stars
-  const stars = Array.from({ length: 260 }, () => ({
-    x: Math.random(),
-    y: Math.random(),
-    r: Math.random() * 1.6 + 0.3,
-    alpha: Math.random(),
-    speed: (Math.random() * 0.015 + 0.004) * (Math.random() > 0.5 ? 1 : -1)
-  }));
-
-  // Parallax offset — follows pointer/touch, subtle
-  let px = 0, py = 0, targetPx = 0, targetPy = 0;
-  function handlePointer(e) {
-    if (currentChapter !== 0) return;
-    const point = e.touches ? e.touches[0] : e;
-    targetPx = (point.clientX / window.innerWidth - 0.5) * 18;
-    targetPy = (point.clientY / window.innerHeight - 0.5) * 18;
-  }
-  window.addEventListener('pointermove', handlePointer);
-  window.addEventListener('touchmove', handlePointer, { passive: true });
-
-  // Tap-to-wish: tap near a star, it sparkles and bursts
-  canvas.addEventListener('click', e => {
-    if (currentChapter !== 0) return;
-    burstSpark(e.clientX, e.clientY);
-  });
-
-  // Shooting stars
-  const shooters = [];
-  function spawnShooter() {
-    if (currentChapter !== 0) return;
-    shooters.push({
-      x: Math.random() * 0.6,
-      y: Math.random() * 0.4,
-      vx: (Math.random() * 0.004 + 0.003),
-      vy: (Math.random() * 0.002 + 0.001),
-      len: Math.random() * 0.08 + 0.04,
-      alpha: 1,
-      decay: Math.random() * 0.015 + 0.01
-    });
-    setTimeout(spawnShooter, 3500 + Math.random() * 4000);
-  }
-  setTimeout(spawnShooter, 2000);
-
-  // Constellation — a small heart shape that quietly draws itself into the sky
-  const heartPoints = [
-    { x: 0.5, y: 0.16 }, { x: 0.44, y: 0.10 }, { x: 0.37, y: 0.09 }, { x: 0.31, y: 0.13 },
-    { x: 0.30, y: 0.20 }, { x: 0.34, y: 0.27 }, { x: 0.43, y: 0.35 }, { x: 0.5, y: 0.43 },
-    { x: 0.57, y: 0.35 }, { x: 0.66, y: 0.27 }, { x: 0.70, y: 0.20 }, { x: 0.69, y: 0.13 },
-    { x: 0.63, y: 0.09 }, { x: 0.56, y: 0.10 }, { x: 0.5, y: 0.16 }
-  ];
-  let constellationProgress = 0; // how many segments drawn
-  let constellationActive = false;
-  function startConstellation() {
-    if (constellationActive) return;
-    constellationActive = true;
-    document.getElementById('ch1-hint').classList.remove('ui-hidden');
-    let seg = 0;
-    const timer = setInterval(() => {
-      seg++;
-      constellationProgress = seg;
-      if (seg >= heartPoints.length) {
-        clearInterval(timer);
-        document.getElementById('begin-btn').classList.add('intensify');
-      }
-    }, 130);
-  }
-
-  function loopCh1() {
-    if (currentChapter !== 0) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const W = canvas.width, H = canvas.height;
-
-    px += (targetPx - px) * 0.06;
-    py += (targetPy - py) * 0.06;
-
-    // Stars
-    stars.forEach(s => {
-      s.alpha = Math.max(0, Math.min(1, s.alpha + s.speed));
-      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
-      ctx.beginPath();
-      ctx.arc(s.x * W + px, s.y * H + py, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(210,205,255,${s.alpha * dimTarget})`;
-      ctx.fill();
-    });
-
-    // Shooting stars
-    for (let i = shooters.length - 1; i >= 0; i--) {
-      const s = shooters[i];
-      s.x += s.vx;
-      s.y += s.vy;
-      s.alpha -= s.decay;
-      if (s.alpha <= 0) { shooters.splice(i, 1); continue; }
-
-      const grd = ctx.createLinearGradient(
-        s.x * W + px, s.y * H + py,
-        (s.x - s.len) * W + px, (s.y - s.len / 2) * H + py
-      );
-      grd.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
-      grd.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.beginPath();
-      ctx.moveTo(s.x * W + px, s.y * H + py);
-      ctx.lineTo((s.x - s.len) * W + px, (s.y - s.len / 2) * H + py);
-      ctx.strokeStyle = grd;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
-
-    // Constellation — glowing connected points, drawn progressively
-    if (constellationProgress > 0) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(200,170,255,0.5)';
-      ctx.lineWidth = 1.2;
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = 'rgba(200,170,255,0.6)';
-      ctx.beginPath();
-      for (let i = 0; i < Math.min(constellationProgress, heartPoints.length); i++) {
-        const pt = heartPoints[i];
-        const cx = pt.x * W + px * 0.6, cy = pt.y * H + py * 0.6;
-        if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
-      }
-      ctx.stroke();
-      for (let i = 0; i < Math.min(constellationProgress, heartPoints.length); i++) {
-        const pt = heartPoints[i];
-        const cx = pt.x * W + px * 0.6, cy = pt.y * H + py * 0.6;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(230,210,255,0.9)';
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    animationFrameId = requestAnimationFrame(loopCh1);
-  }
-  loopCh1();
-
-  createRain('rain1', 45);
-
-  document.getElementById('begin-btn').onclick = () => showChapter(1);
-}
-
-// ═══════════════════════════════════════════════════════════
-// CHAPTER 2 — TERI KAHANI (Full-Screen Photo Journey)
-// ═══════════════════════════════════════════════════════════
-const ERAS = BIRTHDAY_CONFIG.eras;
-let eraIdx = 0;
-let photoIdx = 0;
-let photoCounts = {};  // era folder -> count
-let kenBurnsToggle = false;
-let photoJourneyEnded = false;
-
-// Discover actual photo counts by trying to load images
-function buildPhotoList(era) {
-  // Use the configured counts, try images 1..N
-  const count = (BIRTHDAY_CONFIG.photoCounts && BIRTHDAY_CONFIG.photoCounts[era.folder]) || 2;
-  const list = [];
-  for (let i = 1; i <= count; i++) {
-    list.push(`images/${era.folder}/${i}.jpg`);
-  }
-  return list;
-}
-
-function getPhotoList(era) {
-  if (!photoCounts[era.folder]) {
-    photoCounts[era.folder] = buildPhotoList(era);
-  }
-  return photoCounts[era.folder];
-}
-
-function updateEraOverlay(era) {
-  document.getElementById('era-emoji-fs').textContent = era.emoji;
-  document.getElementById('era-name-fs').textContent = era.name;
-  document.getElementById('era-desc-fs').textContent = era.desc;
-
-  // Era dots
-  const dotsEl = document.getElementById('era-dots');
-  dotsEl.innerHTML = '';
-  ERAS.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = `era-dot${i < eraIdx ? ' done' : i === eraIdx ? ' active' : ''}`;
-    dotsEl.appendChild(d);
-  });
-}
-
-function loadPhoto(path, isAlt) {
-  const layerA = document.getElementById('photo-layer-a');
-  const layerB = document.getElementById('photo-layer-b');
-
-  kenBurnsToggle = !kenBurnsToggle;
-
-  if (layerA.classList.contains('active')) {
-    // Switch to B
-    layerB.style.backgroundImage = `url('${path}')`;
-    layerB.className = `photo-layer active${kenBurnsToggle ? ' kb-alt' : ''}`;
-    // Force reflow to restart animation
-    void layerB.offsetWidth;
-    layerA.className = 'photo-layer';
-  } else {
-    layerA.style.backgroundImage = `url('${path}')`;
-    layerA.className = `photo-layer active${kenBurnsToggle ? ' kb-alt' : ''}`;
-    void layerA.offsetWidth;
-    layerB.className = 'photo-layer';
-  }
-
-  // Update counter
-  const photos = getPhotoList(ERAS[eraIdx]);
-  document.getElementById('photo-counter').textContent = `${photoIdx + 1} / ${photos.length}`;
-}
-
-// ── Wandering memory butterfly (Chapter 2) — tap it to unlock a memory ──
-const seenMemories = new Set();
-function scheduleMemoryButterfly() {
-  const delay = 6000 + Math.random() * 6000;
-  setTimeout(() => {
-    if (currentChapter !== 1) return; // only while still on Chapter 2
-    spawnMemoryButterfly();
-    scheduleMemoryButterfly();
-  }, delay);
-}
-
-function spawnMemoryButterfly() {
-  const el = document.createElement('div');
-  el.className = 'memory-butterfly';
-  el.textContent = '🦋';
-  el.style.left = `${15 + Math.random() * 60}%`;
-  el.style.top = `${55 + Math.random() * 25}%`;
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const pool = BIRTHDAY_CONFIG.hiddenMemories || [];
-    if (!pool.length) return;
-    let idx = Math.floor(Math.random() * pool.length);
-    if (seenMemories.size < pool.length) {
-      while (seenMemories.has(idx)) idx = Math.floor(Math.random() * pool.length);
-    }
-    seenMemories.add(idx);
-    document.getElementById('memory-popup-text').textContent = pool[idx];
-    document.getElementById('memory-popup').classList.remove('ui-hidden');
-    sfxPlay('sparkleChime', 0.3);
-    burstSpark(e.clientX, e.clientY);
-    el.remove();
-    setTimeout(() => document.getElementById('memory-popup').classList.add('ui-hidden'), 3800);
-  });
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 9200);
-}
-
-function advanceJourney() {
-  const dreamFrame = document.getElementById('dream-frame');
-
-  // Polaroid shake + shutter feel on every photo tap
-  const frame = document.querySelector('.polaroid-frame');
-  if (frame) {
-    frame.classList.remove('shake');
-    void frame.offsetWidth;
-    frame.classList.add('shake');
-  }
-  sfxPlay('shutter', 0.3);
-
-  // If dream frame is showing, close it and go to next chapter (regardless of photoJourneyEnded state)
-  if (!dreamFrame.classList.contains('ui-hidden')) {
-    dreamFrame.classList.add('ui-hidden');
-    showChapter(2);
+function playMovieScene(idx) {
+  clearTimeout(movieTimer);
+  const scenes = BIRTHDAY_CONFIG.movieScenes;
+  if (idx >= scenes.length) {
+    endMovieEngine();
     return;
   }
 
-  if (photoJourneyEnded) return;
+  const s = scenes[idx];
+  document.getElementById('cinema-title').textContent = s.title;
+  document.getElementById('cinema-subtitle').textContent = s.subtitle;
+  document.getElementById('cinema-text').textContent = s.text;
+  document.getElementById('cinema-caption').textContent = s.caption;
+  document.getElementById('cinema-img').src = s.photo;
 
-  const era = ERAS[eraIdx];
-  const photos = getPhotoList(era);
-  photoIdx++;
+  // Animate progress fill
+  const fill = document.getElementById('cinema-progress-fill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  setTimeout(() => {
+    fill.style.transition = `width ${s.durationMs}ms linear`;
+    fill.style.width = '100%';
+  }, 50);
 
-  if (photoIdx >= photos.length) {
-    // Move to next era
-    photoIdx = 0;
-    eraIdx++;
+  sfxPlay('sparkleChime', 0.2);
 
-    if (eraIdx >= ERAS.length) {
-      // All eras done — show dream frame
-      photoJourneyEnded = true;
-      setTimeout(() => {
-        dreamFrame.classList.remove('ui-hidden');
-        document.getElementById('ps-tap-hint').classList.add('ui-hidden');
-      }, 300);
-      return;
+  movieTimer = setTimeout(() => {
+    movieIdx++;
+    if (movieIdx < scenes.length) {
+      playMovieScene(movieIdx);
+    } else {
+      endMovieEngine();
     }
-
-    updateEraOverlay(ERAS[eraIdx]);
-  }
-
-  loadPhoto(getPhotoList(ERAS[eraIdx])[photoIdx], kenBurnsToggle);
+  }, s.durationMs);
 }
 
-function initCh2() {
-  eraIdx = 0;
-  photoIdx = 0;
-  photoJourneyEnded = false;
-  photoCounts = {}; // reset cache
-
-  // Load first photo of first era
-  updateEraOverlay(ERAS[0]);
-  const firstEra = ERAS[0];
-  const firstPhotos = getPhotoList(firstEra);
-  loadPhoto(firstPhotos[0], false);
-  document.getElementById('photo-counter').textContent = `1 / ${firstPhotos.length}`;
-  document.getElementById('ps-tap-hint').classList.remove('ui-hidden');
-
-  // Tap to advance
-  const ch2 = document.getElementById('ch2');
-  ch2.onclick = advanceJourney;
-
-  // Occasional butterfly that leads to a hidden unseen memory
-  scheduleMemoryButterfly();
-
-  // Mood particle canvas — changes color per era
-  const canvas = document.getElementById('ps-canvas');
-  const ctx = canvas.getContext('2d');
-  function resizeCh2() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resizeCh2();
-
-  const moodColors = {
-    pink: [255, 182, 193],
-    gold: [255, 215, 100],
-    purple: [196, 123, 255],
-    rose: [255, 107, 157],
-    warm: [255, 162, 100]
-  };
-
-  function getMoodColor() {
-    const era = ERAS[Math.min(eraIdx, ERAS.length - 1)];
-    return moodColors[era.mood] || [255, 182, 193];
-  }
-
-  const particles = Array.from({ length: 40 }, () => ({
-    x: Math.random(),
-    y: Math.random() + 0.5,  // start below
-    r: Math.random() * 3 + 1,
-    vy: -(Math.random() * 0.0012 + 0.0003),
-    vx: (Math.random() - 0.5) * 0.0005,
-    alpha: Math.random() * 0.4 + 0.1
-  }));
-
-  function loopCh2() {
-    if (currentChapter !== 1) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const W = canvas.width, H = canvas.height;
-    const [r, g, b] = getMoodColor();
-
-    particles.forEach(p => {
-      p.y += p.vy;
-      p.x += p.vx;
-      if (p.y < -0.05) { p.y = 1.05; p.x = Math.random(); }
-      if (p.x < 0 || p.x > 1) p.vx = -p.vx;
-
-      ctx.beginPath();
-      ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha * 0.4})`;
-      ctx.fill();
-    });
-    animationFrameId = requestAnimationFrame(loopCh2);
-  }
-  loopCh2();
-}
-
-// ═══════════════════════════════════════════════════════════
-// CHAPTER 3 — BAARISH MEIN (Hearts + Fireflies + Rain)
-// ═══════════════════════════════════════════════════════════
-let activeHearts = [];
-
-function initCh3() {
-  const cfg = BIRTHDAY_CONFIG.chapter3;
-  document.getElementById('rain-text').textContent = cfg.mainMemory.description;
-
-  // Adaptive rain ambience — starts full, will ease as quiz/hearts progress
-  sfxLoop('rainLight', 0.08);
-  setHeartbeatTempo('normal');
-
-  // Hidden rose garden — 6 tap-zones scattered across the chapter viewport
-  initRoseGarden();
-
-  // Rain drops that occasionally spell a word — tap to dissolve
-  scheduleRainWord();
-
-  // Shayari lines (animated, staggered)
-  const shayariWrap = document.querySelector('.rain-shayari');
-  if (shayariWrap && cfg.mainMemory.shayari) {
-    shayariWrap.innerHTML = cfg.mainMemory.shayari.map(l => `<p>${l}</p>`).join('');
-  }
-
-  // ── PART 1: Quiz game ─────────────────────────────────────
-  runQuiz(cfg);
-
-  // ── PART 2 setup happens after quiz completes (see revealHeartsSection) ──
-
-  // Modal setup
-  const modal = document.getElementById('heart-popup');
-  document.getElementById('heart-popup-close').onclick = () => modal.classList.add('ui-hidden');
-
-  // Firefly canvas
-  const canvas = document.getElementById('ch3-canvas');
-  const ctx = canvas.getContext('2d');
-  function resizeCh3() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resizeCh3();
-
-  const flies = Array.from({ length: 30 }, () => ({
-    x: Math.random(), y: Math.random(),
-    r: Math.random() * 2.5 + 1,
-    angle: Math.random() * Math.PI * 2,
-    speed: Math.random() * 0.003 + 0.001,
-    alpha: Math.random()
-  }));
-
-  // Firefly catch — tap near a glowing firefly to catch it (5 total unlocks a wish)
-  canvas.style.pointerEvents = 'auto';
-  canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const xNorm = (e.clientX - rect.left) / rect.width;
-    const yNorm = (e.clientY - rect.top) / rect.height;
-    tryCatchFirefly(xNorm, yNorm, flies);
+function endMovieEngine() {
+  clearTimeout(movieTimer);
+  gsap.to('#cinema-stage', {
+    opacity: 0, duration: 1, onComplete: () => {
+      document.getElementById('cinema-stage').classList.add('ui-hidden');
+      startProposalStage();
+    }
   });
+}
 
-  // Monsoon drops on ch3 canvas
-  const drops = Array.from({ length: 80 }, () => ({
-    x: Math.random(),
-    y: Math.random(),
-    len: Math.random() * 0.06 + 0.02,
-    speed: Math.random() * 0.006 + 0.003,
-    alpha: Math.random() * 0.25 + 0.05
-  }));
+// ═══════════════════════════════════════════════════════════
+// PART 2 — PROPOSAL SCENE & HALF-MOON EMERALD RING
+// ═══════════════════════════════════════════════════════════
+function startProposalStage() {
+  const pStage = document.getElementById('proposal-stage');
+  pStage.classList.remove('ui-hidden');
+  gsap.fromTo(pStage, { opacity: 0 }, { opacity: 1, duration: 1 });
 
-  // Garden petals — slow drifting, gentle sway
-  const petals = Array.from({ length: 14 }, () => ({
-    x: Math.random(), y: Math.random(),
-    r: Math.random() * 3 + 2.5,
-    vy: Math.random() * 0.00035 + 0.00015,
-    sway: Math.random() * 200,
-    swaySpeed: 0.006 + Math.random() * 0.006,
-    swayAmp: 0.015 + Math.random() * 0.015,
-    rot: Math.random() * Math.PI * 2,
-    rotSpeed: (Math.random() - 0.5) * 0.01,
-    hue: Math.random() > 0.5 ? '255,182,193' : '212,237,218'
-  }));
+  const dialogue = document.getElementById('proposal-dialogue-text');
+  dialogue.textContent = BIRTHDAY_CONFIG.proposal.dialogue;
 
-  function loopCh3() {
-    if (currentChapter !== 2) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const W = canvas.width, H = canvas.height;
+  setTimeout(() => {
+    dialogue.textContent = BIRTHDAY_CONFIG.proposal.finalQuote;
+    triggerHaptic(20);
+    sfxPlay('chime', 0.4);
 
-    // Rain drops
-    drops.forEach(d => {
-      d.y += d.speed;
-      if (d.y > 1.05) { d.y = -0.05; d.x = Math.random(); }
-      ctx.beginPath();
-      ctx.moveTo(d.x * W, d.y * H);
-      ctx.lineTo(d.x * W + W * 0.004, (d.y + d.len) * H);
-      ctx.strokeStyle = `rgba(174,220,180,${d.alpha})`;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+    setTimeout(() => {
+      document.getElementById('ring-box').classList.remove('ui-hidden');
+      sfxPlay('sparkleChime', 0.5);
+    }, 1500);
+  }, 3500);
+
+  document.getElementById('proposal-accept-btn').onclick = () => {
+    triggerHaptic(30);
+    sfxPlay('chime', 0.5);
+    burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 30);
+    
+    gsap.to('#proposal-stage', {
+      opacity: 0, duration: 1, onComplete: () => {
+        pStage.classList.add('ui-hidden');
+        startBirthdayStage();
+      }
     });
+  };
+}
 
-    // Garden petals — drifting down with a gentle sway and rotation
-    petals.forEach(p => {
-      p.sway += p.swaySpeed;
-      p.y += p.vy;
-      p.x += sharedWindX();
-      p.rot += p.rotSpeed;
-      if (p.y > 1.05) { p.y = -0.05; p.x = Math.random(); }
-      if (p.x < -0.05) p.x = 1.05;
-      if (p.x > 1.05) p.x = -0.05;
-      const px = (p.x + Math.sin(p.sway) * p.swayAmp) * W;
-      const py = p.y * H;
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(p.rot);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${p.hue},0.35)`;
-      ctx.fill();
-      ctx.restore();
-    });
+// ═══════════════════════════════════════════════════════════
+// PART 3 — GRAND BIRTHDAY SCENE & CHARACTER CANDLE BLOW
+// ═══════════════════════════════════════════════════════════
+let blownCandleCount = 0;
 
-    // Fireflies
-    flies.forEach(f => {
-      f.angle += (Math.random() - 0.5) * 0.15;
-      f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed + sharedWindX()));
-      f.y = Math.max(0, Math.min(1, f.y + Math.sin(f.angle) * f.speed));
-      f.alpha = 0.4 + Math.random() * 0.6;
-      ctx.beginPath();
-      ctx.arc(f.x * W, f.y * H, f.r, 0, Math.PI * 2);
-      const glow = ctx.createRadialGradient(f.x * W, f.y * H, 0, f.x * W, f.y * H, f.r * 4);
-      glow.addColorStop(0, `rgba(244,220,80,${f.alpha})`);
-      glow.addColorStop(1, 'rgba(244,162,97,0)');
-      ctx.fillStyle = glow;
-      ctx.fill();
-    });
+function startBirthdayStage() {
+  const bStage = document.getElementById('birthday-stage');
+  bStage.classList.remove('ui-hidden');
+  gsap.fromTo(bStage, { opacity: 0 }, { opacity: 1, duration: 1 });
 
-    animationFrameId = requestAnimationFrame(loopCh3);
+  const candles = document.querySelectorAll('.bday-candle');
+  const buddy = document.getElementById('chibi-buddy');
+
+  candles.forEach((candle) => {
+    candle.onclick = () => {
+      if (candle.classList.contains('blown')) return;
+
+      // Move buddy to candle X position
+      const rect = candle.getBoundingClientRect();
+      buddy.style.left = `${rect.left}px`;
+      
+      triggerHaptic(15);
+      sfxPlay('candleBlow', 0.4);
+
+      setTimeout(() => {
+        candle.classList.add('blown');
+        blownCandleCount++;
+        burstSpark(rect.left + 5, rect.top);
+
+        if (blownCandleCount >= candles.length) {
+          document.getElementById('candle-hint').textContent = "✨ Poore candles bujh gaye! Ab Cake Cut Karo...";
+          triggerHaptic(30);
+          burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 25);
+          
+          setTimeout(enableCakeCutting, 1200);
+        }
+      }, 300);
+    };
+  });
+}
+
+function enableCakeCutting() {
+  const cake = document.getElementById('cake-3d');
+  const cutLine = document.getElementById('cake-cut-line');
+  cutLine.classList.remove('ui-hidden');
+
+  cake.onclick = () => {
+    triggerHaptic(25);
+    sfxPlay('sparkleChime', 0.4);
+    burstConfetti(window.innerWidth / 2, window.innerHeight * 0.5, 30);
+
+    // Reveal Heart Core
+    document.getElementById('cake-heart-core').classList.remove('ui-hidden');
+    initHeartBreaker();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// PART 4 — 3-STAGE BREAKING HEART CORE & LOVE SHOWER
+// ═══════════════════════════════════════════════════════════
+let heartBreakStage = 0;
+
+function initHeartBreaker() {
+  const heart = document.getElementById('breaking-heart');
+  const hint = document.getElementById('heart-break-hint');
+
+  heart.onclick = () => {
+    heartBreakStage++;
+    triggerHaptic(20);
+    sfxPlay('crack', 0.5);
+
+    if (heartBreakStage === 1) {
+      heart.className = 'breaking-heart stage-1';
+      hint.textContent = '💔 Aur 2 baar tap karo! (1/3)';
+    } else if (heartBreakStage === 2) {
+      heart.className = 'breaking-heart stage-2';
+      hint.textContent = '⚡ Bas 1 aakhri tap! (2/3)';
+    } else if (heartBreakStage >= 3) {
+      triggerHaptic(40);
+      sfxPlay('sparkleChime', 0.6);
+      burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 40);
+
+      document.getElementById('cake-heart-core').classList.add('ui-hidden');
+      startLoveShower();
+    }
+  };
+}
+
+function startLoveShower() {
+  const showerStage = document.getElementById('shower-stage');
+  showerStage.classList.remove('ui-hidden');
+  gsap.fromTo(showerStage, { opacity: 0 }, { opacity: 1, duration: 1 });
+
+  const container = document.getElementById('shower-container');
+  const msgs = BIRTHDAY_CONFIG.heartShowerMessages || [];
+
+  for (let i = 0; i < 20; i++) {
+    const h = document.createElement('div');
+    h.className = 'falling-heart';
+    h.textContent = ['❤️', '💖', '✨', '🌹', '🥰'][i % 5];
+    h.style.left = `${Math.random() * 90}%`;
+    h.style.animationDuration = `${3 + Math.random() * 3}s`;
+    h.style.animationDelay = `${Math.random() * 5}s`;
+
+    h.onclick = () => {
+      triggerHaptic(15);
+      sfxPlay('sparkleChime', 0.3);
+      const msg = msgs[Math.floor(Math.random() * msgs.length)];
+      showShowerToast(msg);
+    };
+    container.appendChild(h);
   }
-  loopCh3();
+}
 
-  createRain('rain3', 80);
-  document.getElementById('ch3-next').onclick = () => showChapter(3);
+function showShowerToast(msg) {
+  const toast = document.getElementById('shower-toast');
+  document.getElementById('toast-message').textContent = msg;
+  toast.classList.remove('ui-hidden');
+
+  document.getElementById('toast-close-btn').onclick = () => {
+    toast.classList.add('ui-hidden');
+  };
+}
+
+// Sparkle helper
+function burstSpark(x, y) {
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('div');
+    s.className = 'touch-trail-spark';
+    s.style.left = `${x}px`;
+    s.style.top = `${y}px`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
 }
 
 // ── QUIZ GAME (Part 1) ──────────────────────────────────────

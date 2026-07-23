@@ -2974,6 +2974,396 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   CINEMATIC MOVIE ENGINE & PROPOSAL STYLING
+═══════════════════════════════════════════════════════════ */
+.stage-section {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #030308;
+  padding: 1.5rem;
+}
+
+/* --- Cinema Movie Stage --- */
+#cinema-stage {
+  padding: 0;
+}
+
+.cinema-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.cinema-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.4) blur(4px);
+  transition: opacity 1s ease-in-out;
+}
+
+.cinema-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 20%, rgba(3, 3, 8, 0.85) 90%);
+}
+
+.cinema-content {
+  position: relative;
+  z-index: 10;
+  max-width: 600px;
+  text-align: center;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.cinema-title {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: #f4dcaa;
+  margin-bottom: 0.3rem;
+}
+
+.cinema-subtitle {
+  font-family: var(--font-script);
+  font-size: 1.2rem;
+  color: rgba(255, 182, 193, 0.85);
+  margin-bottom: 1.2rem;
+}
+
+.cinema-text {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.cinema-caption {
+  font-family: var(--font-script);
+  font-size: 1rem;
+  color: #ffd166;
+  font-style: italic;
+}
+
+.cinema-controls {
+  position: absolute;
+  bottom: 2rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 90%;
+  max-width: 500px;
+}
+
+.cinema-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.cinema-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#cinema-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ff8fab, #ffd166);
+  transition: width 0.1s linear;
+}
+
+/* --- Part 2: Proposal Stage & Chibi Proposer --- */
+.chibi-character {
+  position: relative;
+  z-index: 10;
+  width: 80px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.5s ease;
+}
+
+.chibi-head {
+  width: 50px;
+  height: 50px;
+  background: #ffe0bd;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.chibi-eyes {
+  position: absolute;
+  top: 40%;
+  left: 20%;
+  width: 60%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.chibi-eyes::before, .chibi-eyes::after {
+  content: '';
+  width: 6px;
+  height: 8px;
+  background: #333;
+  border-radius: 50%;
+}
+
+.chibi-blush {
+  position: absolute;
+  top: 55%;
+  left: 15%;
+  width: 70%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.chibi-blush::before, .chibi-blush::after {
+  content: '';
+  width: 8px;
+  height: 4px;
+  background: #ff8fab;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.chibi-body {
+  width: 34px;
+  height: 45px;
+  background: #3b82f6;
+  border-radius: 12px;
+  margin-top: -5px;
+}
+
+/* Half-Moon Emerald Ring */
+.ring-box {
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  margin-top: 1.5rem;
+  animation: fadeInZoom 1.2s ease forwards;
+}
+
+.half-moon-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  border: 4px solid #f4dcaa;
+  box-shadow: 0 0 30px rgba(244, 220, 170, 0.4), inset 0 0 15px rgba(244, 220, 170, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.emerald-gem {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #059669, #10b981, #047857);
+  transform: rotate(45deg);
+  border-radius: 8px;
+  box-shadow: 0 0 20px #10b981, inset 0 0 8px rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ecfdf5;
+}
+
+.gem-initial {
+  transform: rotate(-45deg);
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.accept-btn {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(225, 29, 72, 0.4);
+}
+
+/* --- Part 3 & 4: 3D Cake & 3-Stage Breaking Heart Core --- */
+.bday-cake-box {
+  position: relative;
+  z-index: 10;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.cake-candles-row {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: -12px;
+  position: relative;
+  z-index: 20;
+}
+
+.bday-candle {
+  width: 10px;
+  height: 35px;
+  background: linear-gradient(to bottom, #ff8fab, #ffb3c1);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.bday-candle .flame {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 14px;
+  background: radial-gradient(ellipse at bottom, #ffd166, #ff9248 60%, transparent);
+  border-radius: 50% 50% 35% 35%;
+  animation: flameFlicker 0.4s infinite alternate;
+}
+
+.bday-candle.blown .flame {
+  display: none;
+}
+
+.cake-3d {
+  width: 180px;
+  height: 90px;
+  background: linear-gradient(to bottom, #fbcfe8, #f472b6);
+  border-radius: 16px 16px 8px 8px;
+  margin: 0 auto;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.cake-heart-core {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.breaking-heart {
+  font-size: 5rem;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: transform 0.1s ease;
+}
+
+.breaking-heart.stage-1 {
+  animation: heartShake 0.3s ease infinite;
+}
+
+.breaking-heart.stage-2 {
+  animation: heartShake 0.15s ease infinite;
+  filter: drop-shadow(0 0 15px #f43f5e);
+}
+
+@keyframes heartShake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.05); }
+  75% { transform: rotate(8deg) scale(1.05); }
+}
+
+/* Love Shower */
+#shower-stage {
+  overflow: hidden;
+}
+
+#shower-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.falling-heart {
+  position: absolute;
+  font-size: 2.2rem;
+  cursor: pointer;
+  animation: fallDown 4s linear infinite;
+}
+
+@keyframes fallDown {
+  0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(360deg); opacity: 0.8; }
+}
+
+/* Toast modal */
+#shower-toast {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(3, 3, 8, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.toast-content {
+  background: #1e1b4b;
+  border: 1px solid #818cf8;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 380px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.toast-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+#toast-message {
+  font-family: var(--font-script);
+  font-size: 1.3rem;
+  color: #f4dcaa;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+#toast-close-btn {
+  background: #f43f5e;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
    PHASE 8 — ORIENTATION MIRROR MODE & NIGHT MOOD STYLING
 ═══════════════════════════════════════════════════════════ */
 #orientation-mirror {

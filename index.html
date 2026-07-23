@@ -100,312 +100,117 @@
     </div>
   </div>
 
-  <!-- ═══ CHAPTER NAV ═══ -->
-  <nav id="chapter-nav" class="ui-hidden" aria-label="Story chapters">
-    <div class="chapter-dots">
-      <button class="chapter-dot active" data-chapter="0" aria-label="Chapter 1: Pehle"><span
-          class="dot-inner"></span><span class="dot-label">I</span></button>
-      <div class="dot-line"></div>
-      <button class="chapter-dot" data-chapter="1" aria-label="Chapter 2: Teri Kahani"><span
-          class="dot-inner"></span><span class="dot-label">II</span></button>
-      <div class="dot-line"></div>
-      <button class="chapter-dot" data-chapter="2" aria-label="Chapter 3: Baarish Mein"><span
-          class="dot-inner"></span><span class="dot-label">III</span></button>
-      <div class="dot-line"></div>
-      <button class="chapter-dot" data-chapter="3" aria-label="Chapter 4: Doori"><span class="dot-inner"></span><span
-          class="dot-label">IV</span></button>
-      <div class="dot-line"></div>
-      <button class="chapter-dot" data-chapter="4" aria-label="Chapter 5: Aaj Aur Hamesha"><span
-          class="dot-inner"></span><span class="dot-label">V</span></button>
-    </div>
-  </nav>
-
   <main id="experience">
 
-    <!-- ═══ CHAPTER 1: PEHLE ═══ -->
-    <section id="ch1" class="chapter" data-chapter="0" aria-label="Chapter 1: Pehle">
-      <canvas id="ch1-canvas" class="bg-canvas"></canvas>
-      <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
-      <div class="fog" aria-hidden="true"></div>
-      <div class="heartbeat-vignette" aria-hidden="true"></div>
-      <div class="ch1-moon" id="ch1-moon" aria-hidden="true">
-        <div class="moon-halo" id="moon-halo">
-          <svg class="moon-halo-heart" viewBox="0 0 100 100" aria-hidden="true">
-            <path d="M50 32 C44 22 28 22 22 34 C16 46 24 58 50 76 C76 58 84 46 78 34 C72 22 56 22 50 32 Z" />
-          </svg>
-        </div>
+    <!-- ═══ PART 1: CINEMATIC MOVIE ENGINE ═══ -->
+    <section id="cinema-stage" class="stage-section">
+      <div class="cinema-bg" id="cinema-bg">
+        <img id="cinema-img" src="" alt="Story photo" />
+        <div class="cinema-overlay"></div>
       </div>
-      <svg class="ch1-silhouette" viewBox="0 0 200 300" aria-hidden="true">
-        <ellipse cx="100" cy="60" rx="26" ry="30" fill="rgba(180,170,220,0.06)" />
-        <path d="M60 300 Q60 140 100 130 Q140 140 140 300 Z" fill="rgba(180,170,220,0.06)" />
-        <path id="hollow-heart"
-          d="M100 108 C93 98 78 98 72 110 C66 122 74 134 100 152 C126 134 134 122 128 110 C122 98 107 98 100 108 Z"
-          fill="none" stroke="rgba(180,170,220,0.25)" stroke-width="1.5" />
-      </svg>
+      <canvas id="cinema-canvas" class="bg-canvas"></canvas>
 
-      <div class="ch-content">
-        <div class="ch-badge"><span>Chapter I</span>
-          <div class="badge-rule"></div>
-        </div>
-        <h1 class="ch1-title">Pehle...</h1>
-        <p class="ch1-desc" id="ch1-desc"></p>
+      <div class="cinema-content">
+        <p class="cinema-title" id="cinema-title"></p>
+        <p class="cinema-subtitle" id="cinema-subtitle"></p>
+        <p class="cinema-text" id="cinema-text"></p>
+        <p class="cinema-caption" id="cinema-caption"></p>
+      </div>
 
-        <div class="ch1-panel">
-          <div class="ch1-counter" id="ch1-counter">
-            <span class="counter-num" id="counter-num">0</span>
-            <span class="counter-label">din, ek jaisi subah, ek jaisi shaam...</span>
-          </div>
-          <div class="ch1-fragments" id="ch1-fragments" aria-hidden="true"></div>
-        </div>
-
-        <p class="ch1-typewriter" id="tw" aria-live="polite"></p>
-        <div class="ch1-poem" id="poem">
-          <p data-line="1">Roz uthna,</p>
-          <p data-line="2">Roz so jaana,</p>
-          <p data-line="3">Koi rang nahi tha zindagi mein.</p>
-          <p class="poem-emphasis" data-line="4">Tab tum nahi the.</p>
-        </div>
-        <p class="ch1-hint ui-hidden" id="ch1-hint">✨ aasman ko chuu ke dekho...</p>
-        <button class="begin-btn" id="begin-btn">
-          <span>Kahani Shuruu Karo</span>
-          <span class="btn-spark" aria-hidden="true">✨</span>
-        </button>
+      <div class="cinema-controls">
+        <button id="cinema-prev-btn" class="cinema-btn">‹ Previous</button>
+        <div class="cinema-progress-bar"><div id="cinema-progress-fill"></div></div>
+        <button id="cinema-next-btn" class="cinema-btn">Next ›</button>
       </div>
     </section>
 
-    <!-- ═══ CHAPTER 2: TERI KAHANI (Full-Screen Photo Story) ═══ -->
-    <section id="ch2" class="chapter ch-hidden" data-chapter="1" aria-label="Chapter 2: Teri Kahani">
-
-      <!-- Full-screen background photo layers -->
-      <div class="photo-bg" id="photo-bg" aria-hidden="true">
-        <div class="photo-layer" id="photo-layer-a"></div>
-        <div class="photo-layer" id="photo-layer-b"></div>
-        <div class="photo-tint"></div>
-      </div>
-
-      <!-- Polaroid frame overlay — decorative border + tape, scrapbook feel -->
-      <div class="polaroid-frame" aria-hidden="true">
-        <span class="polaroid-tape tape-left"></span>
-        <span class="polaroid-tape tape-right"></span>
-      </div>
-
-      <!-- Particle canvas over photos -->
-      <canvas class="bg-canvas" id="ps-canvas"></canvas>
-
-      <!-- Photo counter -->
-      <div class="photo-counter" id="photo-counter" aria-live="polite">1 / 1</div>
-
-      <!-- Era overlay — bottom info -->
-      <div class="era-overlay" id="era-overlay">
-        <div class="era-badge-fs" id="era-badge-fs">
-          <span class="era-emoji-fs" id="era-emoji-fs">🧸</span>
-          <span class="era-name-fs" id="era-name-fs">Bachi</span>
+    <!-- ═══ PART 2: PROPOSAL SCENE & HALF-MOON EMERALD RING ═══ -->
+    <section id="proposal-stage" class="stage-section ui-hidden">
+      <canvas id="proposal-canvas" class="bg-canvas"></canvas>
+      
+      <div class="chibi-character" id="chibi-proposer">
+        <div class="chibi-head">
+          <div class="chibi-eyes"></div>
+          <div class="chibi-blush"></div>
         </div>
-        <span class="era-desc-fs" id="era-desc-fs">Masoom savera aur cute bachpan</span>
-        <div class="era-dots" id="era-dots" aria-hidden="true"></div>
+        <div class="chibi-body"></div>
       </div>
 
-      <!-- Tap hint -->
-      <p class="ps-tap-hint" id="ps-tap-hint">tap anywhere to continue →</p>
-
-      <!-- Hidden memory popup, unlocked by the wandering butterfly -->
-      <div class="memory-popup ui-hidden" id="memory-popup">
-        <span class="memory-popup-icon">📸</span>
-        <p id="memory-popup-text"></p>
+      <div class="proposal-dialogue-box" id="proposal-box">
+        <p class="proposal-dialogue" id="proposal-dialogue-text"></p>
       </div>
 
-      <!-- Dream Frame (last era climax) -->
-      <div class="dream-frame ui-hidden" id="dream-frame" role="dialog" aria-modal="true">
-        <div class="dream-inner">
-          <div class="dream-ring" aria-hidden="true">💍</div>
-          <p class="dream-title">Ek Din...</p>
-          <p class="dream-sub">Yeh sapna sach hoga. ✨</p>
-          <p class="dream-cta">tap to continue</p>
+      <!-- Half-Moon Emerald Ring Container -->
+      <div class="ring-box ui-hidden" id="ring-box">
+        <div class="half-moon-ring">
+          <div class="emerald-gem">
+            <span class="gem-initial">K</span>
+          </div>
         </div>
+        <p class="ring-title" id="ring-title">I love you today, tomorrow, and forever.</p>
+        <p class="ring-sub" id="ring-sub">Pran + U = Meri Pranu ❤️</p>
+        <button id="proposal-accept-btn" class="accept-btn">Haath Thamo ❤️</button>
       </div>
     </section>
 
-    <!-- ═══ CHAPTER 3: BAARISH MEIN ═══ -->
-    <section id="ch3" class="chapter ch-hidden" data-chapter="2" aria-label="Chapter 3: Baarish Mein">
-      <canvas class="bg-canvas" id="ch3-canvas"></canvas>
-      <div class="rain-wrap heavy" id="rain3" aria-hidden="true"></div>
-      <div class="warm-glow" aria-hidden="true"></div>
-
-      <!-- Hidden rose garden — tap anywhere in the chapter to find them -->
-      <div class="rose-garden" id="rose-garden" aria-hidden="true"></div>
-      <p class="rose-counter ui-hidden" id="rose-counter">🌹 0 / 6</p>
-
-      <div class="ch-content">
-        <div class="ch-badge"><span>Chapter III</span>
-          <div class="badge-rule"></div>
-        </div>
-        <h2 class="sec-title">Baarish Mein</h2>
-
-        <div class="rain-card">
-          <div class="rain-card-icons" aria-hidden="true"><span>🌧️</span><span>💚</span><span>🌿</span></div>
-          <h3>Woh Garden, Woh Baarish</h3>
-          <p id="rain-text"></p>
-          <div class="rain-shayari"></div>
-        </div>
-
-        <!-- Part 1: Quiz game -->
-        <div class="quiz-wrap" id="quiz-wrap" aria-label="Memory quiz">
-          <div class="quiz-progress">
-            <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
-          </div>
-          <p class="quiz-step" id="quiz-step">Sawal 1 / 5</p>
-          <div class="quiz-question-card" id="quiz-question-card"></div>
-        </div>
-
-        <div class="quiz-result ui-hidden" id="quiz-result">
-          <p class="quiz-result-intro" id="quiz-result-intro">Tumhare jawab keh rahe hain...</p>
-          <div class="result-cards" id="result-cards"></div>
-        </div>
-
-        <!-- Part 2: Hearts, mood light -->
-        <div class="hearts-section ui-hidden" id="hearts-section">
-          <p class="hearts-hint">❤️ Udte hue dil ko pakdo, raaz khulengi...</p>
-          <div class="hearts-wrap" id="hearts-wrap" aria-label="Reasons I love you"></div>
-          <p class="hearts-count" id="hearts-count" aria-live="polite"></p>
-        </div>
-
-        <button class="next-btn" id="ch3-next">Aage Chalein →</button>
+    <!-- ═══ PART 3: GRAND BIRTHDAY SCENE & CHARACTER CANDLE BLOW ═══ -->
+    <section id="birthday-stage" class="stage-section ui-hidden">
+      <div class="bday-hero">
+        <h1 class="bday-title">Happy Birthday Pranu 🎂</h1>
+        <p class="bday-subtitle">Pehla Saal • Pehli Anniversary</p>
       </div>
 
-      <!-- Pop-up modal for heart reasons -->
-      <div class="heart-popup ui-hidden" id="heart-popup" role="dialog" aria-modal="true">
-        <div class="heart-popup-inner">
-          <button class="heart-popup-close" id="heart-popup-close" aria-label="Close">✕</button>
-          <div class="heart-popup-icon" id="heart-popup-icon" aria-hidden="true">😉</div>
-          <p class="heart-popup-msg" id="heart-popup-msg"></p>
+      <!-- Chibi blowing buddy -->
+      <div class="chibi-buddy" id="chibi-buddy">
+        <div class="chibi-head"></div>
+      </div>
+
+      <!-- 3D Birthday Cake Container -->
+      <div class="bday-cake-box">
+        <p class="candle-hint" id="candle-hint">🕯️ Candle pe tap karo, character fook marega! 💨</p>
+        
+        <div class="cake-candles-row" id="interactive-candles">
+          <div class="bday-candle" data-idx="0"><div class="flame"></div></div>
+          <div class="bday-candle" data-idx="1"><div class="flame"></div></div>
+          <div class="bday-candle" data-idx="2"><div class="flame"></div></div>
+          <div class="bday-candle" data-idx="3"><div class="flame"></div></div>
+          <div class="bday-candle" data-idx="4"><div class="flame"></div></div>
         </div>
+
+        <div class="cake-3d" id="cake-3d">
+          <div class="cake-frosting"></div>
+          <div class="cake-cut-line ui-hidden" id="cake-cut-line"></div>
+        </div>
+      </div>
+
+      <!-- ═══ PART 4: 3-STAGE BREAKING HEART CORE ═══ -->
+      <div class="cake-heart-core ui-hidden" id="cake-heart-core">
+        <div class="breaking-heart" id="breaking-heart">
+          <span class="heart-emoji">❤️</span>
+          <div class="heart-crack-overlay" id="crack-overlay"></div>
+        </div>
+        <p class="heart-break-hint" id="heart-break-hint">💔 Heart ko 3 baar tap karke todo! (0/3)</p>
       </div>
     </section>
 
-    <!-- ═══ CHAPTER 4: DOORI ═══ -->
-    <section id="ch4" class="chapter ch-hidden" data-chapter="3" aria-label="Chapter 4: Doori">
-      <canvas class="bg-canvas" id="ch4-canvas"></canvas>
-
-      <div class="ch-content">
-        <div class="ch-badge"><span>Chapter IV</span>
-          <div class="badge-rule"></div>
-        </div>
-        <h2 class="sec-title">Jab Tum Gayi...</h2>
-        <p class="ch4-desc" id="ch4-desc"></p>
-
-        <div class="dist-moments" id="dist-moments"></div>
-
-        <p class="reunion-caption ui-hidden" id="reunion-caption"></p>
-        <p class="no-distance-line" id="no-distance-line">No distance ever won.</p>
-
-        <div class="letter-wrap" id="letter-wrap">
-          <div class="letter-paper">
-            <span class="letter-icon" aria-hidden="true">✉️</span>
-            <p id="letter-text" class="letter-body"></p>
-          </div>
-        </div>
-
-        <button class="next-btn ui-hidden" id="ch4-next">Aur Aage... →</button>
+    <!-- ═══ PART 4 (Contd): LOVE SHOWER CATCH GAME ═══ -->
+    <section id="shower-stage" class="stage-section ui-hidden">
+      <div class="shower-header">
+        <h2>Love Shower! ✨</h2>
+        <p>Udte hue dil ko pakdo aur raaz kholo...</p>
       </div>
-    </section>
-
-    <!-- ═══ CHAPTER 5: AAJ AUR HAMESHA ═══ -->
-    <section id="ch5" class="chapter ch-hidden" data-chapter="4" aria-label="Chapter 5: Aaj Aur Hamesha">
-      <canvas class="bg-canvas" id="ch5-canvas"></canvas>
-      <div class="aurora" id="aurora" aria-hidden="true"></div>
-      <div class="lanterns" id="lanterns" aria-hidden="true"></div>
-
-      <div class="ch-content ch5-content">
-        <div class="ch-badge"><span>Chapter V</span>
-          <div class="badge-rule"></div>
-        </div>
-
-        <div class="bday-block" id="bday-block">
-          <div class="bday-fireworks" id="fw5" aria-hidden="true"></div>
-          <h2 class="bday-title">Happy Birthday</h2>
-          <div class="bday-name-wrap">
-            <span class="bday-name" id="bday-name"></span>
-            <span aria-hidden="true"> 🎂</span>
-          </div>
-          <p class="anni-tag" id="anni-tag"></p>
-
-          <div class="cake-wrap" id="cake-wrap">
-            <p class="cake-hint" id="cake-hint">🕯️ candles ko tap karo...</p>
-            <div class="cake-candles" id="cake-candles"></div>
-            <div class="cake-body" id="cake-body">
-              <div class="cake-slice-line ui-hidden" id="cake-slice-line"></div>
-            </div>
-            <div class="cake-butterflies" id="cake-butterflies" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <div class="wishes-block">
-          <h3 class="wishes-heading">Mere Dil Ki Duaayein...</h3>
-          <div class="wishes-wrap" id="wishes-wrap"></div>
-        </div>
-
-        <div class="envelope-block">
-          <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the letter"
-            aria-expanded="false">
-            <span class="env-icon" aria-hidden="true">💌</span>
-            <p>Ek letter hai tumhare liye...</p>
-            <span class="env-tap">Tap karo</span>
-          </div>
-          <div class="full-letter ui-hidden" id="full-letter" aria-live="polite">
-            <div class="letter-scroll">
-              <div class="letter-deco" aria-hidden="true">❤️</div>
-              <div id="letter-body-ch5" class="letter-body-text"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="closing ui-hidden" id="closing">
-          <p class="close1" id="close1"></p>
-          <p class="close2" id="close2"></p>
-          <button class="finale-trigger ui-hidden" id="finale-trigger">✨ Tap karo...</button>
-        </div>
-      </div>
+      <div id="shower-container"></div>
     </section>
 
   </main>
 
-  <!-- ═══ GRAND FINALE — full sequence, shown after Chapter 5 ═══ -->
-  <div id="grand-finale" class="ui-hidden" aria-hidden="true">
-
-    <div class="finale-scene" id="scene-planet">
-      <canvas id="planet-canvas"></canvas>
-      <p class="finale-line" id="planet-line"></p>
+  <!-- Love Shower Message Toast Modal -->
+  <div id="shower-toast" class="ui-hidden">
+    <div class="toast-content">
+      <span class="toast-icon">💖</span>
+      <p id="toast-message"></p>
+      <button id="toast-close-btn">❤️</button>
     </div>
-
-    <div class="finale-scene ui-hidden" id="scene-credits">
-      <p class="finale-credit-line" id="credit-line"></p>
-    </div>
-
-    <div class="finale-scene ui-hidden" id="scene-heart">
-      <div class="finale-heart" id="finale-heart">❤️</div>
-      <p class="finale-heart-hint" id="finale-heart-hint"></p>
-      <p class="finale-i-love-you ui-hidden" id="finale-i-love-you"></p>
-    </div>
-
-    <div class="finale-scene ui-hidden" id="scene-365">
-      <canvas id="dots-canvas"></canvas>
-      <p class="finale-365-line" id="finale-365-line"></p>
-    </div>
-
-    <div class="finale-scene ui-hidden" id="scene-loop">
-      <canvas id="loop-canvas"></canvas>
-      <p class="finale-loop-line" id="finale-loop-line"></p>
-    </div>
-
-    <div class="finale-scene ui-hidden" id="scene-secret">
-      <p class="secret-quote" id="secret-quote"></p>
-      <div class="secret-final ui-hidden" id="secret-final">
-        <p class="secret-pa">P <span class="heart-mark">❤️</span> A</p>
-        <p class="secret-wish">Happy Birthday<br>Happy First Anniversary<br>Forever.</p>
-        <p class="secret-tagline" id="secret-tagline"></p>
-      </div>
-    </div>
-
   </div>
 
   <!-- Music tracks — use yourmusic.mp3 for romantic chapter; other chapters use royalty-free links -->
