@@ -34,7 +34,27 @@
   showLine();
 })();
 
-// ── SOUND EFFECTS ENGINE ──────────────────────────────────────
+// ── SHARED WIND ENGINE ─────────────────────────────────────────
+// A single slow oscillation used across chapters so that petals, fireflies,
+// dust motes, and smoke all drift together in the same direction —
+// making the world feel like one connected place, not isolated effects.
+function sharedWindX() {
+  return Math.sin(Date.now() / 6000) * 0.00035;
+}
+
+// ── TIME-AWARE MODE — no API, just the device clock ───────────
+// Adds a subtle body class so the whole site's mood shifts gently
+// with the real time of day: night (deep/moon), morning (golden/warm),
+// day (neutral — no extra tint).
+(function initTimeAwareMode() {
+  const hour = new Date().getHours();
+  let mode = 'day';
+  if (hour >= 19 || hour < 5) mode = 'night';
+  else if (hour >= 5 && hour < 8) mode = 'morning';
+  document.documentElement.classList.add(`time-${mode}`);
+})();
+
+
 // NOTE: These are placeholder royalty-free CDN links (same Pixabay-style
 // pattern as the background music tracks). If any link doesn't load,
 // swap it for another free SFX from mixkit.co / pixabay.com/sound-effects —
@@ -765,6 +785,9 @@ function initCh3() {
   sfxLoop('rainLight', 0.08);
   setHeartbeatTempo('normal');
 
+  // Hidden rose garden — 6 tap-zones scattered across the chapter viewport
+  initRoseGarden();
+
   // Shayari lines (animated, staggered)
   const shayariWrap = document.querySelector('.rain-shayari');
   if (shayariWrap && cfg.mainMemory.shayari) {
@@ -837,8 +860,11 @@ function initCh3() {
     petals.forEach(p => {
       p.sway += p.swaySpeed;
       p.y += p.vy;
+      p.x += sharedWindX();
       p.rot += p.rotSpeed;
       if (p.y > 1.05) { p.y = -0.05; p.x = Math.random(); }
+      if (p.x < -0.05) p.x = 1.05;
+      if (p.x > 1.05) p.x = -0.05;
       const px = (p.x + Math.sin(p.sway) * p.swayAmp) * W;
       const py = p.y * H;
       ctx.save();
@@ -854,7 +880,7 @@ function initCh3() {
     // Fireflies
     flies.forEach(f => {
       f.angle += (Math.random() - 0.5) * 0.15;
-      f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed));
+      f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed + sharedWindX()));
       f.y = Math.max(0, Math.min(1, f.y + Math.sin(f.angle) * f.speed));
       f.alpha = 0.4 + Math.random() * 0.6;
       ctx.beginPath();
@@ -1063,6 +1089,107 @@ function initHearts() {
   floatHearts();
 }
 
+// ── Cake-cut → butterfly wishes → balloon release (Chapter 5 finale) ──
+function triggerCakeCut(cfg) {
+  const sliceLine = document.getElementById('cake-slice-line');
+  const cakeBody = document.getElementById('cake-body');
+  sliceLine.classList.remove('ui-hidden');
+  sliceLine.classList.add('cut');
+  sfxPlay('sparkleChime', 0.3);
+
+  const wishWords = ['May your dreams always find you.', 'Joy', 'Hope', 'Forever'];
+  setTimeout(() => {
+    const rect = cakeBody.getBoundingClientRect();
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => spawnButterflyWish(
+        rect.left + rect.width / 2,
+        rect.top,
+        wishWords[i % wishWords.length]
+      ), i * 500);
+    }
+  }, 600);
+
+  setTimeout(() => releaseBalloons(), 2600);
+}
+
+function spawnButterflyWish(x, y, label) {
+  const el = document.createElement('div');
+  el.className = 'butterfly-wish';
+  el.textContent = '🦋';
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  const dx = (Math.random() - 0.5) * 160;
+  const dy = -(200 + Math.random() * 150);
+  el.style.setProperty('--bx', `${dx}px`);
+  el.style.setProperty('--by', `${dy}px`);
+  el.style.setProperty('--brot', `${(Math.random() - 0.5) * 60}deg`);
+  const wishLabel = document.createElement('span');
+  wishLabel.className = 'wish-label';
+  wishLabel.textContent = label;
+  el.appendChild(wishLabel);
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 4200);
+}
+
+function releaseBalloons() {
+  const container = document.getElementById('balloon-release');
+  const words = ['Joy', 'Dream', 'Hope', 'Smile', 'Forever', 'Love'];
+  const colors = ['#ff8fab', '#ffd166', '#8b6fff', '#52b788', '#f4a261', '#ff6b9d'];
+  words.forEach((word, i) => {
+    setTimeout(() => {
+      const b = document.createElement('div');
+      b.className = 'release-balloon';
+      const leftPct = 10 + Math.random() * 80;
+      b.style.left = `${leftPct}%`;
+      b.style.setProperty('--drift', `${(Math.random() - 0.5) * 120}px`);
+      b.style.animationDuration = `${7 + Math.random() * 3}s`;
+      b.innerHTML = `<div class="balloon-shape" style="background:${colors[i % colors.length]}"></div><span class="balloon-word">${word}</span>`;
+      container.appendChild(b);
+      setTimeout(() => b.remove(), 11000);
+    }, i * 350);
+  });
+}
+
+// ── Hidden rose garden (Chapter 3) ──────────────────────────
+function initRoseGarden() {
+  const garden = document.getElementById('rose-garden');
+  const counterEl = document.getElementById('rose-counter');
+  garden.innerHTML = '';
+  counterEl.classList.remove('ui-hidden', 'complete');
+  const total = 6;
+  let found = 0;
+  counterEl.textContent = `🌹 0 / ${total}`;
+
+  // Spread positions across the viewport, spaced apart, avoiding exact center clutter
+  const positions = [
+    { x: 8, y: 12 }, { x: 85, y: 18 }, { x: 12, y: 55 },
+    { x: 88, y: 62 }, { x: 20, y: 85 }, { x: 78, y: 88 }
+  ];
+
+  positions.forEach(pos => {
+    const spot = document.createElement('div');
+    spot.className = 'rose-spot';
+    spot.style.left = `${pos.x}%`;
+    spot.style.top = `${pos.y}%`;
+    spot.innerHTML = '<span class="rose-icon">🌹</span>';
+    spot.addEventListener('click', () => {
+      if (spot.classList.contains('found')) return;
+      spot.classList.add('found');
+      found++;
+      counterEl.textContent = `🌹 ${found} / ${total}`;
+      sfxPlay('sparkleChime', 0.25);
+      const rect = spot.getBoundingClientRect();
+      burstSpark(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      if (found === total) {
+        counterEl.classList.add('complete');
+        counterEl.textContent = `🌹 Poora bagicha khil gaya! ✨`;
+        burstConfetti(window.innerWidth / 2, window.innerHeight * 0.3, 20);
+      }
+    });
+    garden.appendChild(spot);
+  });
+}
+
 function burstEmojiEffect(cx, cy, emoji) {
   for (let i = 0; i < 8; i++) {
     const s = document.createElement('div');
@@ -1146,6 +1273,16 @@ function initCh4() {
   const mergeStart = Date.now() + 1200;
   const mergeDuration = 6500;
 
+  // Tiny bridge-stars scattered along the path between the two souls —
+  // as the souls get closer, more of them twinkle to life, like the
+  // universe quietly building a path between them.
+  const bridgeStars = Array.from({ length: 40 }, (_, i) => ({
+    t: i / 39,
+    yOffset: (Math.random() - 0.5) * 0.1,
+    twinkle: Math.random() * Math.PI * 2,
+    twinkleSpeed: 0.03 + Math.random() * 0.03
+  }));
+
   function updateSouls() {
     if (merged) return;
     const t = Math.max(0, Math.min(1, (Date.now() - mergeStart) / mergeDuration));
@@ -1166,10 +1303,29 @@ function initCh4() {
     setTimeout(() => {
       caption.classList.add('visible');
       setTimeout(() => {
+        document.getElementById('no-distance-line').classList.add('visible');
+      }, 700);
+      setTimeout(() => {
         letterWrap.classList.add('revealed');
         nextBtn.classList.remove('ui-hidden');
-      }, 900);
+      }, 1600);
     }, 300);
+  }
+
+  function drawBridgeStars(ctx, W, H) {
+    if (merged) return;
+    const ax = soulA.x, bx = soulB.x, y = soulA.y;
+    // Only draw stars that currently fall between the two souls
+    bridgeStars.forEach(s => {
+      const sx = ax + (bx - ax) * s.t;
+      if (sx <= ax || sx >= bx) return;
+      s.twinkle += s.twinkleSpeed;
+      const alpha = (0.15 + 0.25 * Math.abs(Math.sin(s.twinkle))) * (1 - Math.abs(s.t - 0.5) * 0.3);
+      ctx.beginPath();
+      ctx.arc(sx * W, (y + s.yOffset) * H, 1.1, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,225,180,${alpha})`;
+      ctx.fill();
+    });
   }
 
   function drawSouls(ctx, W, H) {
@@ -1208,7 +1364,7 @@ function initCh4() {
 
     // Dust motes
     dust.forEach(d => {
-      d.x = Math.max(0, Math.min(1, d.x + d.vx));
+      d.x = Math.max(0, Math.min(1, d.x + d.vx + sharedWindX()));
       d.y += d.vy;
       if (d.y > 1.02) { d.y = -0.02; d.x = Math.random(); }
       d.alpha += d.alphaDir * d.alphaSpeed;
@@ -1221,6 +1377,7 @@ function initCh4() {
     });
 
     updateSouls();
+    drawBridgeStars(ctx, W, H);
     drawSouls(ctx, W, H);
 
     animationFrameId = requestAnimationFrame(loopCh4);
@@ -1271,6 +1428,7 @@ function initCh5() {
       if (blownCount === totalCandles) {
         cakeHint.classList.add('done');
         burstConfetti(window.innerWidth / 2, window.innerHeight * 0.45, 30);
+        setTimeout(() => triggerCakeCut(cfg), 500);
       }
     });
     candleWrap.appendChild(candle);
@@ -1291,8 +1449,13 @@ function initCh5() {
       document.getElementById('closing').classList.remove('ui-hidden');
       launchFireworks();
       sfxPlay('firework', 0.4);
+      setTimeout(() => {
+        document.getElementById('finale-trigger').classList.remove('ui-hidden');
+      }, 3000);
     }, 2200);
   };
+
+  document.getElementById('finale-trigger').addEventListener('click', startGrandFinale);
 
   // Sky stars canvas
   const canvas = document.getElementById('ch5-canvas');
@@ -1436,4 +1599,250 @@ function burstConfetti(cx, cy, count = 26) {
     document.body.appendChild(c);
     setTimeout(() => c.remove(), 2000);
   }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRAND FINALE SEQUENCE
+// ═══════════════════════════════════════════════════════════
+function startGrandFinale() {
+  const cfg = BIRTHDAY_CONFIG.finale;
+  const overlay = document.getElementById('grand-finale');
+  document.getElementById('chapter-footer').classList.add('ui-hidden');
+  document.getElementById('music-player').classList.add('ui-hidden');
+  document.getElementById('chapter-nav').classList.add('ui-hidden');
+  overlay.classList.remove('ui-hidden');
+  setHeartbeatTempo('slow');
+
+  finaleScenePlanet(cfg);
+}
+
+function finaleAdvance(fromId, toId, run) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  from.classList.add('leaving');
+  setTimeout(() => {
+    from.classList.add('ui-hidden');
+    to.classList.remove('ui-hidden');
+    run();
+  }, 1200);
+}
+
+// ── Scene 1: Tiny planet — all chapters, now small enough to hold ──
+function finaleScenePlanet(cfg) {
+  document.getElementById('planet-line').textContent = cfg.planetLine;
+  const canvas = document.getElementById('planet-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H * 0.38;
+  const planetR = Math.min(W, H) * 0.16;
+  const icons = ['🌳', '🌙', '🏠', '🎂', '⭐', '🦟'];
+  let rot = 0;
+  let running = true;
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+    rot += 0.006;
+
+    // Planet body
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, planetR);
+    grd.addColorStop(0, 'rgba(120,150,190,0.9)');
+    grd.addColorStop(1, 'rgba(60,80,120,0.9)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, planetR, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // Orbiting icons (drawn as emoji text around the planet)
+    icons.forEach((icon, i) => {
+      const angle = rot + (i / icons.length) * Math.PI * 2;
+      const ix = cx + Math.cos(angle) * (planetR + 22);
+      const iy = cy + Math.sin(angle) * (planetR + 22) * 0.4 + planetR * 0.15;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(icon, ix, iy);
+    });
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  setTimeout(() => {
+    running = false;
+    finaleAdvance('scene-planet', 'scene-credits', () => finaleSceneCredits(cfg));
+  }, 6000);
+}
+
+// ── Scene 2: Falling star credits ──
+function finaleSceneCredits(cfg) {
+  const lineEl = document.getElementById('credit-line');
+  let i = 0;
+  function nextCredit() {
+    if (i >= cfg.credits.length) {
+      finaleAdvance('scene-credits', 'scene-heart', () => finaleSceneHeart(cfg));
+      return;
+    }
+    lineEl.style.opacity = 0;
+    lineEl.textContent = cfg.credits[i];
+    sfxPlay('sparkleChime', 0.2);
+    requestAnimationFrame(() => { lineEl.style.transition = 'opacity 0.8s ease'; lineEl.style.opacity = 1; });
+    i++;
+    setTimeout(() => {
+      lineEl.style.opacity = 0;
+      setTimeout(nextCredit, 600);
+    }, 1800);
+  }
+  nextCredit();
+}
+
+// ── Scene 3: Long-press heart → "I Love You" ──
+function finaleSceneHeart(cfg) {
+  const heart = document.getElementById('finale-heart');
+  const hint = document.getElementById('finale-heart-hint');
+  const reveal = document.getElementById('finale-i-love-you');
+  hint.textContent = cfg.heartHint;
+  reveal.textContent = cfg.heartReveal;
+  let pressTimer = null;
+
+  function startPress() {
+    heart.classList.add('pressing');
+    setHeartbeatTempo('fast');
+    pressTimer = setTimeout(() => {
+      reveal.classList.remove('ui-hidden');
+      burstConfetti(window.innerWidth / 2, window.innerHeight * 0.4, 24);
+      hint.style.opacity = 0;
+      setTimeout(() => {
+        finaleAdvance('scene-heart', 'scene-365', () => finaleScene365(cfg));
+      }, 2200);
+    }, 3000);
+  }
+  function cancelPress() {
+    clearTimeout(pressTimer);
+    heart.classList.remove('pressing');
+    setHeartbeatTempo('slow');
+  }
+  heart.addEventListener('pointerdown', startPress);
+  heart.addEventListener('pointerup', cancelPress);
+  heart.addEventListener('pointerleave', cancelPress);
+}
+
+// ── Scene 4: 365 Nights Under The Same Moon — heart-shaped dot field ──
+function finaleScene365(cfg) {
+  document.getElementById('finale-365-line').textContent = cfg.nights365Line;
+  const canvas = document.getElementById('dots-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H * 0.36, scale = Math.min(W, H) * 0.018;
+
+  // Generate 365 points along a parametric heart curve, slightly jittered
+  const total = 365;
+  const points = [];
+  for (let i = 0; i < total; i++) {
+    const t = (i / total) * Math.PI * 2;
+    const hx = 16 * Math.pow(Math.sin(t), 3);
+    const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    points.push({
+      x: cx + hx * scale + (Math.random() - 0.5) * 4,
+      y: cy + hy * scale + (Math.random() - 0.5) * 4,
+      revealed: false
+    });
+  }
+
+  let revealed = 0;
+  function drawDots() {
+    ctx.clearRect(0, 0, W, H);
+    points.forEach(p => {
+      if (!p.revealed) return;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,210,230,0.85)';
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = 'rgba(255,180,210,0.6)';
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+  }
+
+  const revealInterval = setInterval(() => {
+    const batch = 12;
+    for (let i = 0; i < batch && revealed < total; i++, revealed++) {
+      points[revealed].revealed = true;
+    }
+    drawDots();
+    if (revealed >= total) {
+      clearInterval(revealInterval);
+      sfxPlay('sparkleChime', 0.3);
+      setTimeout(() => {
+        finaleAdvance('scene-365', 'scene-loop', () => finaleSceneLoop(cfg));
+      }, 3500);
+    }
+  }, 40);
+}
+
+// ── Scene 5: Infinity loop — fireworks fade back into the opening sky, in color ──
+function finaleSceneLoop(cfg) {
+  document.getElementById('finale-loop-line').textContent = cfg.loopLine;
+  const canvas = document.getElementById('loop-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const W = canvas.width, H = canvas.height;
+
+  const stars = Array.from({ length: 120 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.4 + 0.3,
+    alpha: Math.random()
+  }));
+  let running = true;
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,225,200,${s.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  setTimeout(() => {
+    running = false;
+    finaleAdvance('scene-loop', 'scene-secret', () => finaleSceneSecret(cfg));
+  }, 4500);
+}
+
+// ── Scene 6: Final secret ending — black, silence, letter-by-letter, P❤️A ──
+function finaleSceneSecret(cfg) {
+  setHeartbeatTempo('off');
+  const quoteEl = document.getElementById('secret-quote');
+  const finalEl = document.getElementById('secret-final');
+  document.getElementById('secret-tagline').textContent = cfg.finalTagline;
+  quoteEl.textContent = '';
+
+  // 5 seconds of near-silence before anything appears
+  setTimeout(() => {
+    setHeartbeatTempo('slow');
+    const text = cfg.secretQuote;
+    let i = 0;
+    function typeChar() {
+      if (i >= text.length) {
+        setTimeout(() => {
+          finalEl.classList.remove('ui-hidden');
+          burstConfetti(window.innerWidth / 2, window.innerHeight * 0.5, 30);
+          sfxPlay('sparkleChime', 0.35);
+        }, 900);
+        return;
+      }
+      quoteEl.textContent += text[i];
+      i++;
+      setTimeout(typeChar, 55);
+    }
+    typeChar();
+  }, 5000);
 }

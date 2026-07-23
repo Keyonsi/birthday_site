@@ -51,6 +51,24 @@ const BIRTHDAY_CONFIG = {
   ],
   chapterSignature: "— Tumhara, Hamesha",
 
+  // --- Grand Finale sequence (after Chapter 5's letter & fireworks) ---
+  finale: {
+    planetLine: "Har chapter... ab tumhari hatheli mein samaa gaya.",
+    credits: [
+      "Har muskurahat ke liye.",
+      "Har gale milne ke liye.",
+      "Har jhagde ke liye.",
+      "Har intezaar ke liye.",
+      "Har aane wale kal ke liye."
+    ],
+    heartHint: "Dabaye rakho...",
+    heartReveal: "I Love You",
+    nights365Line: "365 din sirf calendar par guzre.\nMere liye har din tum tak pahunchne ka ek aur kadam tha.",
+    loopLine: "Har ant bas ek aur raat hai, usi aasman ke neeche... tumhare saath.",
+    secretQuote: "Agar taqdeer mujhe hazaar zindagiyaan de...\nMain phir bhi 2 August 2003 ko paida hui us ladki ko\nhar ek zindagi mein dhoondh loonga.",
+    finalTagline: "Yeh sirf ek website nahi thi. Yeh har woh dhadkan thi jo main shabdon mein nahi bata paaya."
+  },
+
   // --- Chapter 1: Pehle ---
   chapter1: {
     title: "Chapter I",

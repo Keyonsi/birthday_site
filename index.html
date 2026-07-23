@@ -28,6 +28,9 @@
     <p class="cold-open-line" id="cold-open-line"></p>
   </div>
 
+  <!-- ═══ BALLOON RELEASE — triggered after Ch5 candles+cake ═══ -->
+  <div id="balloon-release" aria-hidden="true"></div>
+
   <!-- ═══ CHAPTER TITLE CARD — cinematic transition, reused per chapter ═══ -->
   <div id="title-card" class="ui-hidden" aria-hidden="true">
     <p class="title-card-label">CHAPTER <span id="title-card-roman"></span></p>
@@ -95,7 +98,13 @@
       <div class="rain-wrap" id="rain1" aria-hidden="true"></div>
       <div class="fog" aria-hidden="true"></div>
       <div class="heartbeat-vignette" aria-hidden="true"></div>
-      <div class="ch1-moon" aria-hidden="true"></div>
+      <div class="ch1-moon" id="ch1-moon" aria-hidden="true">
+        <div class="moon-halo" id="moon-halo">
+          <svg class="moon-halo-heart" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M50 32 C44 22 28 22 22 34 C16 46 24 58 50 76 C76 58 84 46 78 34 C72 22 56 22 50 32 Z" />
+          </svg>
+        </div>
+      </div>
       <svg class="ch1-silhouette" viewBox="0 0 200 300" aria-hidden="true">
         <ellipse cx="100" cy="60" rx="26" ry="30" fill="rgba(180,170,220,0.06)" />
         <path d="M60 300 Q60 140 100 130 Q140 140 140 300 Z" fill="rgba(180,170,220,0.06)" />
@@ -186,6 +195,10 @@
       <div class="rain-wrap heavy" id="rain3" aria-hidden="true"></div>
       <div class="warm-glow" aria-hidden="true"></div>
 
+      <!-- Hidden rose garden — tap anywhere in the chapter to find them -->
+      <div class="rose-garden" id="rose-garden" aria-hidden="true"></div>
+      <p class="rose-counter ui-hidden" id="rose-counter">🌹 0 / 6</p>
+
       <div class="ch-content">
         <div class="ch-badge"><span>Chapter III</span>
           <div class="badge-rule"></div>
@@ -247,6 +260,7 @@
         <div class="dist-moments" id="dist-moments"></div>
 
         <p class="reunion-caption ui-hidden" id="reunion-caption"></p>
+        <p class="no-distance-line" id="no-distance-line">No distance ever won.</p>
 
         <div class="letter-wrap" id="letter-wrap">
           <div class="letter-paper">
@@ -282,6 +296,10 @@
           <div class="cake-wrap" id="cake-wrap">
             <p class="cake-hint" id="cake-hint">🕯️ candles ko tap karo...</p>
             <div class="cake-candles" id="cake-candles"></div>
+            <div class="cake-body" id="cake-body">
+              <div class="cake-slice-line ui-hidden" id="cake-slice-line"></div>
+            </div>
+            <div class="cake-butterflies" id="cake-butterflies" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -308,11 +326,51 @@
         <div class="closing ui-hidden" id="closing">
           <p class="close1" id="close1"></p>
           <p class="close2" id="close2"></p>
+          <button class="finale-trigger ui-hidden" id="finale-trigger">✨ Tap karo...</button>
         </div>
       </div>
     </section>
 
   </main>
+
+  <!-- ═══ GRAND FINALE — full sequence, shown after Chapter 5 ═══ -->
+  <div id="grand-finale" class="ui-hidden" aria-hidden="true">
+
+    <div class="finale-scene" id="scene-planet">
+      <canvas id="planet-canvas"></canvas>
+      <p class="finale-line" id="planet-line"></p>
+    </div>
+
+    <div class="finale-scene ui-hidden" id="scene-credits">
+      <p class="finale-credit-line" id="credit-line"></p>
+    </div>
+
+    <div class="finale-scene ui-hidden" id="scene-heart">
+      <div class="finale-heart" id="finale-heart">❤️</div>
+      <p class="finale-heart-hint" id="finale-heart-hint"></p>
+      <p class="finale-i-love-you ui-hidden" id="finale-i-love-you"></p>
+    </div>
+
+    <div class="finale-scene ui-hidden" id="scene-365">
+      <canvas id="dots-canvas"></canvas>
+      <p class="finale-365-line" id="finale-365-line"></p>
+    </div>
+
+    <div class="finale-scene ui-hidden" id="scene-loop">
+      <canvas id="loop-canvas"></canvas>
+      <p class="finale-loop-line" id="finale-loop-line"></p>
+    </div>
+
+    <div class="finale-scene ui-hidden" id="scene-secret">
+      <p class="secret-quote" id="secret-quote"></p>
+      <div class="secret-final ui-hidden" id="secret-final">
+        <p class="secret-pa">P <span class="heart-mark">❤️</span> A</p>
+        <p class="secret-wish">Happy Birthday<br>Happy First Anniversary<br>Forever.</p>
+        <p class="secret-tagline" id="secret-tagline"></p>
+      </div>
+    </div>
+
+  </div>
 
   <!-- Music tracks — use yourmusic.mp3 for romantic chapter; other chapters use royalty-free links -->
   <audio id="music-ch1" loop preload="auto">
