@@ -83,42 +83,55 @@
     <div class="scene-dots" id="scene-dots"></div>
   </section>
 
-  <!-- ── ACT 2: MOMENTS ───────────────────────────────────── -->
+  <!-- ── ACT 2: MOMENTS (Green Sky + Moon & Clouds + Lightning) ─ -->
   <section id="act-moments" class="act ui-hidden">
     <canvas id="moments-canvas" class="bg-canvas"></canvas>
+    <canvas id="lightning-canvas" class="bg-canvas" style="z-index:4;"></canvas>
     <div class="rain-wrap" id="moments-rain"></div>
+    <div id="lightning-flash" class="lightning-flash"></div>
+
     <div class="act-content">
       <div class="chapter-label">🌧️ Humari Yaadein</div>
       <h2 class="act-title">Baarish Mein...</h2>
-      <p class="act-subtitle">Woh garden, woh baarish, woh pal jo hamesha raha.</p>
-      <div class="moments-list" id="moments-list"></div>
+      <p class="act-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
+      
+      <!-- Moon & Clouds Arena for Moments -->
+      <div class="moon-cloud-arena">
+        <div class="moon-container">
+          <div id="moon-element" class="moon-element">
+            <div class="moon-glow-ring"></div>
+          </div>
+        </div>
+        <div class="clouds-arena" id="clouds-arena"></div>
+      </div>
+
+      <p class="moments-count" id="moments-count">0 / 8 yaadein khuli...</p>
+    </div>
+
+    <!-- Moment popup -->
+    <div id="moment-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
+      <div class="heart-popup-inner">
+        <div class="heart-popup-glow"></div>
+        <div class="heart-popup-emoji" id="moment-popup-icon">🌧️</div>
+        <div class="heart-popup-line"></div>
+        <p class="heart-popup-msg" id="moment-popup-msg"></p>
+        <button id="moment-popup-close" class="popup-close-btn">✕</button>
+      </div>
     </div>
   </section>
 
-  <!-- ── ACT 3: HEARTS + LOVE SHOWER BACKGROUND ──────────── -->
+  <!-- ── ACT 3: HEARTS (10 Raazein) ────────────────────────── -->
   <section id="act-hearts" class="act ui-hidden">
     <!-- Background: love shower rain + fireflies -->
     <canvas id="hearts-canvas" class="bg-canvas"></canvas>
     <div class="love-shower-bg" id="love-shower-bg"></div>
     <div class="rain-wrap" id="hearts-rain"></div>
-    <div id="lightning-flash" class="lightning-flash"></div>
 
     <div class="act-content">
-      <div class="chapter-label">☁️ 10 Raazein</div>
+      <div class="chapter-label">❤️ 10 Raazein</div>
       <h2 class="act-title">Kyun Pyaar Karta Hoon...</h2>
-      <p class="hearts-hint">Badalon ko chhoo kar dekho — bijli kadkegi aur raaz khulenge ✨</p>
-      
-      <!-- Moon & Clouds Arena -->
-      <div class="moon-cloud-arena">
-        <div class="moon-container">
-          <div id="moon-element" class="moon-element">
-            <div class="moon-crescent"></div>
-            <div class="moon-glow-ring"></div>
-          </div>
-        </div>
-        <div class="hearts-arena" id="hearts-arena"></div>
-      </div>
-      
+      <p class="hearts-hint">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
+      <div class="hearts-arena" id="hearts-arena"></div>
       <p class="hearts-count" id="hearts-count">0 / 10 raazein khuli...</p>
     </div>
 
@@ -146,16 +159,28 @@
           <!-- Girl Silhouette -->
           <div class="silhouette-girl" id="sil-girl">
             <svg viewBox="0 0 100 200" class="svg-sil">
-              <path d="M50,22 C55.5,22 60,26.5 60,32 C60,37.5 55.5,42 50,42 C44.5,42 40,37.5 40,32 C40,26.5 44.5,22 50,22 Z M46,43 L54,43 C62,43 65,54 63,74 L59,132 L66,190 L56,190 L52,142 L48,142 L44,190 L34,190 L41,132 L37,74 C35,54 38,43 46,43 Z" fill="rgba(255,107,157,0.85)"/>
+              <defs>
+                <linearGradient id="girlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff758c"/>
+                  <stop offset="100%" stop-color="#ff7eb3"/>
+                </linearGradient>
+              </defs>
+              <path d="M50,18 C56,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44,18 50,18 Z M45,39 L55,39 C64,39 68,52 64,74 L58,135 L66,192 L54,192 L51,142 L49,142 L46,192 L34,192 L42,135 L36,74 C32,52 36,39 45,39 Z" fill="url(#girlGrad)"/>
             </svg>
           </div>
           <!-- Boy Silhouette -->
           <div class="silhouette-boy" id="sil-boy">
             <svg viewBox="0 0 100 200" class="svg-sil">
+              <defs>
+                <linearGradient id="boyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#c47bff"/>
+                  <stop offset="100%" stop-color="#9a4dff"/>
+                </linearGradient>
+              </defs>
               <!-- Standing state -->
-              <path class="boy-standing" d="M50,18 C55.5,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44.5,18 50,18 Z M45,39 L55,39 C63,39 66,48 66,68 L62,126 L67,190 L57,190 L53,138 L47,138 L43,190 L33,190 L38,126 L34,68 C34,48 37,39 45,39 Z" fill="rgba(196,77,255,0.85)"/>
-              <!-- Kneeling state (hidden initially) -->
-              <path class="boy-kneeling" d="M40,50 C45,50 49,46 49,41 C49,36 45,32 40,32 C35,32 31,36 31,41 C31,46 35,50 40,50 Z M36,51 L44,51 C50,51 54,60 53,75 L49,105 L69,110 L67,120 L41,120 L33,140 L23,140 L33,105 L31,75 C30,60 32,51 36,51 Z" fill="rgba(196,77,255,0.85)" style="opacity:0;"/>
+              <path class="boy-standing" d="M50,16 C55.5,16 60,20.5 60,26 C60,31.5 55.5,36 50,36 C44.5,36 40,31.5 40,26 C40,20.5 44.5,16 50,16 Z M45,37 L55,37 C63,37 67,46 67,66 L62,126 L67,192 L57,192 L53,138 L47,138 L43,192 L33,192 L38,126 L33,66 C33,46 37,37 45,37 Z" fill="url(#boyGrad)"/>
+              <!-- Kneeling state (offering ring) -->
+              <path class="boy-kneeling" d="M38,48 C43.5,48 48,43.5 48,38 C48,32.5 43.5,28 38,28 C32.5,28 28,32.5 28,38 C28,43.5 32.5,48 38,48 Z M34,49 L42,49 C50,49 53,58 52,74 L48,105 L72,110 L70,122 L40,122 L30,146 L18,146 L29,105 L27,74 C26,58 29,49 34,49 Z M55,80 L62,80 C65,80 67,82 67,85 L67,90 L55,90 Z" fill="url(#boyGrad)" style="opacity:0;"/>
             </svg>
           </div>
         </div>

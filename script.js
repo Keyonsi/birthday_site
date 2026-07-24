@@ -1,7 +1,7 @@
 /* ============================================================
    MONSOON DIARIES — Linear Cinematic Engine
-   Decoy → Reveal → Gate → Cinema → Moments → Hearts+Shower →
-   Proposal → Candles → Finale
+   Decoy → Reveal → Gate → Cinema → Moments (Green Sky + Moon & Clouds + Lightning) →
+   Hearts (10 Raazein) → Proposal (Anime Silhouettes) → Candles → Finale
    ============================================================ */
 'use strict';
 
@@ -35,7 +35,6 @@ function playTrack(id, vol = 0.45) {
     next.volume = 0;
     next.play().then(() => fadeVol(next, vol, 1500, false)).catch(() => {});
   } else {
-    // If it's already currentAudio (e.g. started silent during decoy), just fade it up
     fadeVol(next, vol, 1500, false);
   }
 }
@@ -101,6 +100,12 @@ function sfxPlay(type) {
       gain.gain.value = 0.12;
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
       osc.start(now); osc.stop(now + 0.4);
+    } else if (type === 'thunder') {
+      osc.type = 'sawtooth'; osc.frequency.value = 120;
+      osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+      gain.gain.value = 0.25;
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+      osc.start(now); osc.stop(now + 0.45);
     } else if (type === 'allBlown') {
       [440, 554, 659, 880].forEach((f, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
@@ -142,7 +147,7 @@ async function switchAct(fromId, toId, cb) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// SPARKS
+// SPARKS & LIGHTNING BOLT PROCEDURAL ENGINE
 // ══════════════════════════════════════════════════════════════════
 function burstSpark(cx, cy, count = 10) {
   const colors = ['#ff6b9d', '#ffd700', '#c47bff', '#52b788', '#fff', '#ff9a9e'];
@@ -159,6 +164,57 @@ function burstSpark(cx, cy, count = 10) {
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 800);
   }
+}
+
+function drawLightningBolt(startX, startY, endX, endY) {
+  const cv = document.getElementById('lightning-canvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+
+  const points = [];
+  let currX = startX;
+  let currY = startY;
+  points.push({ x: currX, y: currY });
+
+  const steps = 18;
+  const dx = (endX - startX) / steps;
+  const dy = (endY - startY) / steps;
+
+  for (let i = 0; i < steps; i++) {
+    currX += dx + (Math.random() - 0.5) * 35;
+    currY += dy + (Math.random() - 0.5) * 20;
+    points.push({ x: currX, y: currY });
+  }
+  points.push({ x: endX, y: endY });
+
+  // Draw glow bolt
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 4;
+  ctx.shadowColor = '#52b788';
+  ctx.shadowBlur = 25;
+  ctx.stroke();
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#e0ffff';
+  ctx.stroke();
+  ctx.restore();
+
+  gsap.to(cv, {
+    opacity: 0,
+    duration: 0.35,
+    onComplete: () => {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      cv.style.opacity = '1';
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -214,7 +270,7 @@ function launchFireworks(containerId, bursts = 5) {
 document.getElementById('decoy-btn').addEventListener('click', startReveal);
 
 async function startReveal() {
-  // Force unlock Web Audio and play main track silently to get browser permission
+  // Force unlock Web Audio and play main track silently
   try {
     const ctx = getACtx();
     bgMusicPlaying = true;
@@ -222,22 +278,19 @@ async function startReveal() {
     if (mainMusic) {
       mainMusic.volume = 0;
       mainMusic.play().then(() => {
-        // Keep it playing at 0 volume until gate opens
         currentAudio = mainMusic;
       }).catch(() => {});
     }
   } catch (e) {}
 
-  // Fade out decoy
   const decoy = document.getElementById('decoy-site');
   decoy.classList.add('fade-out');
   await new Promise(r => setTimeout(r, 700));
   decoy.style.display = 'none';
 
-  // 1.5s Suspense Delay (Screen remains dark)
+  // 1.5s Suspense Delay
   await new Promise(r => setTimeout(r, 1500));
 
-  // Show reveal overlay
   const overlay = document.getElementById('reveal-overlay');
   const msgEl   = document.getElementById('reveal-msg');
   const dotsEl  = overlay.querySelector('.reveal-dots');
@@ -247,11 +300,9 @@ async function startReveal() {
   await new Promise(r => setTimeout(r, 80));
   msgEl.classList.add('show');
 
-  // Show dots after message appears
   await new Promise(r => setTimeout(r, 1200));
   dotsEl.classList.add('show');
 
-  // Wait 5 seconds total before moving on
   await new Promise(r => setTimeout(r, 3800));
 
   msgEl.classList.remove('show');
@@ -267,7 +318,6 @@ function openGate() {
   gate.classList.remove('ui-hidden');
   gate.classList.add('glowing');
 
-  // Spawn gate particles
   const pWrap = document.getElementById('gate-particles');
   for (let i = 0; i < 20; i++) {
     const p = document.createElement('div');
@@ -284,7 +334,6 @@ function openGate() {
   }
 
   setTimeout(() => {
-    // Start music (yourmusic.mp3) immediately
     bgMusicPlaying = true;
     playTrack('music-main', 0.5);
 
@@ -304,7 +353,7 @@ function openGate() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 1 — CINEMATIC FILM (auto-play)
+// ACT 1 — CINEMA (auto-play)
 // ══════════════════════════════════════════════════════════════════
 const SCENES = BIRTHDAY_CONFIG.scenes;
 let sceneIdx = 0, photoIdx = 0, activeSlot = 'a';
@@ -313,7 +362,6 @@ let sceneTimer = null, photoTimer = null;
 function startCinema() {
   document.getElementById('act-cinema').classList.remove('ui-hidden');
 
-  // Build dots
   const dotsEl = document.getElementById('scene-dots');
   dotsEl.innerHTML = '';
   SCENES.forEach((_, i) => {
@@ -322,7 +370,6 @@ function startCinema() {
     dotsEl.appendChild(d);
   });
 
-  // Dust particles
   const cv = document.getElementById('cinema-canvas');
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
@@ -353,12 +400,10 @@ function playScene(idx) {
 
   const s = SCENES[idx];
 
-  // Dots
   document.querySelectorAll('.sdot').forEach((d, i) => {
     d.className = 'sdot' + (i < idx ? ' done' : i === idx ? ' active' : '');
   });
 
-  // Text card animation
   const card = document.getElementById('cinema-card');
   gsap.to(card, {
     opacity: 0, y: 10, duration: 0.4, ease: 'power2.in',
@@ -370,7 +415,6 @@ function playScene(idx) {
     }
   });
 
-  // Photos — cycle
   setPhoto(s.photos, 0);
   if (s.photos.length > 1) {
     const interval = Math.floor(s.durationMs / s.photos.length);
@@ -379,7 +423,6 @@ function playScene(idx) {
     photoTimer = setTimeout(cycle, interval);
   }
 
-  // Progress bar
   const fill = document.getElementById('cinema-fill');
   fill.style.transition = 'none'; fill.style.width = '0%';
   setTimeout(() => { fill.style.transition = `width ${s.durationMs}ms linear`; fill.style.width = '100%'; }, 80);
@@ -413,19 +456,24 @@ async function endCinema() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 2 — MOMENTS
+// ACT 2 — MOMENTS (GREEN NIGHT SKY + MOON & CLOUDS + LIGHTNING)
 // ══════════════════════════════════════════════════════════════════
-function startMoments() {
-  createRain('moments-rain', 60);
-  startRainSound(0.035);
+let momentsRevealed = 0;
 
-  // Soft orb canvas
+function startMoments() {
+  momentsRevealed = 0;
+  createRain('moments-rain', 60, 'rgba(82,183,136,0.3)');
+  startRainSound(0.04);
+
+  document.getElementById('moments-count').textContent = `0 / ${BIRTHDAY_CONFIG.moments.length} yaadein khuli...`;
+
+  // Soft greenish orb canvas
   const cv = document.getElementById('moments-canvas');
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
   const orbs = Array.from({ length: 5 }, () => ({
-    x: Math.random(), y: Math.random(), r: 60 + Math.random() * 100,
-    alpha: 0.015 + Math.random() * 0.02,
+    x: Math.random(), y: Math.random(), r: 70 + Math.random() * 110,
+    alpha: 0.02 + Math.random() * 0.025,
     vx: (Math.random() - 0.5) * 0.0002, vy: (Math.random() - 0.5) * 0.0001
   }));
   (function renderOrbs() {
@@ -446,27 +494,127 @@ function startMoments() {
     requestAnimationFrame(renderOrbs);
   })();
 
-  // Stagger moments
-  const list = document.getElementById('moments-list');
-  list.innerHTML = '';
-  const moments = BIRTHDAY_CONFIG.moments;
-  moments.forEach((m, i) => {
-    const item = document.createElement('div');
-    item.className = 'moment-item';
-    item.innerHTML = `<span class="moment-icon">${m.icon}</span><span>${m.text}</span>`;
-    list.appendChild(item);
-    setTimeout(() => item.classList.add('visible'), i * 450 + 200);
-  });
+  // Moon state setup
+  const moon = document.getElementById('moon-element');
+  if (moon) {
+    moon.style.opacity = '0.22';
+    moon.style.transform = 'scale(0.8)';
+    moon.style.boxShadow = '0 0 15px rgba(255,215,0,0.25)';
+    const ring = moon.querySelector('.moon-glow-ring');
+    if (ring) ring.style.opacity = '0';
+  }
 
-  const totalMs = moments.length * 450 + 2500;
-  setTimeout(() => {
-    stopRainSound();
-    switchAct('act-moments', 'act-hearts', startHearts);
-  }, totalMs);
+  // Populate 8 floating clouds in Act 2
+  const arena  = document.getElementById('clouds-arena');
+  arena.innerHTML = '';
+  const popup   = document.getElementById('moment-popup');
+  const popIcon = document.getElementById('moment-popup-icon');
+  const popMsg  = document.getElementById('moment-popup-msg');
+  document.getElementById('moment-popup-close').onclick = () => popup.classList.add('ui-hidden');
+
+  const moments = BIRTHDAY_CONFIG.moments;
+  const positions = [
+    { l: 8,  t: 20 }, { l: 26, t: 8  }, { l: 58, t: 12 }, { l: 78, t: 22 },
+    { l: 10, t: 62 }, { l: 32, t: 70 }, { l: 60, t: 64 }, { l: 82, t: 58 }
+  ];
+
+  function triggerLightningStrike(cloudElem) {
+    const flash = document.getElementById('lightning-flash');
+    const act   = document.getElementById('act-moments');
+    const rect  = cloudElem.getBoundingClientRect();
+    
+    // Draw procedural lightning bolt on canvas from top of screen to cloud position
+    drawLightningBolt(rect.left + rect.width / 2, 0, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    
+    sfxPlay('thunder');
+
+    // Flash
+    gsap.timeline()
+      .to(flash, { opacity: 0.95, duration: 0.05 })
+      .to(flash, { opacity: 0, duration: 0.08 })
+      .to(flash, { opacity: 0.7, duration: 0.04 })
+      .to(flash, { opacity: 0, duration: 0.15 });
+
+    // Shake
+    gsap.timeline()
+      .to(act, { x: -8, y: 5, duration: 0.04 })
+      .to(act, { x: 7, y: -6, duration: 0.04 })
+      .to(act, { x: -5, y: 3, duration: 0.04 })
+      .to(act, { x: 4, y: -2, duration: 0.04 })
+      .to(act, { x: 0, y: 0, duration: 0.04 });
+  }
+
+  moments.forEach((m, i) => {
+    const cItem = document.createElement('div');
+    cItem.className = 'cloud-item';
+    cItem.textContent = '☁️';
+    cItem.style.left = `calc(${positions[i % positions.length].l}% - 38px)`;
+    cItem.style.top  = `calc(${positions[i % positions.length].t}% - 23px)`;
+    cItem.style.setProperty('--fDur', `${3.2 + Math.random() * 1.5}s`);
+    cItem.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
+
+    let done = false;
+    cItem.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!done) {
+        done = true;
+        momentsRevealed++;
+
+        triggerLightningStrike(cItem);
+        burstSpark(e.clientX, e.clientY, 12);
+
+        cItem.classList.add('wink');
+        setTimeout(() => {
+          cItem.textContent = m.icon;
+          cItem.classList.remove('wink');
+          cItem.classList.add('revealed');
+          cItem.style.animation = 'none';
+        }, 450);
+
+        document.getElementById('moments-count').textContent =
+          `${momentsRevealed} / ${moments.length} yaadein khuli...`;
+
+        // Illuminate moon gradually
+        const progress = momentsRevealed / moments.length;
+        if (moon) {
+          gsap.to(moon, {
+            opacity: 0.22 + (0.78 * progress),
+            scale: 0.8 + (0.35 * progress),
+            boxShadow: `0 0 ${15 + (45 * progress)}px rgba(255,215,0,${0.25 + (0.5 * progress)})`,
+            duration: 0.6
+          });
+        }
+
+        // Show moment popup
+        setTimeout(() => {
+          popIcon.textContent = m.icon;
+          popMsg.textContent  = m.text;
+          popup.classList.remove('ui-hidden');
+        }, 400);
+
+        if (momentsRevealed === moments.length) {
+          const ring = moon.querySelector('.moon-glow-ring');
+          if (ring) gsap.to(ring, { opacity: 1, duration: 0.8 });
+
+          setTimeout(() => popup.classList.add('ui-hidden'), 2400);
+          setTimeout(() => {
+            stopRainSound();
+            switchAct('act-moments', 'act-hearts', startHearts);
+          }, 3000);
+        }
+      } else {
+        popIcon.textContent = m.icon;
+        popMsg.textContent  = m.text;
+        popup.classList.remove('ui-hidden');
+      }
+    });
+
+    arena.appendChild(cItem);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 3 — HEARTS + LOVE SHOWER BACKGROUND
+// ACT 3 — HEARTS (10 RAAZEIN + LOVE SHOWER BACKGROUND)
 // ══════════════════════════════════════════════════════════════════
 let heartsRevealed = 0;
 const HEARTS = BIRTHDAY_CONFIG.hearts;
@@ -501,7 +649,6 @@ function startHearts() {
     if (document.getElementById('act-hearts').classList.contains('ui-hidden')) return;
     cx.clearRect(0, 0, cv.width, cv.height);
     const W = cv.width, H = cv.height;
-    // Orbs
     orbs.forEach(o => {
       o.x = Math.max(0, Math.min(1, o.x + o.vx));
       o.y = Math.max(0, Math.min(1, o.y + o.vy));
@@ -513,7 +660,6 @@ function startHearts() {
       cx.beginPath(); cx.arc(o.x*W, o.y*H, o.r, 0, Math.PI*2);
       cx.fillStyle = g; cx.fill();
     });
-    // Fireflies
     flies.forEach(f => {
       f.angle += (Math.random() - 0.5) * 0.1;
       f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed));
@@ -528,17 +674,7 @@ function startHearts() {
     requestAnimationFrame(renderHeartsCanvas);
   })();
 
-  // Reset Moon state at start of Act 3
-  const moon = document.getElementById('moon-element');
-  if (moon) {
-    moon.style.opacity = '0.22';
-    moon.style.transform = 'scale(0.8)';
-    moon.style.boxShadow = '0 0 15px rgba(255,215,0,0.25)';
-    const ring = moon.querySelector('.moon-glow-ring');
-    if (ring) ring.style.opacity = '0';
-  }
-
-  // Place 10 clouds
+  // 10 floating hearts
   const arena  = document.getElementById('hearts-arena');
   arena.innerHTML = '';
   const popup   = document.getElementById('heart-popup');
@@ -553,33 +689,13 @@ function startHearts() {
     { l: 82, t: 64 }
   ];
 
-  function triggerLightning() {
-    const flash = document.getElementById('lightning-flash');
-    const act = document.getElementById('act-hearts');
-    
-    // Play dramatic flash
-    gsap.timeline()
-      .to(flash, { opacity: 0.95, duration: 0.05 })
-      .to(flash, { opacity: 0, duration: 0.08 })
-      .to(flash, { opacity: 0.7, duration: 0.04 })
-      .to(flash, { opacity: 0, duration: 0.15 });
-
-    // Shake screen
-    gsap.timeline()
-      .to(act, { x: -8, y: 5, duration: 0.04 })
-      .to(act, { x: 7, y: -6, duration: 0.04 })
-      .to(act, { x: -5, y: 3, duration: 0.04 })
-      .to(act, { x: 4, y: -2, duration: 0.04 })
-      .to(act, { x: 0, y: 0, duration: 0.04 });
-  }
-
   HEARTS.forEach((h, i) => {
     const bbl = document.createElement('div');
     bbl.className = 'heart-bubble';
-    bbl.textContent = '☁️';
-    bbl.style.left = `calc(${positions[i].l}% - 31px)`;
-    bbl.style.top  = `calc(${positions[i].t}% - 19px)`;
-    bbl.style.setProperty('--fDur', `${3.2 + Math.random() * 1.5}s`);
+    bbl.textContent = '❤️';
+    bbl.style.left = `calc(${positions[i].l}% - 26px)`;
+    bbl.style.top  = `calc(${positions[i].t}% - 26px)`;
+    bbl.style.setProperty('--fDur', `${2.6 + Math.random() * 1.5}s`);
     bbl.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
 
     let done = false;
@@ -589,8 +705,6 @@ function startHearts() {
         done = true;
         heartsRevealed++;
         
-        // Trigger visual lightning & audio
-        triggerLightning();
         sfxPlay('chime');
         burstSpark(e.clientX, e.clientY, 14);
 
@@ -600,35 +714,18 @@ function startHearts() {
           bbl.classList.remove('wink');
           bbl.classList.add('revealed');
           bbl.style.animation = 'none';
-        }, 500);
+        }, 450);
 
         document.getElementById('hearts-count').textContent =
           `${heartsRevealed} / ${HEARTS.length} raazein khuli...`;
 
-        // Update Moon lighting step-by-step
-        const moonProgress = heartsRevealed / HEARTS.length;
-        if (moon) {
-          gsap.to(moon, {
-            opacity: 0.22 + (0.78 * moonProgress),
-            scale: 0.8 + (0.35 * moonProgress),
-            boxShadow: `0 0 ${15 + (45 * moonProgress)}px rgba(255,215,0,${0.25 + (0.5 * moonProgress)})`,
-            duration: 0.6
-          });
-        }
-
-        // Show popup with 400ms delay after lightning strike so user sees the flash first
         setTimeout(() => {
           popEmoji.textContent = h.emoji;
           popMsg.textContent   = h.reason;
           popup.classList.remove('ui-hidden');
-        }, 400);
+        }, 300);
 
         if (heartsRevealed === HEARTS.length) {
-          // Fully lit moon glow ring fades in
-          const ring = moon.querySelector('.moon-glow-ring');
-          if (ring) gsap.to(ring, { opacity: 1, duration: 0.8 });
-
-          // All done — wait 2.5s then advance
           setTimeout(() => popup.classList.add('ui-hidden'), 2200);
           setTimeout(() => {
             stopRainSound();
@@ -645,7 +742,6 @@ function startHearts() {
   });
 }
 
-// Love shower background — hearts raining down behind the floating hearts
 function startLoveShowerBg() {
   const wrap = document.getElementById('love-shower-bg');
   wrap.innerHTML = '';
@@ -673,10 +769,9 @@ function startLoveShowerBg() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 4 — PROPOSAL (chibi + ring)
+// ACT 4 — PROPOSAL (ANIME SILHOUETTES + RING)
 // ══════════════════════════════════════════════════════════════════
 function startProposal() {
-  // Aurora canvas
   const cv = document.getElementById('proposal-canvas');
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
@@ -771,7 +866,6 @@ function startCandles() {
   document.getElementById('bday-name').textContent  = `Happy Birthday ${BIRTHDAY_CONFIG.nickname}! 🎂`;
   document.getElementById('bday-anni').textContent  = BIRTHDAY_CONFIG.anniversaryMessage;
 
-  // Birthday canvas — stars
   const cv = document.getElementById('candles-canvas');
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
@@ -793,7 +887,6 @@ function startCandles() {
     requestAnimationFrame(renderStars);
   })();
 
-  // Build 5 candles
   const row = document.getElementById('candles-row');
   row.innerHTML = '';
   let blown = 0;
@@ -815,7 +908,6 @@ function startCandles() {
       document.getElementById('candles-status').textContent = `${blown} / ${total} bujhe`;
       burstSpark(e.clientX, e.clientY, 8);
 
-      // Puff
       const puff = document.createElement('div');
       puff.className = 'candle-puff'; puff.textContent = '💨';
       puff.style.left = `${e.clientX - 20}px`; puff.style.top = `${e.clientY - 30}px`;
@@ -836,13 +928,12 @@ function startCandles() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 6 — FINALE (letter + fireworks + lanterns)
+// ACT 6 — FINALE
 // ══════════════════════════════════════════════════════════════════
 function startFinale() {
   launchFireworks('finale-fireworks', 6);
   startLanterns();
 
-  // Stars canvas
   const cv = document.getElementById('finale-canvas');
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
@@ -904,7 +995,7 @@ function startLanterns() {
   })();
 }
 
-// Recalculate all canvas sizes dynamically on window resize (e.g. mobile rotation)
+// Canvas resize listener
 window.addEventListener('resize', () => {
   document.querySelectorAll('canvas').forEach(cv => {
     cv.width = window.innerWidth;
