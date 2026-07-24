@@ -362,6 +362,15 @@ let sceneTimer = null, photoTimer = null;
 function startCinema() {
   document.getElementById('act-cinema').classList.remove('ui-hidden');
 
+  const skipBtn = document.getElementById('cinema-skip-btn');
+  if (skipBtn) {
+    skipBtn.onclick = () => {
+      clearTimeout(sceneTimer);
+      clearTimeout(photoTimer);
+      endCinema();
+    };
+  }
+
   const dotsEl = document.getElementById('scene-dots');
   dotsEl.innerHTML = '';
   SCENES.forEach((_, i) => {
