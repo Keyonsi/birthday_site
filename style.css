@@ -179,23 +179,23 @@ html, body {
 .act-content {
   position: relative; z-index: 5;
   width: 100%; max-width: 480px;
-  padding: 5.5rem 1.5rem 5rem;
+  padding: 2.2rem 1rem 3rem;
   display: flex; flex-direction: column;
-  align-items: center; gap: 1.6rem;
+  align-items: center; gap: 0.75rem;
 }
 .chapter-label {
   font-size: 0.65rem; letter-spacing: 0.28em;
-  text-transform: uppercase; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; color: rgba(255,255,255,0.45);
   font-family: var(--font-d);
 }
 .act-title {
   font-family: var(--font-d);
-  font-size: clamp(1.9rem, 6vw, 2.6rem);
+  font-size: clamp(1.6rem, 5.5vw, 2.4rem);
   font-style: italic; text-align: center; line-height: 1.2;
 }
 .act-subtitle {
-  font-family: var(--font-s); font-size: 1.1rem;
-  color: rgba(255,255,255,0.6); text-align: center;
+  font-family: var(--font-s); font-size: 1.02rem;
+  color: rgba(255,255,255,0.65); text-align: center;
 }
 
 /* ════════════════════════════════════════
@@ -781,3 +781,21 @@ html, body {
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* Mobile Viewport Optimization */
+@media (max-width: 600px), (max-height: 720px) {
+  .act-content {
+    padding: 1.6rem 0.8rem 2.2rem;
+    gap: 0.5rem;
+  }
+  .moon-cloud-arena {
+    height: 270px;
+  }
+  .hearts-arena {
+    height: 250px;
+  }
+  .heart-popup-inner {
+    padding: 2.2rem 1.4rem 1.5rem;
+    max-width: 300px;
+  }
+}

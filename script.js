@@ -683,19 +683,19 @@ function startHearts() {
   document.getElementById('popup-close').onclick = () => popup.classList.add('ui-hidden');
 
   const positions = [
-    { l: 6,  t: 26 }, { l: 22, t: 8  }, { l: 36, t: 34 },
-    { l: 52, t: 10 }, { l: 68, t: 36 }, { l: 82, t: 12 },
-    { l: 12, t: 62 }, { l: 44, t: 68 }, { l: 64, t: 56 },
-    { l: 82, t: 64 }
+    { l: 6,  t: 12 }, { l: 26, t: 8  }, { l: 48, t: 14 }, { l: 70, t: 8  }, { l: 88, t: 16 },
+    { l: 12, t: 38 }, { l: 32, t: 44 }, { l: 54, t: 36 }, { l: 74, t: 42 }, { l: 90, t: 38 },
+    { l: 8,  t: 68 }, { l: 28, t: 72 }, { l: 50, t: 66 }, { l: 70, t: 74 }, { l: 86, t: 68 }
   ];
 
   HEARTS.forEach((h, i) => {
+    const pos = positions[i % positions.length];
     const bbl = document.createElement('div');
     bbl.className = 'heart-bubble';
     bbl.textContent = '❤️';
-    bbl.style.left = `calc(${positions[i].l}% - 26px)`;
-    bbl.style.top  = `calc(${positions[i].t}% - 26px)`;
-    bbl.style.setProperty('--fDur', `${2.6 + Math.random() * 1.5}s`);
+    bbl.style.left = `calc(${pos.l}% - 24px)`;
+    bbl.style.top  = `calc(${pos.t}% - 24px)`;
+    bbl.style.setProperty('--fDur', `${2.5 + Math.random() * 1.5}s`);
     bbl.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
 
     let done = false;
@@ -713,8 +713,7 @@ function startHearts() {
           bbl.textContent = h.emoji;
           bbl.classList.remove('wink');
           bbl.classList.add('revealed');
-          bbl.style.animation = 'none';
-        }, 450);
+        }, 400);
 
         document.getElementById('hearts-count').textContent =
           `${heartsRevealed} / ${HEARTS.length} raazein khuli...`;
@@ -723,6 +722,9 @@ function startHearts() {
           popEmoji.textContent = h.emoji;
           popMsg.textContent   = h.reason;
           popup.classList.remove('ui-hidden');
+
+          // Softly dissolve/fade out heart from arena
+          bbl.classList.add('dissolve');
         }, 300);
 
         if (heartsRevealed === HEARTS.length) {
