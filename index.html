@@ -101,12 +101,24 @@
     <canvas id="hearts-canvas" class="bg-canvas"></canvas>
     <div class="love-shower-bg" id="love-shower-bg"></div>
     <div class="rain-wrap" id="hearts-rain"></div>
+    <div id="lightning-flash" class="lightning-flash"></div>
 
     <div class="act-content">
-      <div class="chapter-label">❤️ 10 Raazein</div>
+      <div class="chapter-label">☁️ 10 Raazein</div>
       <h2 class="act-title">Kyun Pyaar Karta Hoon...</h2>
-      <p class="hearts-hint">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
-      <div class="hearts-arena" id="hearts-arena"></div>
+      <p class="hearts-hint">Badalon ko chhoo kar dekho — bijli kadkegi aur raaz khulenge ✨</p>
+      
+      <!-- Moon & Clouds Arena -->
+      <div class="moon-cloud-arena">
+        <div class="moon-container">
+          <div id="moon-element" class="moon-element">
+            <div class="moon-crescent"></div>
+            <div class="moon-glow-ring"></div>
+          </div>
+        </div>
+        <div class="hearts-arena" id="hearts-arena"></div>
+      </div>
+      
       <p class="hearts-count" id="hearts-count">0 / 10 raazein khuli...</p>
     </div>
 
@@ -128,25 +140,23 @@
     <div id="proposal-particles" class="proposal-particles"></div>
 
     <div class="proposal-scene">
-      <!-- Chibi character -->
-      <div class="chibi-wrap" id="chibi-wrap">
-        <div class="chibi-character" id="chibi-proposer">
-          <div class="chibi-head">
-            <div class="chibi-hair"></div>
-            <div class="chibi-face">
-              <div class="chibi-eyes">
-                <div class="chibi-eye left"></div>
-                <div class="chibi-eye right"></div>
-              </div>
-              <div class="chibi-blush left"></div>
-              <div class="chibi-blush right"></div>
-              <div class="chibi-mouth"></div>
-            </div>
+      <!-- Silhouette Characters -->
+      <div class="silhouette-wrap" id="silhouette-wrap">
+        <div class="silhouette-container">
+          <!-- Girl Silhouette -->
+          <div class="silhouette-girl" id="sil-girl">
+            <svg viewBox="0 0 100 200" class="svg-sil">
+              <path d="M50,22 C55.5,22 60,26.5 60,32 C60,37.5 55.5,42 50,42 C44.5,42 40,37.5 40,32 C40,26.5 44.5,22 50,22 Z M46,43 L54,43 C62,43 65,54 63,74 L59,132 L66,190 L56,190 L52,142 L48,142 L44,190 L34,190 L41,132 L37,74 C35,54 38,43 46,43 Z" fill="rgba(255,107,157,0.85)"/>
+            </svg>
           </div>
-          <div class="chibi-body">
-            <div class="chibi-arm left"></div>
-            <div class="chibi-arm right holding"></div>
-            <div class="chibi-legs"></div>
+          <!-- Boy Silhouette -->
+          <div class="silhouette-boy" id="sil-boy">
+            <svg viewBox="0 0 100 200" class="svg-sil">
+              <!-- Standing state -->
+              <path class="boy-standing" d="M50,18 C55.5,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44.5,18 50,18 Z M45,39 L55,39 C63,39 66,48 66,68 L62,126 L67,190 L57,190 L53,138 L47,138 L43,190 L33,190 L38,126 L34,68 C34,48 37,39 45,39 Z" fill="rgba(196,77,255,0.85)"/>
+              <!-- Kneeling state (hidden initially) -->
+              <path class="boy-kneeling" d="M40,50 C45,50 49,46 49,41 C49,36 45,32 40,32 C35,32 31,36 31,41 C31,46 35,50 40,50 Z M36,51 L44,51 C50,51 54,60 53,75 L49,105 L69,110 L67,120 L41,120 L33,140 L23,140 L33,105 L31,75 C30,60 32,51 36,51 Z" fill="rgba(196,77,255,0.85)" style="opacity:0;"/>
+            </svg>
           </div>
         </div>
       </div>

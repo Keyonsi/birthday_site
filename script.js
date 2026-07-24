@@ -29,9 +29,15 @@ function playTrack(id, vol = 0.45) {
   const next = document.getElementById(id);
   if (!next) return;
   if (currentAudio && currentAudio !== next) fadeVol(currentAudio, 0, 900, true);
+  const isSame = (currentAudio === next);
   currentAudio = next;
-  next.volume = 0;
-  next.play().then(() => fadeVol(next, vol, 1500, false)).catch(() => {});
+  if (!isSame) {
+    next.volume = 0;
+    next.play().then(() => fadeVol(next, vol, 1500, false)).catch(() => {});
+  } else {
+    // If it's already currentAudio (e.g. started silent during decoy), just fade it up
+    fadeVol(next, vol, 1500, false);
+  }
 }
 
 document.getElementById('music-btn').addEventListener('click', () => {
@@ -208,11 +214,30 @@ function launchFireworks(containerId, bursts = 5) {
 document.getElementById('decoy-btn').addEventListener('click', startReveal);
 
 async function startReveal() {
+  // Force unlock Web Audio and play main track silently to get browser permission
+  try {
+    const ctx = getACtx();
+    bgMusicPlaying = true;
+    const mainMusic = document.getElementById('music-main');
+    if (mainMusic) {
+      mainMusic.volume = 0;
+      mainMusic.play().then(() => {
+        // Keep it playing at 0 volume until gate opens
+        currentAudio = mainMusic;
+      }).catch(() => {});
+    }
+  } catch (e) {}
+
+  // Fade out decoy
   const decoy = document.getElementById('decoy-site');
   decoy.classList.add('fade-out');
   await new Promise(r => setTimeout(r, 700));
   decoy.style.display = 'none';
 
+  // 1.5s Suspense Delay (Screen remains dark)
+  await new Promise(r => setTimeout(r, 1500));
+
+  // Show reveal overlay
   const overlay = document.getElementById('reveal-overlay');
   const msgEl   = document.getElementById('reveal-msg');
   const dotsEl  = overlay.querySelector('.reveal-dots');
@@ -373,6 +398,7 @@ function setPhoto(photos, pIdx) {
   active.style.transition = 'opacity 1.5s ease-in-out';
   active.onload  = () => {
     active.classList.add('cinema-img-active');
+    out.classList.remove('cinema-img-active');
     requestAnimationFrame(() => {
       active.style.opacity = '1';
       out.style.opacity    = '0';
@@ -502,7 +528,17 @@ function startHearts() {
     requestAnimationFrame(renderHeartsCanvas);
   })();
 
-  // Place 10 hearts
+  // Reset Moon state at start of Act 3
+  const moon = document.getElementById('moon-element');
+  if (moon) {
+    moon.style.opacity = '0.22';
+    moon.style.transform = 'scale(0.8)';
+    moon.style.boxShadow = '0 0 15px rgba(255,215,0,0.25)';
+    const ring = moon.querySelector('.moon-glow-ring');
+    if (ring) ring.style.opacity = '0';
+  }
+
+  // Place 10 clouds
   const arena  = document.getElementById('hearts-arena');
   arena.innerHTML = '';
   const popup   = document.getElementById('heart-popup');
@@ -511,19 +547,39 @@ function startHearts() {
   document.getElementById('popup-close').onclick = () => popup.classList.add('ui-hidden');
 
   const positions = [
-    { l: 6,  t: 28 }, { l: 20, t: 8  }, { l: 36, t: 38 },
-    { l: 52, t: 12 }, { l: 68, t: 36 }, { l: 80, t: 10 },
-    { l: 10, t: 64 }, { l: 42, t: 70 }, { l: 63, t: 58 },
-    { l: 83, t: 66 }
+    { l: 6,  t: 26 }, { l: 22, t: 8  }, { l: 36, t: 34 },
+    { l: 52, t: 10 }, { l: 68, t: 36 }, { l: 82, t: 12 },
+    { l: 12, t: 62 }, { l: 44, t: 68 }, { l: 64, t: 56 },
+    { l: 82, t: 64 }
   ];
+
+  function triggerLightning() {
+    const flash = document.getElementById('lightning-flash');
+    const act = document.getElementById('act-hearts');
+    
+    // Play dramatic flash
+    gsap.timeline()
+      .to(flash, { opacity: 0.95, duration: 0.05 })
+      .to(flash, { opacity: 0, duration: 0.08 })
+      .to(flash, { opacity: 0.7, duration: 0.04 })
+      .to(flash, { opacity: 0, duration: 0.15 });
+
+    // Shake screen
+    gsap.timeline()
+      .to(act, { x: -8, y: 5, duration: 0.04 })
+      .to(act, { x: 7, y: -6, duration: 0.04 })
+      .to(act, { x: -5, y: 3, duration: 0.04 })
+      .to(act, { x: 4, y: -2, duration: 0.04 })
+      .to(act, { x: 0, y: 0, duration: 0.04 });
+  }
 
   HEARTS.forEach((h, i) => {
     const bbl = document.createElement('div');
     bbl.className = 'heart-bubble';
-    bbl.textContent = '❤️';
-    bbl.style.left = `calc(${positions[i].l}% - 25px)`;
-    bbl.style.top  = `calc(${positions[i].t}% - 25px)`;
-    bbl.style.setProperty('--fDur', `${2.5 + Math.random() * 1.8}s`);
+    bbl.textContent = '☁️';
+    bbl.style.left = `calc(${positions[i].l}% - 31px)`;
+    bbl.style.top  = `calc(${positions[i].t}% - 19px)`;
+    bbl.style.setProperty('--fDur', `${3.2 + Math.random() * 1.5}s`);
     bbl.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
 
     let done = false;
@@ -532,6 +588,12 @@ function startHearts() {
       if (!done) {
         done = true;
         heartsRevealed++;
+        
+        // Trigger visual lightning & audio
+        triggerLightning();
+        sfxPlay('chime');
+        burstSpark(e.clientX, e.clientY, 14);
+
         bbl.classList.add('wink');
         setTimeout(() => {
           bbl.textContent = h.emoji;
@@ -539,17 +601,33 @@ function startHearts() {
           bbl.classList.add('revealed');
           bbl.style.animation = 'none';
         }, 500);
+
         document.getElementById('hearts-count').textContent =
           `${heartsRevealed} / ${HEARTS.length} raazein khuli...`;
-        burstSpark(e.clientX, e.clientY, 12);
-        sfxPlay('chime');
 
-        // Show popup
-        popEmoji.textContent = h.emoji;
-        popMsg.textContent   = h.reason;
-        popup.classList.remove('ui-hidden');
+        // Update Moon lighting step-by-step
+        const moonProgress = heartsRevealed / HEARTS.length;
+        if (moon) {
+          gsap.to(moon, {
+            opacity: 0.22 + (0.78 * moonProgress),
+            scale: 0.8 + (0.35 * moonProgress),
+            boxShadow: `0 0 ${15 + (45 * moonProgress)}px rgba(255,215,0,${0.25 + (0.5 * moonProgress)})`,
+            duration: 0.6
+          });
+        }
+
+        // Show popup with 400ms delay after lightning strike so user sees the flash first
+        setTimeout(() => {
+          popEmoji.textContent = h.emoji;
+          popMsg.textContent   = h.reason;
+          popup.classList.remove('ui-hidden');
+        }, 400);
 
         if (heartsRevealed === HEARTS.length) {
+          // Fully lit moon glow ring fades in
+          const ring = moon.querySelector('.moon-glow-ring');
+          if (ring) gsap.to(ring, { opacity: 1, duration: 0.8 });
+
           // All done — wait 2.5s then advance
           setTimeout(() => popup.classList.add('ui-hidden'), 2200);
           setTimeout(() => {
@@ -626,9 +704,10 @@ function startProposal() {
     requestAnimationFrame(renderAurora);
   })();
 
-  // Chibi walks in
+  // Silhouette walks in
   setTimeout(() => {
-    document.getElementById('chibi-wrap').classList.add('in');
+    const silWrap = document.getElementById('silhouette-wrap');
+    if (silWrap) silWrap.classList.add('in');
   }, 300);
 
   // Typewriter dialogue
@@ -649,6 +728,14 @@ function startProposal() {
   }
   function nextLine() {
     if (lineIdx >= lines.length) {
+      // Trigger kneeling silhouette animation
+      const standing = document.querySelector('.boy-standing');
+      const kneeling = document.querySelector('.boy-kneeling');
+      if (standing && kneeling) {
+        gsap.to(standing, { opacity: 0, scale: 0.95, duration: 0.5 });
+        gsap.fromTo(kneeling, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.6, delay: 0.1 });
+      }
+
       // Show final quote then ring
       setTimeout(() => {
         textEl.textContent = cfg.finalQuote;
@@ -816,3 +903,11 @@ function startLanterns() {
     setTimeout(spawnLantern, 1400 + Math.random() * 1800);
   })();
 }
+
+// Recalculate all canvas sizes dynamically on window resize (e.g. mobile rotation)
+window.addEventListener('resize', () => {
+  document.querySelectorAll('canvas').forEach(cv => {
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+  });
+});
