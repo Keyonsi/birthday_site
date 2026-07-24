@@ -267,64 +267,12 @@ html, body {
 /* ════════════════════════════════════════
    ACT 2 — MOMENTS
 ════════════════════════════════════════ */
-#act-moments {
-  background: radial-gradient(ellipse at 40% 30%, #071a0c 0%, #030a06 60%, #000 100%);
-}
-.rain-wrap {
-  position: absolute; inset: 0;
-  pointer-events: none; z-index: 1; overflow: hidden;
-}
-.drop {
-  position: absolute; top: -20px; width: 1px;
-  background: linear-gradient(to bottom, transparent, rgba(174,220,180,0.3));
-  animation: fall linear infinite;
-}
-@keyframes fall { to { transform: translateY(115vh); } }
-.moments-list { width: 100%; display: flex; flex-direction: column; gap: 0.55rem; }
-.moment-item {
-  display: flex; align-items: center; gap: 0.8rem;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(82,183,136,0.14);
-  border-left: 3px solid rgba(82,183,136,0.45);
-  border-radius: 14px; padding: 0.8rem 1rem;
-  font-size: 0.88rem; color: rgba(212,237,218,0.85); line-height: 1.4;
-  opacity: 0; transform: translateX(-22px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.moment-item.visible { opacity: 1; transform: translateX(0); }
-.moment-icon { font-size: 1.25rem; flex-shrink: 0; }
-
 /* ════════════════════════════════════════
-   ACT 3 — HEARTS + LOVE SHOWER BG
+   ACT 2 — MOMENTS (GREEN NIGHT SKY + MOON & CLOUDS)
 ════════════════════════════════════════ */
-#act-hearts {
-  background: radial-gradient(ellipse at 40% 30%, #0a0a1e 0%, #030308 70%);
+#act-moments {
+  background: radial-gradient(ellipse at 50% 30%, #082012 0%, #030d07 70%, #010402 100%);
 }
-/* Love shower background */
-.love-shower-bg {
-  position: absolute; inset: 0; z-index: 1;
-  pointer-events: none; overflow: hidden;
-}
-.bg-falling-heart {
-  position: absolute; top: -40px;
-  pointer-events: none;
-  animation: bgHeartFall linear forwards;
-  opacity: 0;
-}
-@keyframes bgHeartFall {
-  0%   { opacity: 0; transform: translateY(-40px) rotate(var(--rot)) scale(var(--sc)); }
-  8%   { opacity: 0.4; }
-  90%  { opacity: 0.2; }
-  100% { opacity: 0; transform: translateY(110vh) rotate(calc(var(--rot) + 30deg)) scale(var(--sc)); }
-}
-
-.hearts-hint {
-  font-family: var(--font-s); font-size: 1.05rem;
-  color: rgba(255,255,255,0.4); text-align: center;
-  animation: breathe 2.5s ease-in-out infinite;
-}
-@keyframes breathe { 0%,100% { opacity: 0.3; } 50% { opacity: 0.9; } }
-
 .lightning-flash {
   position: absolute; inset: 0;
   background: rgba(255,255,255,0.95);
@@ -332,11 +280,11 @@ html, body {
   pointer-events: none;
 }
 .moon-cloud-arena {
-  position: relative; width: 100%; height: 320px;
+  position: relative; width: 100%; height: 310px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; border-radius: 20px;
-  background: rgba(82,183,136,0.02);
-  border: 1px dashed rgba(82,183,136,0.12);
+  background: rgba(82,183,136,0.03);
+  border: 1px dashed rgba(82,183,136,0.18);
 }
 .moon-container {
   position: absolute;
@@ -356,41 +304,99 @@ html, body {
 }
 .moon-glow-ring {
   position: absolute; inset: -25px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
-.hearts-arena {
+.clouds-arena {
   position: absolute; inset: 0; z-index: 2;
 }
-.heart-bubble {
+.cloud-item {
   position: absolute; width: 76px; height: 46px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 24px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 1.25rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
   animation: floatBubble var(--fDur, 3.5s) ease-in-out var(--fDel, 0s) infinite;
 }
-.heart-bubble::before, .heart-bubble::after {
+.cloud-item::before, .cloud-item::after {
   content: ''; position: absolute; background: inherit; border: inherit; border-bottom: none;
 }
-.heart-bubble::before {
+.cloud-item::before {
   width: 34px; height: 34px; top: -16px; left: 12px; border-radius: 50%;
 }
-.heart-bubble::after {
+.cloud-item::after {
   width: 26px; height: 26px; top: -10px; right: 12px; border-radius: 50%;
+}
+.cloud-item.revealed {
+  background: rgba(255,255,255,0.95);
+  color: #111;
+  border-color: #ffffff;
+  box-shadow: 0 0 25px rgba(255,255,255,0.9);
+  animation: none;
+}
+.cloud-item.wink { animation: winkAnim 0.5s ease forwards; }
+
+.moments-count {
+  font-size: 0.72rem; color: rgba(212,237,218,0.5);
+  letter-spacing: 0.08em; text-align: center;
+}
+
+/* ════════════════════════════════════════
+   ACT 3 — HEARTS (10 RAAZEIN + LOVE SHOWER BG)
+════════════════════════════════════════ */
+#act-hearts {
+  background: radial-gradient(ellipse at 40% 30%, #0a0a1e 0%, #030308 70%);
+}
+/* Love shower background */
+.love-shower-bg {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+}
+.bg-falling-heart {
+  position: absolute; top: -40px;
+  pointer-events: none;
+  animation: bgHeartFall linear forwards;
+  opacity: 0;
+}
+@keyframes bgHeartFall {
+  0%   { opacity: 0; transform: translateY(-40px) rotate(var(--rot)) scale(var(--sc)); }
+  8%   { opacity: 0.45; }
+  90%  { opacity: 0.2; }
+  100% { opacity: 0; transform: translateY(110vh) rotate(calc(var(--rot) + 30deg)) scale(var(--sc)); }
+}
+
+.hearts-hint {
+  font-family: var(--font-s); font-size: 1.05rem;
+  color: rgba(255,255,255,0.45); text-align: center;
+  animation: breathe 2.5s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+
+.hearts-arena {
+  width: 100%; height: 290px; position: relative;
+  overflow: hidden; border-radius: 20px;
+  background: rgba(255,107,157,0.025);
+  border: 1px dashed rgba(255,107,157,0.12);
+}
+.heart-bubble {
+  position: absolute; width: 52px; height: 52px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,157,0.25), rgba(196,77,255,0.15));
+  border: 1px solid rgba(255,107,157,0.35);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.35rem;
+  box-shadow: 0 0 16px rgba(255,107,157,0.2);
+  animation: floatBubble var(--fDur, 3s) ease-in-out var(--fDel, 0s) infinite;
 }
 @keyframes floatBubble {
   0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-10px) scale(1.03); }
+  50%      { transform: translateY(-10px) scale(1.04); }
 }
 .heart-bubble.revealed {
-  background: rgba(255,255,255,0.92);
-  color: #111;
-  border-color: #ffffff;
-  box-shadow: 0 0 20px rgba(255,255,255,0.8);
+  background: radial-gradient(circle, rgba(255,107,157,0.5), rgba(196,77,255,0.35));
+  box-shadow: 0 0 28px rgba(255,107,157,0.65), 0 0 50px rgba(196,77,255,0.25);
   animation: none;
 }
 .heart-bubble.wink { animation: winkAnim 0.5s ease forwards; }
@@ -405,10 +411,10 @@ html, body {
   letter-spacing: 0.08em; text-align: center;
 }
 
-/* Heart popup — PREMIUM */
+/* Heart & Moment Popups — PREMIUM */
 .heart-popup {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.72); backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(14px);
   z-index: 600; display: flex; align-items: center;
   justify-content: center; padding: 1.5rem;
 }
@@ -423,6 +429,13 @@ html, body {
               0 0 80px rgba(196,77,255,0.1) inset;
   animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
+}
+.popup-close-btn, #popup-close {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.08); border: none; border-radius: 50%;
+  width: 30px; height: 30px; color: rgba(255,255,255,0.6);
+  cursor: pointer; font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
 }
 @keyframes popIn {
   from { transform: scale(0.65); opacity: 0; }
