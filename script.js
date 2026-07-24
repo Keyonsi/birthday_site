@@ -456,13 +456,13 @@ async function endCinema() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 2 — MOMENTS (GREEN NIGHT SKY + MOON & CLOUDS + LIGHTNING)
+// ACT 2 — MOMENTS (GREEN NIGHT SKY + WHITE MOON & CLOUDS + LIGHTNING)
 // ══════════════════════════════════════════════════════════════════
 let momentsRevealed = 0;
 
 function startMoments() {
   momentsRevealed = 0;
-  createRain('moments-rain', 60, 'rgba(82,183,136,0.3)');
+  createRain('moments-rain', 65, 'rgba(82,183,136,0.3)');
   startRainSound(0.04);
 
   document.getElementById('moments-count').textContent = `0 / ${BIRTHDAY_CONFIG.moments.length} yaadein khuli...`;
@@ -494,12 +494,12 @@ function startMoments() {
     requestAnimationFrame(renderOrbs);
   })();
 
-  // Moon state setup
+  // White Moon state setup
   const moon = document.getElementById('moon-element');
   if (moon) {
-    moon.style.opacity = '0.22';
-    moon.style.transform = 'scale(0.8)';
-    moon.style.boxShadow = '0 0 15px rgba(255,215,0,0.25)';
+    moon.style.opacity = '0.35';
+    moon.style.transform = 'scale(0.85)';
+    moon.style.boxShadow = '0 0 20px rgba(255,255,255,0.4)';
     const ring = moon.querySelector('.moon-glow-ring');
     if (ring) ring.style.opacity = '0';
   }
@@ -574,13 +574,13 @@ function startMoments() {
         document.getElementById('moments-count').textContent =
           `${momentsRevealed} / ${moments.length} yaadein khuli...`;
 
-        // Illuminate moon gradually
+        // Illuminate White Moon gradually
         const progress = momentsRevealed / moments.length;
         if (moon) {
           gsap.to(moon, {
-            opacity: 0.22 + (0.78 * progress),
-            scale: 0.8 + (0.35 * progress),
-            boxShadow: `0 0 ${15 + (45 * progress)}px rgba(255,215,0,${0.25 + (0.5 * progress)})`,
+            opacity: 0.35 + (0.65 * progress),
+            scale: 0.85 + (0.3 * progress),
+            boxShadow: `0 0 ${20 + (55 * progress)}px rgba(255,255,255,${0.4 + (0.6 * progress)})`,
             duration: 0.6
           });
         }
@@ -614,7 +614,7 @@ function startMoments() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 3 — HEARTS (10 RAAZEIN + LOVE SHOWER BACKGROUND)
+// ACT 3 — HEARTS (15 RAAZEIN + LOVE SHOWER BACKGROUND)
 // ══════════════════════════════════════════════════════════════════
 let heartsRevealed = 0;
 const HEARTS = BIRTHDAY_CONFIG.hearts;
@@ -632,9 +632,9 @@ function startHearts() {
   const cx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
 
-  const flies = Array.from({ length: 22 }, () => ({
+  const flies = Array.from({ length: 24 }, () => ({
     x: Math.random(), y: Math.random(),
-    r: Math.random() * 2 + 0.8,
+    r: Math.random() * 2.2 + 0.8,
     angle: Math.random() * Math.PI * 2,
     speed: 0.0015 + Math.random() * 0.002,
     alpha: Math.random()
@@ -674,7 +674,7 @@ function startHearts() {
     requestAnimationFrame(renderHeartsCanvas);
   })();
 
-  // 10 floating hearts
+  // 15 floating hearts grid
   const arena  = document.getElementById('hearts-arena');
   arena.innerHTML = '';
   const popup   = document.getElementById('heart-popup');

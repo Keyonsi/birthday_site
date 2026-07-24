@@ -294,27 +294,27 @@ html, body {
 }
 .moon-element {
   position: relative;
-  width: 100px; height: 100px;
+  width: 105px; height: 105px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fffdf0 20%, #ffd700 80%);
-  box-shadow: 0 0 15px rgba(255,215,0,0.25);
-  opacity: 0.22;
-  transform: scale(0.8);
-  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease;
+  background: radial-gradient(circle, #ffffff 35%, #edf7f2 75%, #d4eadd 100%);
+  box-shadow: 0 0 20px rgba(255,255,255,0.4);
+  opacity: 0.35;
+  transform: scale(0.85);
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
 }
 .moon-glow-ring {
-  position: absolute; inset: -25px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 70%);
+  position: absolute; inset: -30px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
 .clouds-arena {
   position: absolute; inset: 0; z-index: 2;
 }
 .cloud-item {
   position: absolute; width: 76px; height: 46px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 24px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 1.25rem;
@@ -334,7 +334,7 @@ html, body {
   background: rgba(255,255,255,0.95);
   color: #111;
   border-color: #ffffff;
-  box-shadow: 0 0 25px rgba(255,255,255,0.9);
+  box-shadow: 0 0 28px rgba(255,255,255,0.95);
   animation: none;
 }
 .cloud-item.wink { animation: winkAnim 0.5s ease forwards; }
@@ -345,7 +345,7 @@ html, body {
 }
 
 /* ════════════════════════════════════════
-   ACT 3 — HEARTS (10 RAAZEIN + LOVE SHOWER BG)
+   ACT 3 — HEARTS (15 RAAZEIN + LOVE SHOWER BG)
 ════════════════════════════════════════ */
 #act-hearts {
   background: radial-gradient(ellipse at 40% 30%, #0a0a1e 0%, #030308 70%);
@@ -382,13 +382,14 @@ html, body {
   border: 1px dashed rgba(255,107,157,0.12);
 }
 .heart-bubble {
-  position: absolute; width: 52px; height: 52px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,107,157,0.25), rgba(196,77,255,0.15));
-  border: 1px solid rgba(255,107,157,0.35);
+  position: absolute; width: 48px; height: 48px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,157,0.3), rgba(196,77,255,0.18));
+  border: 1px solid rgba(255,107,157,0.4);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 1.35rem;
-  box-shadow: 0 0 16px rgba(255,107,157,0.2);
+  cursor: pointer; font-size: 1.25rem;
+  box-shadow: 0 0 16px rgba(255,107,157,0.25);
   animation: floatBubble var(--fDur, 3s) ease-in-out var(--fDel, 0s) infinite;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 @keyframes floatBubble {
   0%,100% { transform: translateY(0) scale(1); }
@@ -397,7 +398,11 @@ html, body {
 .heart-bubble.revealed {
   background: radial-gradient(circle, rgba(255,107,157,0.5), rgba(196,77,255,0.35));
   box-shadow: 0 0 28px rgba(255,107,157,0.65), 0 0 50px rgba(196,77,255,0.25);
-  animation: none;
+}
+.heart-bubble.dissolve {
+  opacity: 0 !important;
+  transform: scale(0) !important;
+  pointer-events: none !important;
 }
 .heart-bubble.wink { animation: winkAnim 0.5s ease forwards; }
 @keyframes winkAnim {

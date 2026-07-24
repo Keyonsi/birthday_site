@@ -123,7 +123,7 @@ const BIRTHDAY_CONFIG = {
     { icon: "😊", text: "Tumhari hasi — jo meri kamzori bhi hai aur meri jaan bhi." }
   ],
 
-  // ── HEARTS (10 floating hearts — tap to reveal) ────────────
+  // ── HEARTS (15 floating hearts — tap to reveal) ────────────
   hearts: [
     { emoji: "😄", reason: "Teri cute smile jo poora din roshan kar deti hai." },
     { emoji: "🥹", reason: "Tera bina kahe sab samajh jaana — woh meri favourite cheez hai." },
@@ -134,7 +134,12 @@ const BIRTHDAY_CONFIG = {
     { emoji: "🕊️", reason: "Birla Mandir ki seedhiyon pe bitaaye vo peaceful pal." },
     { emoji: "🌅", reason: "Office jaane se pehle milne ki vo sweet excitement." },
     { emoji: "🥰", reason: "Mujhe apna partner chunne ka tera vo pyaara sa pride." },
-    { emoji: "🌙", reason: "Raat ko aakhri 'good night' ke baad bhi tumhara ek aur message aata tha." }
+    { emoji: "🌙", reason: "Raat ko aakhri 'good night' ke baad bhi tumhara ek aur message aata tha." },
+    { emoji: "🌧️", reason: "Baarish mein tumhara mere paas aana aur chupchap rehna." },
+    { emoji: "🍟", reason: "Fries aur schezwan chutney saath mein khana." },
+    { emoji: "✨", reason: "Bina bole ek doosre ki aankhon mein dekh kar sab samajhna." },
+    { emoji: "🧸", reason: "Tera pyara sa gussa jo 2 minute mein pighal jata hai." },
+    { emoji: "💍", reason: "Har kal mein, har sapne mein sirf tera naam hona." }
   ],
 
   // ── LOVE SHOWER (after hearts) ─────────────────────────────
