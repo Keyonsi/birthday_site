@@ -173,6 +173,18 @@ Yeh sirf shuruwaat hai. ❤️
 
 — Tumhara`,
 
+
+  // ── PROPOSAL SCENE ─────────────────────────────────────────
+  proposal: {
+    dialogueLines: [
+      "Pranu...",
+      "Chahe zindagi kisi bhi taraf mudh jaaye...",
+      "Main tumhe hi chununga.",
+      "Har baar. Har janam. Hamesha."
+    ],
+    finalQuote: "I love you today, tomorrow, and forever. 💍"
+  },
+
   closingLine: "Agli zindagi ke chapter mein bhi — saath. ❤️"
 
 };
