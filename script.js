@@ -1,7 +1,12 @@
 /* ============================================================
-   MONSOON DIARIES — Linear Cinematic Engine
-   Decoy → Reveal → Gate → Cinema → Moments (Green Sky + Moon & Clouds + Lightning) →
-   Hearts (10 Raazein) → Proposal (Anime Silhouettes) → Candles → Finale
+   MONSOON DIARIES — Linear Cinematic Engine v1.0.3
+   Decoy (flip card + fireworks + countdown) →
+   Reveal → Gate →
+   Intro (safar + preload) →
+   Cinema (photos) →
+   Moments (full-screen canvas clouds + moon + lightning) →
+   Hearts (big SVG heart fill + floating) →
+   Proposal → Candles → Finale
    ============================================================ */
 'use strict';
 
@@ -174,8 +179,7 @@ function drawLightningBolt(startX, startY, endX, endY) {
   cv.height = window.innerHeight;
 
   const points = [];
-  let currX = startX;
-  let currY = startY;
+  let currX = startX, currY = startY;
   points.push({ x: currX, y: currY });
 
   const steps = 18;
@@ -189,27 +193,22 @@ function drawLightningBolt(startX, startY, endX, endY) {
   }
   points.push({ x: endX, y: endY });
 
-  // Draw glow bolt
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 4;
   ctx.shadowColor = '#52b788';
   ctx.shadowBlur = 25;
   ctx.stroke();
-
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#e0ffff';
   ctx.stroke();
   ctx.restore();
 
   gsap.to(cv, {
-    opacity: 0,
-    duration: 0.35,
+    opacity: 0, duration: 0.35,
     onComplete: () => {
       ctx.clearRect(0, 0, cv.width, cv.height);
       cv.style.opacity = '1';
@@ -241,10 +240,11 @@ function createRain(id, count = 110, color = 'rgba(174,220,180,0.3)') {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// FIREWORKS
+// FIREWORKS (reusable)
 // ══════════════════════════════════════════════════════════════════
 function launchFireworks(containerId, bursts = 5) {
   const container = document.getElementById(containerId);
+  if (!container) return;
   const colors = ['#ffd700', '#ff6b9d', '#c47bff', '#52b788', '#fff', '#ff9a9e'];
   for (let b = 0; b < bursts; b++) {
     setTimeout(() => {
@@ -268,21 +268,137 @@ function launchFireworks(containerId, bursts = 5) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// DECOY → REVEAL → GATE
+// DECOY — FLIP CARD + BALLOON BURST + FIREWORKS + COUNTDOWN RING
 // ══════════════════════════════════════════════════════════════════
-document.getElementById('decoy-btn').addEventListener('click', startReveal);
+let decoyCountdownInterval = null;
+
+document.getElementById('decoy-btn').addEventListener('click', openDecoyCard);
+
+function openDecoyCard() {
+  const wrapper = document.getElementById('decoy-flip-wrapper');
+  const balloons = document.getElementById('decoy-balloons');
+
+  // Unlock audio early
+  try { getACtx(); } catch (e) { }
+
+  // 1. Flip the card
+  wrapper.classList.add('flipped');
+
+  // 2. Burst the balloons upward after 400ms
+  setTimeout(() => {
+    Array.from(balloons.children).forEach((b, i) => {
+      setTimeout(() => b.classList.add('balloon-fly'), i * 120);
+    });
+  }, 400);
+
+  // 3. Start fireworks on the decoy canvas after 600ms
+  setTimeout(() => {
+    startDecoyFireworks();
+  }, 600);
+
+  // 4. Start the SVG countdown ring after 800ms
+  setTimeout(() => {
+    startDecoyCountdown();
+  }, 800);
+}
+
+function startDecoyFireworks() {
+  const cv = document.getElementById('decoy-fireworks-canvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+
+  const colors = ['#ffd700', '#ff6b9d', '#c47bff', '#ff9a9e', '#fff', '#f472b6'];
+
+  // Burst 4 times over 3.2 seconds
+  for (let b = 0; b < 4; b++) {
+    setTimeout(() => {
+      if (cv.style.display === 'none') return;
+      const bx = 15 + Math.random() * 70;
+      const by = 8 + Math.random() * 35;
+      const numParticles = 28;
+      const particles = [];
+      for (let i = 0; i < numParticles; i++) {
+        const angle = (i / numParticles) * Math.PI * 2;
+        const speed = 1.8 + Math.random() * 2.5;
+        particles.push({
+          x: cv.width * bx / 100,
+          y: cv.height * by / 100,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          r: 2.5 + Math.random() * 2
+        });
+      }
+
+      let frame = 0;
+      function animateBurst() {
+        if (frame++ > 55) return;
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.04; // gravity
+          p.alpha -= 0.018;
+          p.vx *= 0.97;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + Math.max(0, Math.floor(p.alpha * 255)).toString(16).padStart(2, '0');
+          ctx.fill();
+        });
+        requestAnimationFrame(animateBurst);
+      }
+      animateBurst();
+    }, b * 800);
+  }
+}
+
+function startDecoyCountdown() {
+  const ringProgress = document.getElementById('decoy-ring-progress');
+  const continueBtn = document.getElementById('decoy-continue-btn');
+  const hint = document.getElementById('decoy-ring-hint');
+  if (!ringProgress) return;
+
+  const circumference = 213.6; // 2 * PI * 34
+  const totalMs = 8000;
+  const startTime = Date.now();
+
+  // Animate the ring progress
+  decoyCountdownInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / totalMs, 1);
+    // dashoffset goes from 213.6 (empty) → 0 (full)
+    ringProgress.style.strokeDashoffset = circumference * (1 - progress);
+
+    if (progress >= 1) {
+      clearInterval(decoyCountdownInterval);
+      if (hint) hint.textContent = 'Chalte hain! 🚀';
+      triggerDecoyReveal();
+    }
+  }, 50);
+
+  // Button also triggers early
+  continueBtn.addEventListener('click', () => {
+    clearInterval(decoyCountdownInterval);
+    triggerDecoyReveal();
+  }, { once: true });
+}
+
+function triggerDecoyReveal() {
+  startReveal();
+}
 
 async function startReveal() {
-  // Force unlock Web Audio and play main track silently
+  // Force unlock Web Audio and start music
   try {
-    const ctx = getACtx();
+    getACtx();
     bgMusicPlaying = true;
     const mainMusic = document.getElementById('music-main');
     if (mainMusic) {
       mainMusic.volume = 0;
-      mainMusic.play().then(() => {
-        currentAudio = mainMusic;
-      }).catch(() => { });
+      mainMusic.play().then(() => { currentAudio = mainMusic; }).catch(() => { });
     }
   } catch (e) { }
 
@@ -291,7 +407,6 @@ async function startReveal() {
   await new Promise(r => setTimeout(r, 700));
   decoy.style.display = 'none';
 
-  // 1.5s Suspense Delay
   await new Promise(r => setTimeout(r, 1500));
 
   const overlay = document.getElementById('reveal-overlay');
@@ -349,10 +464,83 @@ function openGate() {
 
       setTimeout(() => {
         gate.style.display = 'none';
-        startCinema();
+        startIntro();
       }, 700);
     }, 1000);
   }, 500);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ACT 0.5 — SAFAR INTRO (with background preload)
+// ══════════════════════════════════════════════════════════════════
+function preloadAllPhotos() {
+  const allPhotos = [];
+  (BIRTHDAY_CONFIG.scenes || []).forEach(s => {
+    (s.photos || []).forEach(p => allPhotos.push(p));
+  });
+  allPhotos.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
+function startIntro() {
+  document.getElementById('act-intro').classList.remove('ui-hidden');
+
+  // Preload all cinema photos silently in background
+  preloadAllPhotos();
+
+  // Starfield canvas
+  const cv = document.getElementById('intro-canvas');
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+
+  const stars = Array.from({ length: 120 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.5 + 0.3,
+    alpha: Math.random(),
+    speed: (Math.random() * 0.008 + 0.002) * (Math.random() > 0.5 ? 1 : -1)
+  }));
+
+  // A few large colored orbs
+  const orbs = [
+    { x: 0.2, y: 0.3, r: 120, hue: 270, alpha: 0.04 },
+    { x: 0.8, y: 0.6, r: 140, hue: 330, alpha: 0.035 },
+    { x: 0.5, y: 0.8, r: 90, hue: 200, alpha: 0.03 }
+  ];
+
+  (function renderIntroCanvas() {
+    if (document.getElementById('act-intro').classList.contains('ui-hidden')) return;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height;
+
+    // Orbs
+    orbs.forEach(o => {
+      const g = ctx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r);
+      g.addColorStop(0, `hsla(${o.hue},70%,55%,${o.alpha})`);
+      g.addColorStop(1, `hsla(${o.hue},70%,55%,0)`);
+      ctx.beginPath(); ctx.arc(o.x * W, o.y * H, o.r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+    });
+
+    // Stars
+    stars.forEach(s => {
+      s.alpha += s.speed;
+      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
+      ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,240,255,${Math.abs(s.alpha) * 0.75})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(renderIntroCanvas);
+  })();
+
+  // Begin button
+  document.getElementById('intro-begin-btn').addEventListener('click', () => {
+    sfxPlay('chime');
+    switchAct('act-intro', 'act-cinema', startCinema);
+  }, { once: true });
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -468,58 +656,75 @@ async function endCinema() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 2 — MOMENTS (GREEN NIGHT SKY + WHITE MOON & CLOUDS + LIGHTNING)
+// ACT 2 — MOMENTS: Full-screen canvas (Sky + Moon + Clouds + Lightning)
 // ══════════════════════════════════════════════════════════════════
 let momentsRevealed = 0;
 
+// Cloud data — positions as fractions of canvas size
+// Clouds are painted on the moments-canvas using arc-based shapes
+// We store each cloud as { cx, cy, scale, revealed, done }
+let cloudData = [];
+
 function startMoments() {
   momentsRevealed = 0;
-  createRain('moments-rain', 130, 'rgba(82,183,136,0.3)');
+  const moments = BIRTHDAY_CONFIG.moments;
+  document.getElementById('moments-count').textContent = `0 / ${moments.length} yaadein khuli...`;
+
+  createRain('moments-rain', 130, 'rgba(82,183,136,0.28)');
   startRainSound(0.04);
 
-  document.getElementById('moments-count').textContent = `0 / ${BIRTHDAY_CONFIG.moments.length} yaadein khuli...`;
-
-  // Soft greenish orb canvas
   const cv = document.getElementById('moments-canvas');
-  const cx = cv.getContext('2d');
-  cv.width = window.innerWidth; cv.height = window.innerHeight;
-  const orbs = Array.from({ length: 5 }, () => ({
-    x: Math.random(), y: Math.random(), r: 70 + Math.random() * 110,
-    alpha: 0.02 + Math.random() * 0.025,
-    vx: (Math.random() - 0.5) * 0.0002, vy: (Math.random() - 0.5) * 0.0001
-  }));
-  (function renderOrbs() {
-    if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
-    cx.clearRect(0, 0, cv.width, cv.height);
-    const W = cv.width, H = cv.height;
-    orbs.forEach(o => {
-      o.x = Math.max(0, Math.min(1, o.x + o.vx));
-      o.y = Math.max(0, Math.min(1, o.y + o.vy));
-      if (o.x <= 0 || o.x >= 1) o.vx = -o.vx;
-      if (o.y <= 0 || o.y >= 1) o.vy = -o.vy;
-      const g = cx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r);
-      g.addColorStop(0, `rgba(82,183,136,${o.alpha})`);
-      g.addColorStop(1, 'rgba(82,183,136,0)');
-      cx.beginPath(); cx.arc(o.x * W, o.y * H, o.r, 0, Math.PI * 2);
-      cx.fillStyle = g; cx.fill();
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  const W = cv.width, H = cv.height;
+
+  // ── Moon definition (upper-center-right) ──
+  const moon = {
+    cx: W * 0.62,
+    cy: H * 0.28,
+    r: Math.min(W, H) * 0.095,
+    glow: 0.3,    // 0 = faint → 1 = full
+    brightness: 1
+  };
+
+  // ── Build cloud positions (8 clouds over moon area) ──
+  cloudData = [];
+  const rawPositions = [
+    { xf: 0.18, yf: 0.16 }, { xf: 0.48, yf: 0.10 }, { xf: 0.72, yf: 0.15 },
+    { xf: 0.30, yf: 0.28 }, { xf: 0.58, yf: 0.22 }, { xf: 0.82, yf: 0.28 },
+    { xf: 0.22, yf: 0.40 }, { xf: 0.68, yf: 0.38 }
+  ];
+  moments.forEach((m, i) => {
+    const pos = rawPositions[i % rawPositions.length];
+    cloudData.push({
+      idx: i,
+      cx: W * pos.xf,
+      cy: H * pos.yf,
+      scale: 0.7 + Math.random() * 0.5,
+      alpha: 0.55 + Math.random() * 0.25,
+      driftOffset: Math.random() * Math.PI * 2,
+      driftSpeed: 0.0008 + Math.random() * 0.0006,
+      lit: false,       // becomes true when tapped
+      litAlpha: 0,      // 0→1 glow when tapped
+      revealed: false,  // after reveal, show icon
+      done: false,      // touch handled once
+      icon: m.icon,
+      moment: m
     });
-    requestAnimationFrame(renderOrbs);
-  })();
+  });
 
-  // White Moon state setup
-  const moon = document.getElementById('moon-element');
-  if (moon) {
-    moon.style.opacity = '0.32';
-    moon.style.transform = 'scale(0.8)';
-    moon.style.boxShadow = '0 0 20px rgba(255,255,255,0.4)';
-    const ring = moon.querySelector('.moon-glow-ring');
-    if (ring) ring.style.opacity = '0';
-    const flare = document.getElementById('moon-flare');
-    if (flare) { flare.style.opacity = '0'; }
-  }
+  // ── Fireflies ──
+  const flies = Array.from({ length: 14 }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.8 + 0.8,
+    angle: Math.random() * Math.PI * 2,
+    speed: 0.35 + Math.random() * 0.55,
+    alpha: Math.random()
+  }));
 
-  // Ambient distant lightning — occasional soft flashes for realism,
-  // independent of tapping clouds
+  // ── Ambient lightning loop ──
   (function ambientLightning() {
     if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
     const flash = document.getElementById('lightning-flash');
@@ -527,141 +732,262 @@ function startMoments() {
     setTimeout(() => {
       if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
       gsap.timeline()
-        .to(flash, { opacity: 0.35, duration: 0.06 })
+        .to(flash, { opacity: 0.3, duration: 0.06 })
         .to(flash, { opacity: 0, duration: 0.18 });
       ambientLightning();
     }, delay);
   })();
 
-  // Populate 8 floating clouds in Act 2
-  const arena = document.getElementById('clouds-arena');
-  arena.innerHTML = '';
+  // ── Draw helpers ──
+  function drawCloud(ctx, cx, cy, scale, alpha, isLit, litAlpha) {
+    const s = scale;
+    const baseAlpha = isLit ? Math.min(1, alpha + litAlpha * 0.45) : alpha;
+
+    ctx.save();
+    ctx.globalAlpha = baseAlpha;
+
+    // Cloud glow halo if lit
+    if (litAlpha > 0.01) {
+      const glowR = 90 * s;
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+      g.addColorStop(0, `rgba(255,255,255,${litAlpha * 0.25})`);
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.globalAlpha = baseAlpha;
+    }
+
+    const cloudColor = isLit
+      ? `rgba(240,248,255,${Math.min(0.95, baseAlpha + litAlpha * 0.2)})`
+      : `rgba(190,215,200,${baseAlpha})`;
+
+    ctx.fillStyle = cloudColor;
+    ctx.shadowColor = isLit ? 'rgba(255,255,255,0.5)' : 'rgba(100,180,140,0.2)';
+    ctx.shadowBlur = isLit ? 22 : 8;
+
+    // Multi-circle cloud body
+    ctx.beginPath(); ctx.arc(cx,      cy,      38 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 30 * s, cy + 8 * s, 28 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 30 * s, cy + 8 * s, 26 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 16 * s, cy - 24 * s, 24 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 18 * s, cy - 20 * s, 20 * s, 0, Math.PI * 2); ctx.fill();
+    // Flat bottom fill
+    ctx.beginPath();
+    ctx.rect(cx - 68 * s, cy, 136 * s, 30 * s);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function drawMoon(ctx, cx, cy, r, glowFrac, brightness) {
+    ctx.save();
+    // Outer glow
+    const glowR = r + 55 * glowFrac;
+    const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, glowR);
+    glow.addColorStop(0, `rgba(255,255,230,${0.25 + glowFrac * 0.55})`);
+    glow.addColorStop(1, 'rgba(255,255,230,0)');
+    ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+    ctx.fillStyle = glow; ctx.fill();
+
+    // Moon disk
+    const moonGrad = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, 0, cx, cy, r);
+    moonGrad.addColorStop(0, `rgba(255,255,248,${0.35 + glowFrac * 0.65})`);
+    moonGrad.addColorStop(0.6, `rgba(240,245,230,${0.28 + glowFrac * 0.52})`);
+    moonGrad.addColorStop(1, `rgba(200,220,200,${0.15 + glowFrac * 0.35})`);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = moonGrad; ctx.fill();
+
+    // Subtle surface craters
+    if (glowFrac > 0.15) {
+      ctx.globalAlpha = 0.07 * glowFrac;
+      ctx.fillStyle = 'rgba(150,180,150,1)';
+      [[cx + r * 0.2, cy - r * 0.1, r * 0.08],
+       [cx - r * 0.25, cy + r * 0.15, r * 0.06],
+       [cx + r * 0.05, cy + r * 0.25, r * 0.05]].forEach(([x, y, cr]) => {
+        ctx.beginPath(); ctx.arc(x, y, cr, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
+  }
+
+  let frameTime = 0;
+
+  // ── Main render loop ──
+  (function render(ts) {
+    if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
+    frameTime = ts;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Sky gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+    skyGrad.addColorStop(0, '#010e04');
+    skyGrad.addColorStop(0.5, '#030c06');
+    skyGrad.addColorStop(1, '#020a05');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Moon
+    drawMoon(ctx, moon.cx, moon.cy, moon.r, moon.glow, moon.brightness);
+
+    // Clouds (behind moon are drawn first, clouds in front second)
+    // Sort: draw revealed clouds last (they glow brighter)
+    const sorted = [...cloudData].sort((a, b) => (a.revealed ? 1 : 0) - (b.revealed ? 1 : 0));
+    sorted.forEach(c => {
+      // Gentle horizontal drift
+      const drift = Math.sin(ts * c.driftSpeed + c.driftOffset) * 8;
+      const drawX = c.cx + drift;
+      // Fade litAlpha back down over time
+      if (c.lit && c.litAlpha > 0 && !c.revealed) c.litAlpha = Math.min(1, c.litAlpha);
+      if (c.revealed) c.litAlpha = Math.min(1, (c.litAlpha || 0) + 0.01);
+      drawCloud(ctx, drawX, c.cy, c.scale, c.alpha, c.lit || c.revealed, c.litAlpha || 0);
+
+      // Icon text for revealed clouds
+      if (c.revealed) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (c.litAlpha || 0) * 1.5);
+        ctx.font = `${Math.round(26 * c.scale)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(c.icon, drawX, c.cy - 2);
+        ctx.restore();
+      }
+    });
+
+    // Fireflies
+    flies.forEach(f => {
+      f.angle += (Math.random() - 0.5) * 0.08;
+      f.x = Math.max(0, Math.min(W, f.x + Math.cos(f.angle) * f.speed));
+      f.y = Math.max(0, Math.min(H, f.y + Math.sin(f.angle) * f.speed));
+      f.alpha = 0.25 + Math.abs(Math.sin(ts * 0.002 + f.angle)) * 0.75;
+      const fg = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 5);
+      fg.addColorStop(0, `rgba(244,220,80,${f.alpha})`);
+      fg.addColorStop(1, 'rgba(244,162,97,0)');
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = fg; ctx.fill();
+    });
+
+    requestAnimationFrame(render);
+  })(0);
+
+  // ── Touch/click detection on canvas ──
   const popup = document.getElementById('moment-popup');
   const popIcon = document.getElementById('moment-popup-icon');
   const popMsg = document.getElementById('moment-popup-msg');
   document.getElementById('moment-popup-close').onclick = () => popup.classList.add('ui-hidden');
 
-  const moments = BIRTHDAY_CONFIG.moments;
-  const positions = [
-    { l: 8, t: 20 }, { l: 26, t: 8 }, { l: 58, t: 12 }, { l: 78, t: 22 },
-    { l: 10, t: 62 }, { l: 32, t: 70 }, { l: 60, t: 64 }, { l: 82, t: 58 }
-  ];
-
-  function triggerLightningStrike(cloudElem) {
-    const flash = document.getElementById('lightning-flash');
-    const act = document.getElementById('act-moments');
-    const rect = cloudElem.getBoundingClientRect();
-
-    // Draw procedural lightning bolt on canvas from top of screen to cloud position
-    drawLightningBolt(rect.left + rect.width / 2, 0, rect.left + rect.width / 2, rect.top + rect.height / 2);
-
-    sfxPlay('thunder');
-
-    // Flash
-    gsap.timeline()
-      .to(flash, { opacity: 0.95, duration: 0.05 })
-      .to(flash, { opacity: 0, duration: 0.08 })
-      .to(flash, { opacity: 0.7, duration: 0.04 })
-      .to(flash, { opacity: 0, duration: 0.15 });
-
-    // Shake
-    gsap.timeline()
-      .to(act, { x: -8, y: 5, duration: 0.04 })
-      .to(act, { x: 7, y: -6, duration: 0.04 })
-      .to(act, { x: -5, y: 3, duration: 0.04 })
-      .to(act, { x: 4, y: -2, duration: 0.04 })
-      .to(act, { x: 0, y: 0, duration: 0.04 });
+  function findCloudAt(x, y) {
+    // Hit radius for each cloud: ~60*scale px
+    for (let i = cloudData.length - 1; i >= 0; i--) {
+      const c = cloudData[i];
+      const drift = Math.sin(frameTime * c.driftSpeed + c.driftOffset) * 8;
+      const dx = x - (c.cx + drift);
+      const dy = y - c.cy;
+      const hitR = 60 * c.scale;
+      if (dx * dx + dy * dy < hitR * hitR) return c;
+    }
+    return null;
   }
 
-  moments.forEach((m, i) => {
-    const cItem = document.createElement('div');
-    cItem.className = 'cloud-item';
-    cItem.textContent = '☁️';
-    cItem.style.left = `calc(${positions[i % positions.length].l}% - 38px)`;
-    cItem.style.top = `calc(${positions[i % positions.length].t}% - 23px)`;
-    cItem.style.setProperty('--fDur', `${3.2 + Math.random() * 1.5}s`);
-    cItem.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
-    cItem.style.setProperty('--fx', `${(Math.random() - 0.5) * 30}px`);
+  function onMomentsClick(e) {
+    e.preventDefault();
+    const rect = cv.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
-    let done = false;
-    cItem.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!done) {
-        done = true;
-        momentsRevealed++;
+    const cloud = findCloudAt(x, y);
+    if (!cloud) return;
 
-        triggerLightningStrike(cItem);
-        burstSpark(e.clientX, e.clientY, 12);
+    if (cloud.done) {
+      // Re-show popup for already revealed cloud
+      popIcon.textContent = cloud.icon;
+      popMsg.textContent = cloud.moment.text;
+      popup.classList.remove('ui-hidden');
+      return;
+    }
 
-        cItem.classList.add('wink');
-        setTimeout(() => {
-          cItem.textContent = m.icon;
-          cItem.classList.remove('wink');
-          cItem.classList.add('revealed');
-          // NOTE: no longer setting animation to 'none' — the cloud
-          // keeps drifting/floating even after it's revealed
-        }, 450);
+    cloud.done = true;
+    cloud.lit = true;
+    cloud.litAlpha = 1;
+    momentsRevealed++;
 
-        document.getElementById('moments-count').textContent =
-          `${momentsRevealed} / ${moments.length} yaadein khuli...`;
+    // Lightning strike from top to this cloud
+    const drift = Math.sin(frameTime * cloud.driftSpeed + cloud.driftOffset) * 8;
+    drawLightningBolt(cloud.cx + drift, 0, cloud.cx + drift, cloud.cy);
+    sfxPlay('thunder');
+    burstSpark(clientX, clientY, 10);
 
-        // Illuminate White Moon gradually, with a little brightness
-        // burst each time so every reveal visibly adds more light
-        const progress = momentsRevealed / moments.length;
-        if (moon) {
-          gsap.to(moon, {
-            opacity: 0.32 + (0.68 * progress),
-            scale: 0.8 + (0.5 * progress),
-            boxShadow: `0 0 ${22 + (70 * progress)}px rgba(255,255,255,${0.45 + (0.55 * progress)})`,
-            duration: 0.7,
-            ease: 'power2.out'
-          });
-          // Quick brightness pulse burst on top of the gradual glow
-          gsap.fromTo(moon, { filter: 'brightness(1.9)' }, { filter: 'brightness(1)', duration: 0.9, ease: 'power2.out' });
-        }
+    // Flash
+    const flash = document.getElementById('lightning-flash');
+    const act = document.getElementById('act-moments');
+    gsap.timeline()
+      .to(flash, { opacity: 0.9, duration: 0.05 })
+      .to(flash, { opacity: 0, duration: 0.08 })
+      .to(flash, { opacity: 0.6, duration: 0.04 })
+      .to(flash, { opacity: 0, duration: 0.15 });
 
-        // Show moment popup
-        setTimeout(() => {
-          popIcon.textContent = m.icon;
-          popMsg.textContent = m.text;
-          popup.classList.remove('ui-hidden');
-        }, 400);
+    gsap.timeline()
+      .to(act, { x: -7, y: 4, duration: 0.04 })
+      .to(act, { x: 6, y: -5, duration: 0.04 })
+      .to(act, { x: -4, y: 2, duration: 0.04 })
+      .to(act, { x: 0, y: 0, duration: 0.04 });
 
-        if (momentsRevealed === moments.length) {
-          const ring = moon.querySelector('.moon-glow-ring');
-          if (ring) gsap.to(ring, { opacity: 1, duration: 0.8 });
+    // Reveal cloud
+    setTimeout(() => { cloud.revealed = true; }, 350);
 
-          setTimeout(() => popup.classList.add('ui-hidden'), 2400);
+    // Update count
+    document.getElementById('moments-count').textContent =
+      `${momentsRevealed} / ${moments.length} yaadein khuli...`;
 
-          // Full brightness — the moon flares out across the whole
-          // screen right before the scene changes
-          setTimeout(() => {
-            const flare = document.getElementById('moon-flare');
-            if (flare) {
-              gsap.to(flare, { opacity: 1, scale: 2.4, duration: 1.1, ease: 'power2.out' });
-            }
-            const flash = document.getElementById('lightning-flash');
-            gsap.to(flash, { opacity: 0.9, duration: 0.9, ease: 'power1.in' });
-          }, 2600);
+    // Grow moon's glow
+    moon.glow = Math.min(1, momentsRevealed / moments.length);
 
+    // Show popup
+    setTimeout(() => {
+      popIcon.textContent = cloud.icon;
+      popMsg.textContent = cloud.moment.text;
+      popup.classList.remove('ui-hidden');
+    }, 400);
+
+    if (momentsRevealed === moments.length) {
+      // All revealed — show transition message
+      setTimeout(() => popup.classList.add('ui-hidden'), 2400);
+
+      setTimeout(() => {
+        const flash2 = document.getElementById('lightning-flash');
+        gsap.to(flash2, { opacity: 0.9, duration: 1.1, ease: 'power1.in' });
+      }, 2600);
+
+      setTimeout(() => {
+        // Show the transition text overlay
+        const transMsg = document.getElementById('moments-transition-msg');
+        if (transMsg) {
+          transMsg.classList.remove('ui-hidden');
           setTimeout(() => {
             stopRainSound();
             switchAct('act-moments', 'act-hearts', startHearts);
-          }, 3600);
+          }, 2800);
+        } else {
+          stopRainSound();
+          switchAct('act-moments', 'act-hearts', startHearts);
         }
-      } else {
-        popIcon.textContent = m.icon;
-        popMsg.textContent = m.text;
-        popup.classList.remove('ui-hidden');
-      }
-    });
+      }, 3600);
+    }
+  }
 
-    arena.appendChild(cItem);
-  });
+  cv.addEventListener('click', onMomentsClick);
+  cv.addEventListener('touchstart', onMomentsClick, { passive: false });
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 3 — HEARTS (15 RAAZEIN + LOVE SHOWER BACKGROUND)
+// ACT 3 — HEARTS: Big SVG heart fill + floating hearts
 // ══════════════════════════════════════════════════════════════════
 let heartsRevealed = 0;
 const HEARTS = BIRTHDAY_CONFIG.hearts;
@@ -670,16 +996,16 @@ function startHearts() {
   heartsRevealed = 0;
   document.getElementById('hearts-count').textContent = `0 / ${HEARTS.length} raazein khuli...`;
 
-  createRain('hearts-rain', 95, 'rgba(255,107,157,0.25)');
+  createRain('hearts-rain', 95, 'rgba(255,107,157,0.22)');
   startRainSound(0.03);
   startLoveShowerBg();
 
-  // Firefly + aurora canvas
+  // Background: purple orbs + fireflies on canvas
   const cv = document.getElementById('hearts-canvas');
-  const cx = cv.getContext('2d');
+  const ctx = cv.getContext('2d');
   cv.width = window.innerWidth; cv.height = window.innerHeight;
 
-  const flies = Array.from({ length: 24 }, () => ({
+  const flies = Array.from({ length: 22 }, () => ({
     x: Math.random(), y: Math.random(),
     r: Math.random() * 2.2 + 0.8,
     angle: Math.random() * Math.PI * 2,
@@ -694,56 +1020,62 @@ function startHearts() {
 
   (function renderHeartsCanvas() {
     if (document.getElementById('act-hearts').classList.contains('ui-hidden')) return;
-    cx.clearRect(0, 0, cv.width, cv.height);
+    ctx.clearRect(0, 0, cv.width, cv.height);
     const W = cv.width, H = cv.height;
     orbs.forEach(o => {
       o.x = Math.max(0, Math.min(1, o.x + o.vx));
       o.y = Math.max(0, Math.min(1, o.y + o.vy));
       if (o.x <= 0 || o.x >= 1) o.vx = -o.vx;
       if (o.y <= 0 || o.y >= 1) o.vy = -o.vy;
-      const g = cx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r);
+      const g = ctx.createRadialGradient(o.x * W, o.y * H, 0, o.x * W, o.y * H, o.r);
       g.addColorStop(0, `rgba(196,77,255,${o.alpha})`);
       g.addColorStop(1, 'rgba(196,77,255,0)');
-      cx.beginPath(); cx.arc(o.x * W, o.y * H, o.r, 0, Math.PI * 2);
-      cx.fillStyle = g; cx.fill();
+      ctx.beginPath(); ctx.arc(o.x * W, o.y * H, o.r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
     });
     flies.forEach(f => {
       f.angle += (Math.random() - 0.5) * 0.1;
       f.x = Math.max(0, Math.min(1, f.x + Math.cos(f.angle) * f.speed));
       f.y = Math.max(0, Math.min(1, f.y + Math.sin(f.angle) * f.speed));
       f.alpha = 0.3 + Math.random() * 0.7;
-      const g = cx.createRadialGradient(f.x * W, f.y * H, 0, f.x * W, f.y * H, f.r * 5);
-      g.addColorStop(0, `rgba(244,220,80,${f.alpha})`);
-      g.addColorStop(1, 'rgba(244,162,97,0)');
-      cx.beginPath(); cx.arc(f.x * W, f.y * H, f.r, 0, Math.PI * 2);
-      cx.fillStyle = g; cx.fill();
+      const fg = ctx.createRadialGradient(f.x * W, f.y * H, 0, f.x * W, f.y * H, f.r * 5);
+      fg.addColorStop(0, `rgba(244,220,80,${f.alpha})`);
+      fg.addColorStop(1, 'rgba(244,162,97,0)');
+      ctx.beginPath(); ctx.arc(f.x * W, f.y * H, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = fg; ctx.fill();
     });
     requestAnimationFrame(renderHeartsCanvas);
   })();
 
-  // 15 floating hearts grid
-  const arena = document.getElementById('hearts-arena');
-  arena.innerHTML = '';
+  // ── Spawn 15 floating heart bubbles across the full screen ──
+  const floatingLayer = document.getElementById('hearts-floating-layer');
+  floatingLayer.innerHTML = '';
+
   const popup = document.getElementById('heart-popup');
   const popEmoji = document.getElementById('popup-emoji');
   const popMsg = document.getElementById('popup-msg');
   document.getElementById('popup-close').onclick = () => popup.classList.add('ui-hidden');
 
-  const positions = [
-    { l: 6, t: 12 }, { l: 26, t: 8 }, { l: 48, t: 14 }, { l: 70, t: 8 }, { l: 88, t: 16 },
-    { l: 12, t: 38 }, { l: 32, t: 44 }, { l: 54, t: 36 }, { l: 74, t: 42 }, { l: 90, t: 38 },
-    { l: 8, t: 68 }, { l: 28, t: 72 }, { l: 50, t: 66 }, { l: 70, t: 74 }, { l: 86, t: 68 }
+  // Scattered positions across the whole screen (not a grid)
+  const spawnPositions = [
+    { l: 5,  t: 8  }, { l: 25, t: 5  }, { l: 50, t: 10 }, { l: 72, t: 6  }, { l: 88, t: 12 },
+    { l: 10, t: 30 }, { l: 35, t: 35 }, { l: 60, t: 28 }, { l: 80, t: 32 }, { l: 92, t: 22 },
+    { l: 3,  t: 55 }, { l: 22, t: 60 }, { l: 48, t: 52 }, { l: 70, t: 58 }, { l: 88, t: 50 }
   ];
 
   HEARTS.forEach((h, i) => {
-    const pos = positions[i % positions.length];
+    const pos = spawnPositions[i % spawnPositions.length];
     const bbl = document.createElement('div');
     bbl.className = 'heart-bubble';
     bbl.textContent = '❤️';
-    bbl.style.left = `calc(${pos.l}% - 24px)`;
-    bbl.style.top = `calc(${pos.t}% - 24px)`;
-    bbl.style.setProperty('--fDur', `${2.5 + Math.random() * 1.5}s`);
+    // Position as % of viewport, subtract half bubble size (approx 28px)
+    bbl.style.left = `calc(${pos.l}% - 28px)`;
+    bbl.style.top  = `calc(${pos.t}% - 28px)`;
+    bbl.style.setProperty('--fDur', `${2.5 + Math.random() * 1.8}s`);
     bbl.style.setProperty('--fDel', `${Math.random() * 1.5}s`);
+    bbl.style.setProperty('--dDur', `${5 + Math.random() * 4}s`);
+    bbl.style.setProperty('--dDel', `${Math.random() * 3}s`);
+    bbl.style.setProperty('--driftAmt', `${(Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 25)}px`);
 
     let done = false;
     bbl.addEventListener('click', e => {
@@ -765,21 +1097,52 @@ function startHearts() {
         document.getElementById('hearts-count').textContent =
           `${heartsRevealed} / ${HEARTS.length} raazein khuli...`;
 
+        // Update big heart fill
+        updateBigHeart(heartsRevealed, HEARTS.length);
+
+        // Show center photo after 7+ reveals
+        if (heartsRevealed >= 7) {
+          const photoWrap = document.getElementById('heart-center-photo-wrap');
+          if (photoWrap && !photoWrap.classList.contains('visible')) {
+            photoWrap.classList.add('visible');
+          }
+        }
+
         setTimeout(() => {
           popEmoji.textContent = h.emoji;
           popMsg.textContent = h.reason;
           popup.classList.remove('ui-hidden');
-
-          // Softly dissolve/fade out heart from arena
           bbl.classList.add('dissolve');
         }, 300);
 
         if (heartsRevealed === HEARTS.length) {
+          const bigContainer = document.getElementById('big-heart-container');
+          if (bigContainer) bigContainer.classList.add('fully-revealed');
+
           setTimeout(() => popup.classList.add('ui-hidden'), 2200);
+
+          // Show achievement
+          setTimeout(() => {
+            const achievement = document.getElementById('heart-achievement');
+            if (achievement) {
+              achievement.classList.remove('ui-hidden');
+              gsap.fromTo(achievement.querySelector('.achievement-inner'),
+                { scale: 0.6, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1, 0.6)' });
+            }
+          }, 2500);
+
+          // Pink flash transition
+          setTimeout(() => {
+            const act = document.getElementById('act-hearts');
+            gsap.to(act, { filter: 'brightness(3) saturate(2)', duration: 0.5,
+              onComplete: () => gsap.set(act, { filter: '' }) });
+          }, 4500);
+
           setTimeout(() => {
             stopRainSound();
             switchAct('act-hearts', 'act-proposal', startProposal);
-          }, 2800);
+          }, 5000);
         }
       } else {
         popEmoji.textContent = h.emoji;
@@ -787,8 +1150,28 @@ function startHearts() {
         popup.classList.remove('ui-hidden');
       }
     });
-    arena.appendChild(bbl);
+
+    floatingLayer.appendChild(bbl);
   });
+}
+
+// Update the big SVG heart fill (y attribute of the fill rect slides up)
+function updateBigHeart(revealed, total) {
+  const fillRect = document.getElementById('heart-fill-rect');
+  const outline = document.querySelector('.big-heart-outline');
+  if (!fillRect) return;
+
+  const progress = revealed / total; // 0 → 1
+  // heart viewBox height=180, fill rect starts at y=180 (empty) → y=0 (full)
+  const newY = 180 * (1 - progress);
+  fillRect.setAttribute('y', newY);
+
+  // Brighten outline
+  if (outline) {
+    const strokeAlpha = 0.4 + progress * 0.55;
+    outline.style.stroke = `rgba(255,107,157,${strokeAlpha})`;
+    outline.style.strokeWidth = 1.5 + progress * 1.5;
+  }
 }
 
 function startLoveShowerBg() {
@@ -848,13 +1231,11 @@ function startProposal() {
     requestAnimationFrame(renderAurora);
   })();
 
-  // Silhouette walks in
   setTimeout(() => {
     const silWrap = document.getElementById('silhouette-wrap');
     if (silWrap) silWrap.classList.add('in');
   }, 300);
 
-  // Typewriter dialogue
   const cfg = BIRTHDAY_CONFIG.proposal;
   const lines = cfg.dialogueLines || [];
   let lineIdx = 0;
@@ -872,15 +1253,12 @@ function startProposal() {
   }
   function nextLine() {
     if (lineIdx >= lines.length) {
-      // Trigger kneeling silhouette animation
       const standing = document.querySelector('.boy-standing');
       const kneeling = document.querySelector('.boy-kneeling');
       if (standing && kneeling) {
         gsap.to(standing, { opacity: 0, scale: 0.95, duration: 0.5 });
         gsap.fromTo(kneeling, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.6, delay: 0.1 });
       }
-
-      // Show final quote then ring
       setTimeout(() => {
         textEl.textContent = cfg.finalQuote;
         gsap.fromTo(document.getElementById('proposal-box'),
@@ -1033,11 +1411,7 @@ function startFinale() {
 
   const replayBtn = document.getElementById('replay-btn');
   if (replayBtn) {
-    replayBtn.addEventListener('click', () => {
-      // Simplest, most reliable way to restart the whole linear
-      // experience from the decoy screen again
-      window.location.reload();
-    });
+    replayBtn.addEventListener('click', () => { window.location.reload(); });
   }
 }
 
@@ -1058,7 +1432,7 @@ function startLanterns() {
   })();
 }
 
-// Canvas resize listener
+// Canvas resize
 window.addEventListener('resize', () => {
   document.querySelectorAll('canvas').forEach(cv => {
     cv.width = window.innerWidth;

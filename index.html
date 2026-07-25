@@ -20,16 +20,54 @@
 
   <!-- ══ DECOY ══════════════════════════════════════════════════════ -->
   <div id="decoy-site">
-    <div class="decoy-balloons" aria-hidden="true">
-      <span>🎈</span><span>🎉</span><span>🎈</span><span>🎊</span><span>🎈</span>
+    <canvas id="decoy-fireworks-canvas" class="decoy-fw-canvas"></canvas>
+
+    <div class="decoy-balloons" id="decoy-balloons" aria-hidden="true">
+      <span>🎈</span><span>🎉</span><span>🎈</span><span>🎊</span><span>🎈</span><span>🎈</span>
     </div>
-    <div class="decoy-card">
-      <div class="decoy-cake">🎂</div>
-      <h1 class="decoy-title">Happy Birthday!</h1>
-      <p class="decoy-subtitle">Wishing you a wonderful day full of joy and smiles!</p>
-      <p class="decoy-name">— From a special someone 💝</p>
-      <button id="decoy-btn" class="decoy-btn">Open Card 🎁</button>
+
+    <!-- The flip card container -->
+    <div class="decoy-flip-wrapper" id="decoy-flip-wrapper">
+      <!-- FRONT face: simple birthday card -->
+      <div class="decoy-face decoy-face-front">
+        <div class="decoy-cake">🎂</div>
+        <h1 class="decoy-title">Happy Birthday!</h1>
+        <p class="decoy-subtitle">Wishing you a wonderful day full of joy and smiles!</p>
+        <p class="decoy-name">— From a special someone 💝</p>
+        <button id="decoy-btn" class="decoy-btn">Open Card 🎁</button>
+      </div>
+
+      <!-- BACK face: collage + fireworks + countdown -->
+      <div class="decoy-face decoy-face-back">
+        <div class="decoy-back-header">
+          <span class="decoy-back-emoji">🎉</span>
+          <h2 class="decoy-back-title">Happy Birthday Pranu! 🥳</h2>
+        </div>
+
+        <!-- Photo collage grid -->
+        <div class="decoy-collage" id="decoy-collage">
+          <img class="decoy-col-img" src="images/teeth/2.jpg" alt="" />
+          <img class="decoy-col-img" src="images/saree/1.jpg" alt="" />
+          <img class="decoy-col-img" src="images/saree/2.jpg" alt="" />
+        </div>
+
+        <!-- Countdown ring button -->
+        <div class="decoy-end-wrap" id="decoy-end-wrap">
+          <div class="decoy-ring-btn" id="decoy-ring-btn">
+            <svg class="decoy-ring-svg" viewBox="0 0 80 80">
+              <circle class="decoy-ring-track" cx="40" cy="40" r="34" />
+              <circle class="decoy-ring-progress" id="decoy-ring-progress" cx="40" cy="40" r="34" />
+            </svg>
+            <button id="decoy-continue-btn" class="decoy-continue-inner">
+              <span class="decoy-continue-text">Theek hai...</span>
+              <span class="decoy-continue-sub">par ruko 😏</span>
+            </button>
+          </div>
+          <p class="decoy-ring-hint" id="decoy-ring-hint">Ek secret hai... 8 second mein khulega ✨</p>
+        </div>
+      </div>
     </div>
+
     <div class="decoy-confetti-row" aria-hidden="true">
       <span>🌸</span><span>⭐</span><span>🌸</span><span>⭐</span><span>🌸</span>
     </div>
@@ -65,6 +103,21 @@
       <span class="music-label">Pranu ke liye ♥</span>
     </div>
 
+    <!-- ── ACT 0.5: SAFAR INTRO ─────────────────────────────── -->
+    <section id="act-intro" class="act ui-hidden">
+      <canvas id="intro-canvas" class="bg-canvas"></canvas>
+      <div class="intro-content">
+        <p class="intro-eyebrow">✦ Ek Khaas Safar ✦</p>
+        <h2 class="intro-title">Tumhari Yaadein 🌸</h2>
+        <p class="intro-subtitle">Woh pal jo kabhi nahi bhoolenge...</p>
+        <p class="intro-subtext">Chalo, tumhein ek safar par leke chalata hoon</p>
+        <button id="intro-begin-btn" class="intro-begin-btn">
+          <span>Shuru Karo</span>
+          <span class="intro-btn-arrow">→</span>
+        </button>
+      </div>
+    </section>
+
     <!-- ── ACT 1: CINEMATIC FILM ────────────────────────────── -->
     <section id="act-cinema" class="act ui-hidden">
       <button id="cinema-skip-btn" class="cinema-skip-btn">Skip ⏩</button>
@@ -76,7 +129,7 @@
       <canvas id="cinema-canvas" class="bg-canvas"></canvas>
 
       <div class="cinema-card" id="cinema-card">
-        <p class="cinema-eyebrow">✦ Ek Safar ✦</p>
+        <p class="cinema-eyebrow">✦ Apni Yaadein ✦</p>
         <h2 class="cinema-title" id="cinema-title"></h2>
         <p class="cinema-text" id="cinema-text"></p>
         <p class="cinema-caption" id="cinema-caption"></p>
@@ -88,30 +141,34 @@
       <div class="scene-dots" id="scene-dots"></div>
     </section>
 
-    <!-- ── ACT 2: MOMENTS (Green Sky + Moon & Clouds + Lightning) ─ -->
+    <!-- ── ACT 2: MOMENTS (Full-screen Moon & Clouds) ─────── -->
     <section id="act-moments" class="act ui-hidden">
-      <canvas id="moments-canvas" class="bg-canvas"></canvas>
-      <canvas id="lightning-canvas" class="bg-canvas" style="z-index:4;"></canvas>
+      <!-- Full-screen canvas draws everything: sky, moon, clouds, fireflies -->
+      <canvas id="moments-canvas" class="bg-canvas moments-main-canvas"></canvas>
+      <!-- Lightning bolt canvas on top -->
+      <canvas id="lightning-canvas" class="bg-canvas" style="z-index:4; pointer-events:none;"></canvas>
+      <!-- Rain drops layer -->
       <div class="rain-wrap" id="moments-rain"></div>
+      <!-- White flash on lightning -->
       <div id="lightning-flash" class="lightning-flash"></div>
 
-      <div class="act-content">
-        <div class="chapter-label">🌙 सुनहरी यादें</div>
-        <h2 class="act-title">Baarish Mein...</h2>
-        <p class="act-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
-
-        <!-- Moon & Clouds Arena for Moments -->
-        <div class="moon-cloud-arena">
-          <div class="moon-container">
-            <div id="moon-element" class="moon-element">
-              <div class="moon-flare" id="moon-flare"></div>
-              <div class="moon-glow-ring"></div>
-            </div>
-          </div>
-          <div class="clouds-arena" id="clouds-arena"></div>
-        </div>
-
+      <!-- Minimal HUD at bottom -->
+      <div class="moments-hud">
         <p class="moments-count" id="moments-count">0 / 8 yaadein khuli...</p>
+      </div>
+
+      <!-- Floating instruction at top -->
+      <div class="moments-header">
+        <div class="chapter-label">🌙 सुनहरी यादें</div>
+        <h2 class="act-title moments-title">Baarish Mein...</h2>
+        <p class="act-subtitle moments-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
+      </div>
+
+      <!-- Transition message overlay (shown after all 8 done) -->
+      <div id="moments-transition-msg" class="moments-transition-msg ui-hidden">
+        <p class="moments-trans-text">Acha... tumne soch hi liya 💫</p>
+        <p class="moments-trans-sub">Main kyu tumhe itna pyaar karta hoon?</p>
+        <p class="moments-trans-cta">Chalo, aa jaan lo ❤️</p>
       </div>
 
       <!-- Moment popup -->
@@ -126,20 +183,62 @@
       </div>
     </section>
 
-    <!-- ── ACT 3: HEARTS (10 Raazein) ────────────────────────── -->
+    <!-- ── ACT 3: HEARTS — Large heart fill + floating hearts ── -->
     <section id="act-hearts" class="act ui-hidden">
-      <!-- Background: love shower rain + fireflies -->
+      <!-- Background canvas: purple orbs + fireflies -->
       <canvas id="hearts-canvas" class="bg-canvas"></canvas>
+      <!-- Love shower bg: falling emoji hearts -->
       <div class="love-shower-bg" id="love-shower-bg"></div>
+      <!-- Pink rain -->
       <div class="rain-wrap" id="hearts-rain"></div>
 
-      <div class="act-content">
-        <div class="chapter-label">❤️ 10 Raazein</div>
-        <h2 class="act-title">Kyun Pyaar Karta Hoon...</h2>
-        <p class="hearts-hint">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
-        <div class="hearts-arena" id="hearts-arena"></div>
-        <p class="hearts-count" id="hearts-count">0 / 10 raazein khuli...</p>
+      <!-- Large heart SVG (fills as hearts are caught) -->
+      <div class="big-heart-scene">
+        <div class="big-heart-container" id="big-heart-container">
+          <!-- SVG heart outline + clip-fill -->
+          <svg class="big-heart-svg" id="big-heart-svg" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="heart-clip">
+                <path d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z"/>
+              </clipPath>
+              <linearGradient id="heartFillGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#ff2d55"/>
+                <stop offset="50%" stop-color="#ff6b9d"/>
+                <stop offset="100%" stop-color="#ffb3c8"/>
+              </linearGradient>
+              <linearGradient id="petalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c41e6a"/>
+                <stop offset="100%" stop-color="#ff6b9d"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Heart outline (always visible) -->
+            <path class="big-heart-outline"
+              d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z"/>
+
+            <!-- Fill rect clipped to heart shape -->
+            <rect id="heart-fill-rect" x="0" y="180" width="200" height="180" fill="url(#heartFillGrad)" clip-path="url(#heart-clip)"/>
+
+            <!-- Petal decorations (revealed one by one) -->
+            <g id="heart-petals" clip-path="url(#heart-clip)" opacity="0.6"></g>
+          </svg>
+
+          <!-- Center photo (fades in after 7+ hearts) -->
+          <div class="heart-center-photo-wrap" id="heart-center-photo-wrap">
+            <img class="heart-center-photo" id="heart-center-photo" src="images/teeth/2.jpg" alt="Pranu's smile" />
+            <div class="heart-center-glow"></div>
+          </div>
+        </div>
+
+        <!-- HUD: progress text -->
+        <div class="hearts-hud">
+          <p class="hearts-hint" id="hearts-hint-text">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
+          <p class="hearts-count" id="hearts-count">0 / 15 raazein khuli...</p>
+        </div>
       </div>
+
+      <!-- Floating heart bubbles (rendered dynamically, outside big-heart-scene) -->
+      <div id="hearts-floating-layer" class="hearts-floating-layer"></div>
 
       <!-- Heart reveal popup -->
       <div id="heart-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
@@ -149,6 +248,15 @@
           <div class="heart-popup-line"></div>
           <p class="heart-popup-msg" id="popup-msg"></p>
           <button id="popup-close" aria-label="Close">✕</button>
+        </div>
+      </div>
+
+      <!-- Achievement unlock popup -->
+      <div id="heart-achievement" class="heart-achievement ui-hidden">
+        <div class="achievement-inner">
+          <div class="achievement-icon">💖</div>
+          <h3 class="achievement-title">You Unlocked My Heart!</h3>
+          <p class="achievement-msg">Abse main tumhara hoon... ❤️</p>
         </div>
       </div>
     </section>
@@ -270,22 +378,22 @@
       </div>
     </section>
 
-    <!-- Letter Popup Modal -->
-    <div id="finale-letter-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
-      <div class="heart-popup-inner letter-popup-inner">
-        <div class="heart-popup-glow"></div>
-        <div class="letter-deco">❤️</div>
-        <div id="letter-body" class="letter-body"></div>
+  </main>
 
-        <div id="finale-closing" class="finale-closing ui-hidden">
-          <p id="closing-line" class="closing-line"></p>
-          <p class="the-end-line">The End 🎬</p>
-          <button id="replay-btn" class="replay-btn">Phir Se Dekho ↻</button>
-        </div>
+  <!-- Letter Popup Modal -->
+  <div id="finale-letter-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
+    <div class="heart-popup-inner letter-popup-inner">
+      <div class="heart-popup-glow"></div>
+      <div class="letter-deco">❤️</div>
+      <div id="letter-body" class="letter-body"></div>
+
+      <div id="finale-closing" class="finale-closing ui-hidden">
+        <p id="closing-line" class="closing-line"></p>
+        <p class="the-end-line">The End 🎬</p>
+        <button id="replay-btn" class="replay-btn">Phir Se Dekho ↻</button>
       </div>
     </div>
-
-  </main>
+  </div>
 
   <!-- Act transition overlay -->
   <div id="act-transition" class="act-transition ui-hidden"></div>
