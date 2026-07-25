@@ -1,8 +1,3 @@
-// ============================================================
-//  BIRTHDAY CONFIG — Monsoon Diaries
-//  Linear cinematic experience — no games, pure emotion
-// ============================================================
-
 const BIRTHDAY_CONFIG = {
 
   name: "Pratibha Pareek",
@@ -10,108 +5,73 @@ const BIRTHDAY_CONFIG = {
   birthday: "2003-08-02",
   anniversaryMessage: "Pehla Saal • Pehli Anniversary ❤️",
 
-  // ── DECOY WEBSITE ──────────────────────────────────────────
   decoy: {
     title: "Happy Birthday! 🎂",
     subtitle: "Wishing you a wonderful day!",
     buttonText: "Open Card 🎁"
   },
 
-  // ── REVEAL MESSAGE (after decoy) ───────────────────────────
   revealMsg: "Tumko kya laga... ye bas itna sa tha? 😏",
 
-  // ── CINEMATIC SCENES (Act 1 — auto play) ───────────────────
-  // Each scene plays for durationMs, photos cycle automatically
   scenes: [
     {
       title: "Pehle...",
       text: "Ek waqt tha jab zindagi mein koi rang nahi tha.",
       caption: "Tab tum nahi the.",
-      photos: [
-        "images/kid/1.jpg",
-        "images/kid/2.jpg"
-      ],
+      photos: ["images/kid/1.jpg", "images/kid/2.jpg"],
       durationMs: 7000
     },
     {
       title: "Bachi thi tum... 🧸",
       text: "Masoom aankhein, chhupa hua poora aasman in mein.",
       caption: "Bachpan ka wo innocent savera...",
-      photos: [
-        "images/kid/3.jpg",
-        "images/kid/4.jpg"
-      ],
+      photos: ["images/kid/3.jpg", "images/kid/4.jpg"],
       durationMs: 7000
     },
     {
       title: "Phir badi hui... ✨",
       text: "Attitude aa gaya, style aa gaya — lekin woh pyaari naughtiness gayi nahi.",
       caption: "Bossy era 😤",
-      photos: [
-        "images/bossy/1.jpg",
-        "images/bossy/2.jpg",
-        "images/bossy/3.jpg"
-      ],
+      photos: ["images/bossy/1.jpg", "images/bossy/2.jpg", "images/bossy/3.jpg"],
       durationMs: 9000
     },
     {
       title: "Woh smile... 😄",
       text: "Jab tum hansti ho, duniya thodi aur sundar ho jaati hai.",
       caption: "Meri sabse kamzori.",
-      photos: [
-        "images/teeth/1.jpg",
-        "images/teeth/2.jpg",
-        "images/teeth/WhatsApp Image 2026-07-07 at 7.19.17 AM (4).jpeg"
-      ],
+      photos: ["images/teeth/1.jpg", "images/teeth/2.jpg", "images/teeth/WhatsApp Image 2026-07-07 at 7.19.17 AM (4).jpeg"],
       durationMs: 9000
     },
     {
       title: "Saree mein... 🥻",
       text: "Graceful. Khoobsurat. Bilkul tum jaisi.",
       caption: "Aur main bas dekhta hi reh gaya.",
-      photos: [
-        "images/saree/1.jpg",
-        "images/saree/2.jpg",
-        "images/saree/WhatsApp Image 2026-07-07 at 7.19.16 AM (4).jpeg",
-        "images/saree/WhatsApp Image 2026-07-07 at 7.19.17 AM (6).jpeg"
-      ],
+      photos: ["images/saree/1.jpg", "images/saree/2.jpg", "images/saree/WhatsApp Image 2026-07-07 at 7.19.16 AM (4).jpeg", "images/saree/WhatsApp Image 2026-07-07 at 7.19.17 AM (6).jpeg"],
       durationMs: 10000
     },
     {
       title: "Hum dono... 🫂",
       text: "Ek sabzi ki galti. Tumhari ek hasi. Meri poori duniya badal gayi.",
       caption: "Yeh shuruwaat thi.",
-      photos: [
-        "images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (7).jpeg",
-        "images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (8).jpeg",
-        "images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (9).jpeg"
-      ],
+      photos: ["images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (7).jpeg", "images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (8).jpeg", "images/us/WhatsApp Image 2026-07-07 at 7.19.17 AM (9).jpeg"],
       durationMs: 10000
     },
     {
       title: "Yaadon ki khushboo... 🌧️",
       text: "Woh baarish, woh garden, woh pal — dil mein hamesha ke liye bas gaya.",
       caption: "Do baar tumhare lips ne chhua mujhe. Sirf do baar.",
-      photos: [
-        "images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (1).jpeg",
-        "images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (2).jpeg",
-        "images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (5).jpeg"
-      ],
+      photos: ["images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (1).jpeg", "images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (2).jpeg", "images/collages/WhatsApp Image 2026-07-07 at 7.19.17 AM (5).jpeg"],
       durationMs: 10000
     },
     {
       title: "Ek din... 💍",
       text: "Agar taqdeer mujhe hazaar zindagiyaan de...",
       caption: "Main phir bhi tumhein hi dhoondh loonga. Har baar. Har janam.",
-      photos: [
-        "images/dream.jpeg",
-        "images/final/3.jpg"
-      ],
+      photos: ["images/dream.jpeg", "images/final/3.jpg"],
       durationMs: 9000
     }
   ],
 
-  // ── MOMENTS (auto-display, no interaction needed) ──────────
   moments: [
     { icon: "🛕", text: "Birla Mandir ki seedhiyaan pe baithna, shanti se." },
     { icon: "🌅", text: "Office se pehle milna, intezaar karna." },
@@ -123,7 +83,6 @@ const BIRTHDAY_CONFIG = {
     { icon: "😊", text: "Tumhari hasi — jo meri kamzori bhi hai aur meri jaan bhi." }
   ],
 
-  // ── HEARTS (15 floating hearts — tap to reveal) ────────────
   hearts: [
     { emoji: "😄", reason: "Teri cute smile jo poora din roshan kar deti hai." },
     { emoji: "🥹", reason: "Tera bina kahe sab samajh jaana — woh meri favourite cheez hai." },
@@ -142,7 +101,6 @@ const BIRTHDAY_CONFIG = {
     { emoji: "💍", reason: "Har kal mein, har sapne mein sirf tera naam hona." }
   ],
 
-  // ── LOVE SHOWER (after hearts) ─────────────────────────────
   showerMessages: [
     "Teri cute smile! 😄",
     "Tera samajh jaana! 🥹",
@@ -156,7 +114,6 @@ const BIRTHDAY_CONFIG = {
     "Hamesha saath! 💍"
   ],
 
-  // ── FINAL LETTER ───────────────────────────────────────────
   letter: `Pranu,
 
 Ek sabzi ki galti se shuruu hua tha yeh sab. Tumne hasa tha — aur us hasi ne meri duniya badal di.
@@ -178,8 +135,6 @@ Yeh sirf shuruwaat hai. ❤️
 
 — Tumhara`,
 
-
-  // ── PROPOSAL SCENE ─────────────────────────────────────────
   proposal: {
     dialogueLines: [
       "Pranu...",

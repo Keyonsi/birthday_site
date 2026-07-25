@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi" dir="ltr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -7,283 +8,300 @@
   <title>Happy Birthday! 🎂</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="config.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<!-- ══ DECOY ══════════════════════════════════════════════════════ -->
-<div id="decoy-site">
-  <div class="decoy-balloons" aria-hidden="true">
-    <span>🎈</span><span>🎉</span><span>🎈</span><span>🎊</span><span>🎈</span>
-  </div>
-  <div class="decoy-card">
-    <div class="decoy-cake">🎂</div>
-    <h1 class="decoy-title">Happy Birthday!</h1>
-    <p class="decoy-subtitle">Wishing you a wonderful day full of joy and smiles!</p>
-    <p class="decoy-name">— From a special someone 💝</p>
-    <button id="decoy-btn" class="decoy-btn">Open Card 🎁</button>
-  </div>
-  <div class="decoy-confetti-row" aria-hidden="true">
-    <span>🌸</span><span>⭐</span><span>🌸</span><span>⭐</span><span>🌸</span>
-  </div>
-</div>
-
-<!-- ══ REVEAL OVERLAY ═════════════════════════════════════════════ -->
-<div id="reveal-overlay" class="ui-hidden">
-  <div class="reveal-content">
-    <p id="reveal-msg" class="reveal-msg"></p>
-    <div class="reveal-dots">
-      <span></span><span></span><span></span>
+  <!-- ══ DECOY ══════════════════════════════════════════════════════ -->
+  <div id="decoy-site">
+    <div class="decoy-balloons" aria-hidden="true">
+      <span>🎈</span><span>🎉</span><span>🎈</span><span>🎊</span><span>🎈</span>
+    </div>
+    <div class="decoy-card">
+      <div class="decoy-cake">🎂</div>
+      <h1 class="decoy-title">Happy Birthday!</h1>
+      <p class="decoy-subtitle">Wishing you a wonderful day full of joy and smiles!</p>
+      <p class="decoy-name">— From a special someone 💝</p>
+      <button id="decoy-btn" class="decoy-btn">Open Card 🎁</button>
+    </div>
+    <div class="decoy-confetti-row" aria-hidden="true">
+      <span>🌸</span><span>⭐</span><span>🌸</span><span>⭐</span><span>🌸</span>
     </div>
   </div>
-</div>
 
-<!-- ══ GATE ═══════════════════════════════════════════════════════ -->
-<div id="gate-wrap" class="ui-hidden" aria-hidden="true">
-  <div class="gate-left"></div>
-  <div class="gate-right"></div>
-  <div class="gate-glow"></div>
-  <div class="gate-particles" id="gate-particles"></div>
-</div>
-
-<!-- ══ MAIN EXPERIENCE ════════════════════════════════════════════ -->
-<main id="experience" class="ui-hidden">
-
-  <!-- Music player -->
-  <div id="music-player" style="display:none;">
-    <button id="music-btn" aria-label="Play or pause music">
-      <span id="music-icon">❚❚</span>
-    </button>
-    <span class="music-note">♪</span>
-    <span class="music-label">Pranu ke liye ♥</span>
+  <!-- ══ REVEAL OVERLAY ═════════════════════════════════════════════ -->
+  <div id="reveal-overlay" class="ui-hidden">
+    <div class="reveal-content">
+      <p id="reveal-msg" class="reveal-msg"></p>
+      <div class="reveal-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
   </div>
 
-  <!-- ── ACT 1: CINEMATIC FILM ────────────────────────────── -->
-  <section id="act-cinema" class="act ui-hidden">
-    <button id="cinema-skip-btn" class="cinema-skip-btn">Skip ⏩</button>
-    <div class="cinema-bg">
-      <img id="img-a" class="cinema-img cinema-img-active" src="" alt="" />
-      <img id="img-b" class="cinema-img" src="" alt="" />
-      <div class="cinema-overlay"></div>
+  <!-- ══ GATE ═══════════════════════════════════════════════════════ -->
+  <div id="gate-wrap" class="ui-hidden" aria-hidden="true">
+    <div class="gate-left"></div>
+    <div class="gate-right"></div>
+    <div class="gate-glow"></div>
+    <div class="gate-particles" id="gate-particles"></div>
+  </div>
+
+  <!-- ══ MAIN EXPERIENCE ════════════════════════════════════════════ -->
+  <main id="experience" class="ui-hidden">
+
+    <!-- Music player -->
+    <div id="music-player" style="display:none;">
+      <button id="music-btn" aria-label="Play or pause music">
+        <span id="music-icon">❚❚</span>
+      </button>
+      <span class="music-note">♪</span>
+      <span class="music-label">Pranu ke liye ♥</span>
     </div>
-    <canvas id="cinema-canvas" class="bg-canvas"></canvas>
 
-    <div class="cinema-card" id="cinema-card">
-      <p class="cinema-eyebrow">✦ Ek Safar ✦</p>
-      <h2 class="cinema-title" id="cinema-title"></h2>
-      <p class="cinema-text"  id="cinema-text"></p>
-      <p class="cinema-caption" id="cinema-caption"></p>
-    </div>
+    <!-- ── ACT 1: CINEMATIC FILM ────────────────────────────── -->
+    <section id="act-cinema" class="act ui-hidden">
+      <button id="cinema-skip-btn" class="cinema-skip-btn">Skip ⏩</button>
+      <div class="cinema-bg">
+        <img id="img-a" class="cinema-img cinema-img-active" src="" alt="" />
+        <img id="img-b" class="cinema-img" src="" alt="" />
+        <div class="cinema-overlay"></div>
+      </div>
+      <canvas id="cinema-canvas" class="bg-canvas"></canvas>
 
-    <div class="cinema-progress-bar">
-      <div id="cinema-fill"></div>
-    </div>
-    <div class="scene-dots" id="scene-dots"></div>
-  </section>
-
-  <!-- ── ACT 2: MOMENTS (Green Sky + Moon & Clouds + Lightning) ─ -->
-  <section id="act-moments" class="act ui-hidden">
-    <canvas id="moments-canvas" class="bg-canvas"></canvas>
-    <canvas id="lightning-canvas" class="bg-canvas" style="z-index:4;"></canvas>
-    <div class="rain-wrap" id="moments-rain"></div>
-    <div id="lightning-flash" class="lightning-flash"></div>
-
-    <div class="act-content">
-      <div class="chapter-label">🌧️ Humari Yaadein</div>
-      <h2 class="act-title">Baarish Mein...</h2>
-      <p class="act-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
-      
-      <!-- Moon & Clouds Arena for Moments -->
-      <div class="moon-cloud-arena">
-        <div class="moon-container">
-          <div id="moon-element" class="moon-element">
-            <div class="moon-glow-ring"></div>
-          </div>
-        </div>
-        <div class="clouds-arena" id="clouds-arena"></div>
+      <div class="cinema-card" id="cinema-card">
+        <p class="cinema-eyebrow">✦ Ek Safar ✦</p>
+        <h2 class="cinema-title" id="cinema-title"></h2>
+        <p class="cinema-text" id="cinema-text"></p>
+        <p class="cinema-caption" id="cinema-caption"></p>
       </div>
 
-      <p class="moments-count" id="moments-count">0 / 8 yaadein khuli...</p>
-    </div>
+      <div class="cinema-progress-bar">
+        <div id="cinema-fill"></div>
+      </div>
+      <div class="scene-dots" id="scene-dots"></div>
+    </section>
 
-    <!-- Moment popup -->
-    <div id="moment-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
-      <div class="heart-popup-inner">
+    <!-- ── ACT 2: MOMENTS (Green Sky + Moon & Clouds + Lightning) ─ -->
+    <section id="act-moments" class="act ui-hidden">
+      <canvas id="moments-canvas" class="bg-canvas"></canvas>
+      <canvas id="lightning-canvas" class="bg-canvas" style="z-index:4;"></canvas>
+      <div class="rain-wrap" id="moments-rain"></div>
+      <div id="lightning-flash" class="lightning-flash"></div>
+
+      <div class="act-content">
+        <div class="chapter-label">🌙 सुनहरी यादें</div>
+        <h2 class="act-title">Baarish Mein...</h2>
+        <p class="act-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
+
+        <!-- Moon & Clouds Arena for Moments -->
+        <div class="moon-cloud-arena">
+          <div class="moon-container">
+            <div id="moon-element" class="moon-element">
+              <div class="moon-flare" id="moon-flare"></div>
+              <div class="moon-glow-ring"></div>
+            </div>
+          </div>
+          <div class="clouds-arena" id="clouds-arena"></div>
+        </div>
+
+        <p class="moments-count" id="moments-count">0 / 8 yaadein khuli...</p>
+      </div>
+
+      <!-- Moment popup -->
+      <div id="moment-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
+        <div class="heart-popup-inner">
+          <div class="heart-popup-glow"></div>
+          <div class="heart-popup-emoji" id="moment-popup-icon">🌧️</div>
+          <div class="heart-popup-line"></div>
+          <p class="heart-popup-msg" id="moment-popup-msg"></p>
+          <button id="moment-popup-close" class="popup-close-btn">✕</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ACT 3: HEARTS (10 Raazein) ────────────────────────── -->
+    <section id="act-hearts" class="act ui-hidden">
+      <!-- Background: love shower rain + fireflies -->
+      <canvas id="hearts-canvas" class="bg-canvas"></canvas>
+      <div class="love-shower-bg" id="love-shower-bg"></div>
+      <div class="rain-wrap" id="hearts-rain"></div>
+
+      <div class="act-content">
+        <div class="chapter-label">❤️ 10 Raazein</div>
+        <h2 class="act-title">Kyun Pyaar Karta Hoon...</h2>
+        <p class="hearts-hint">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
+        <div class="hearts-arena" id="hearts-arena"></div>
+        <p class="hearts-count" id="hearts-count">0 / 10 raazein khuli...</p>
+      </div>
+
+      <!-- Heart reveal popup -->
+      <div id="heart-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
+        <div class="heart-popup-inner">
+          <div class="heart-popup-glow"></div>
+          <div class="heart-popup-emoji" id="popup-emoji">❤️</div>
+          <div class="heart-popup-line"></div>
+          <p class="heart-popup-msg" id="popup-msg"></p>
+          <button id="popup-close" aria-label="Close">✕</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ACT 4: PROPOSAL ──────────────────────────────────── -->
+    <section id="act-proposal" class="act ui-hidden">
+      <canvas id="proposal-canvas" class="bg-canvas"></canvas>
+      <div id="proposal-particles" class="proposal-particles"></div>
+
+      <div class="proposal-scene">
+        <!-- Silhouette Characters -->
+        <div class="silhouette-wrap" id="silhouette-wrap">
+          <div class="silhouette-container">
+            <!-- Girl Silhouette -->
+            <div class="silhouette-girl" id="sil-girl">
+              <svg viewBox="0 0 100 200" class="svg-sil">
+                <defs>
+                  <linearGradient id="girlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff758c" />
+                    <stop offset="100%" stop-color="#ff7eb3" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M50,18 C56,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44,18 50,18 Z M45,39 L55,39 C64,39 68,52 64,74 L58,135 L66,192 L54,192 L51,142 L49,142 L46,192 L34,192 L42,135 L36,74 C32,52 36,39 45,39 Z"
+                  fill="url(#girlGrad)" />
+              </svg>
+            </div>
+            <!-- Boy Silhouette -->
+            <div class="silhouette-boy" id="sil-boy">
+              <svg viewBox="0 0 100 200" class="svg-sil">
+                <defs>
+                  <linearGradient id="boyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#c47bff" />
+                    <stop offset="100%" stop-color="#9a4dff" />
+                  </linearGradient>
+                </defs>
+                <!-- Standing state -->
+                <path class="boy-standing"
+                  d="M50,16 C55.5,16 60,20.5 60,26 C60,31.5 55.5,36 50,36 C44.5,36 40,31.5 40,26 C40,20.5 44.5,16 50,16 Z M45,37 L55,37 C63,37 67,46 67,66 L62,126 L67,192 L57,192 L53,138 L47,138 L43,192 L33,192 L38,126 L33,66 C33,46 37,37 45,37 Z"
+                  fill="url(#boyGrad)" />
+                <!-- Kneeling state (offering ring) -->
+                <path class="boy-kneeling"
+                  d="M38,48 C43.5,48 48,43.5 48,38 C48,32.5 43.5,28 38,28 C32.5,28 28,32.5 28,38 C28,43.5 32.5,48 38,48 Z M34,49 L42,49 C50,49 53,58 52,74 L48,105 L72,110 L70,122 L40,122 L30,146 L18,146 L29,105 L27,74 C26,58 29,49 34,49 Z M55,80 L62,80 C65,80 67,82 67,85 L67,90 L55,90 Z"
+                  fill="url(#boyGrad)" style="opacity:0;" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialogue bubble -->
+        <div class="proposal-dialogue-box" id="proposal-box">
+          <p class="proposal-dialogue" id="proposal-text"></p>
+        </div>
+
+        <!-- Ring box (hidden until dialogue done) -->
+        <div class="ring-box ui-hidden" id="ring-box">
+          <div class="ring-glow-aura"></div>
+          <div class="half-moon-ring">
+            <div class="ring-band-left"></div>
+            <div class="ring-band-right"></div>
+            <div class="emerald-gem">
+              <div class="gem-facets"></div>
+              <span class="gem-initial">K</span>
+              <div class="gem-shine"></div>
+            </div>
+          </div>
+          <p class="ring-title">I love you today, tomorrow, and forever.</p>
+          <p class="ring-sub">Pran + U = Meri Pranu ❤️</p>
+          <button id="proposal-accept-btn" class="accept-btn">Haath Thamo ❤️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ACT 5: BIRTHDAY CANDLES ──────────────────────────── -->
+    <section id="act-candles" class="act ui-hidden">
+      <canvas id="candles-canvas" class="bg-canvas"></canvas>
+      <div id="candles-fw" class="fireworks-wrap"></div>
+
+      <div class="act-content candles-content">
+        <div class="chapter-label">🎂 Janamdin</div>
+        <h2 class="bday-name" id="bday-name">Happy Birthday Pranu!</h2>
+        <p class="bday-anni" id="bday-anni">Pehla Saal • Pehli Anniversary ❤️</p>
+
+        <div class="cake-wrap" id="cake-wrap">
+          <div class="cake-body">
+            <div class="cake-tier top">
+              <div class="cake-deco">🌸 🌸</div>
+            </div>
+            <div class="cake-tier bottom">
+              <div class="candles-row" id="candles-row"></div>
+            </div>
+            <div class="cake-base"></div>
+          </div>
+        </div>
+
+        <p class="candles-hint" id="candles-hint">Bujhao sab diye — ek ek karke 🕯️</p>
+        <p class="candles-status" id="candles-status">0 / 5 bujhe</p>
+      </div>
+    </section>
+
+    <!-- ── ACT 6: FINALE ────────────────────────────────────── -->
+    <section id="act-finale" class="act ui-hidden">
+      <canvas id="finale-canvas" class="bg-canvas"></canvas>
+      <div id="finale-fireworks" class="fireworks-wrap"></div>
+      <div id="finale-lanterns" class="lanterns-wrap"></div>
+
+      <div class="act-content finale-content">
+        <div class="finale-bday">
+          <h1 class="finale-title">Happy Birthday</h1>
+          <p class="finale-name">Pratibha Pareek 🎂</p>
+          <p class="finale-anni">Pehla Saal • Pehli Anniversary ❤️</p>
+        </div>
+
+        <div id="finale-envelope" class="finale-envelope" role="button" tabindex="0" aria-label="Open letter">
+          <span class="env-icon">💌</span>
+          <p class="env-text">Ek khat hai tumhare liye...</p>
+          <span class="env-tap">Tap karo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Letter Popup Modal -->
+    <div id="finale-letter-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
+      <div class="heart-popup-inner letter-popup-inner">
         <div class="heart-popup-glow"></div>
-        <div class="heart-popup-emoji" id="moment-popup-icon">🌧️</div>
-        <div class="heart-popup-line"></div>
-        <p class="heart-popup-msg" id="moment-popup-msg"></p>
-        <button id="moment-popup-close" class="popup-close-btn">✕</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── ACT 3: HEARTS (10 Raazein) ────────────────────────── -->
-  <section id="act-hearts" class="act ui-hidden">
-    <!-- Background: love shower rain + fireflies -->
-    <canvas id="hearts-canvas" class="bg-canvas"></canvas>
-    <div class="love-shower-bg" id="love-shower-bg"></div>
-    <div class="rain-wrap" id="hearts-rain"></div>
-
-    <div class="act-content">
-      <div class="chapter-label">❤️ 10 Raazein</div>
-      <h2 class="act-title">Kyun Pyaar Karta Hoon...</h2>
-      <p class="hearts-hint">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
-      <div class="hearts-arena" id="hearts-arena"></div>
-      <p class="hearts-count" id="hearts-count">0 / 10 raazein khuli...</p>
-    </div>
-
-    <!-- Heart reveal popup -->
-    <div id="heart-popup" class="heart-popup ui-hidden" role="dialog" aria-modal="true">
-      <div class="heart-popup-inner">
-        <div class="heart-popup-glow"></div>
-        <div class="heart-popup-emoji" id="popup-emoji">❤️</div>
-        <div class="heart-popup-line"></div>
-        <p class="heart-popup-msg" id="popup-msg"></p>
-        <button id="popup-close" aria-label="Close">✕</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── ACT 4: PROPOSAL ──────────────────────────────────── -->
-  <section id="act-proposal" class="act ui-hidden">
-    <canvas id="proposal-canvas" class="bg-canvas"></canvas>
-    <div id="proposal-particles" class="proposal-particles"></div>
-
-    <div class="proposal-scene">
-      <!-- Silhouette Characters -->
-      <div class="silhouette-wrap" id="silhouette-wrap">
-        <div class="silhouette-container">
-          <!-- Girl Silhouette -->
-          <div class="silhouette-girl" id="sil-girl">
-            <svg viewBox="0 0 100 200" class="svg-sil">
-              <defs>
-                <linearGradient id="girlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#ff758c"/>
-                  <stop offset="100%" stop-color="#ff7eb3"/>
-                </linearGradient>
-              </defs>
-              <path d="M50,18 C56,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44,18 50,18 Z M45,39 L55,39 C64,39 68,52 64,74 L58,135 L66,192 L54,192 L51,142 L49,142 L46,192 L34,192 L42,135 L36,74 C32,52 36,39 45,39 Z" fill="url(#girlGrad)"/>
-            </svg>
-          </div>
-          <!-- Boy Silhouette -->
-          <div class="silhouette-boy" id="sil-boy">
-            <svg viewBox="0 0 100 200" class="svg-sil">
-              <defs>
-                <linearGradient id="boyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#c47bff"/>
-                  <stop offset="100%" stop-color="#9a4dff"/>
-                </linearGradient>
-              </defs>
-              <!-- Standing state -->
-              <path class="boy-standing" d="M50,16 C55.5,16 60,20.5 60,26 C60,31.5 55.5,36 50,36 C44.5,36 40,31.5 40,26 C40,20.5 44.5,16 50,16 Z M45,37 L55,37 C63,37 67,46 67,66 L62,126 L67,192 L57,192 L53,138 L47,138 L43,192 L33,192 L38,126 L33,66 C33,46 37,37 45,37 Z" fill="url(#boyGrad)"/>
-              <!-- Kneeling state (offering ring) -->
-              <path class="boy-kneeling" d="M38,48 C43.5,48 48,43.5 48,38 C48,32.5 43.5,28 38,28 C32.5,28 28,32.5 28,38 C28,43.5 32.5,48 38,48 Z M34,49 L42,49 C50,49 53,58 52,74 L48,105 L72,110 L70,122 L40,122 L30,146 L18,146 L29,105 L27,74 C26,58 29,49 34,49 Z M55,80 L62,80 C65,80 67,82 67,85 L67,90 L55,90 Z" fill="url(#boyGrad)" style="opacity:0;"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dialogue bubble -->
-      <div class="proposal-dialogue-box" id="proposal-box">
-        <p class="proposal-dialogue" id="proposal-text"></p>
-      </div>
-
-      <!-- Ring box (hidden until dialogue done) -->
-      <div class="ring-box ui-hidden" id="ring-box">
-        <div class="ring-glow-aura"></div>
-        <div class="half-moon-ring">
-          <div class="ring-band-left"></div>
-          <div class="ring-band-right"></div>
-          <div class="emerald-gem">
-            <div class="gem-facets"></div>
-            <span class="gem-initial">K</span>
-            <div class="gem-shine"></div>
-          </div>
-        </div>
-        <p class="ring-title">I love you today, tomorrow, and forever.</p>
-        <p class="ring-sub">Pran + U = Meri Pranu ❤️</p>
-        <button id="proposal-accept-btn" class="accept-btn">Haath Thamo ❤️</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── ACT 5: BIRTHDAY CANDLES ──────────────────────────── -->
-  <section id="act-candles" class="act ui-hidden">
-    <canvas id="candles-canvas" class="bg-canvas"></canvas>
-    <div id="candles-fw" class="fireworks-wrap"></div>
-
-    <div class="act-content candles-content">
-      <div class="chapter-label">🎂 Janamdin</div>
-      <h2 class="bday-name" id="bday-name">Happy Birthday Pranu!</h2>
-      <p class="bday-anni" id="bday-anni">Pehla Saal • Pehli Anniversary ❤️</p>
-
-      <div class="cake-wrap" id="cake-wrap">
-        <div class="cake-body">
-          <div class="cake-tier top">
-            <div class="cake-deco">🌸 🌸</div>
-          </div>
-          <div class="cake-tier bottom">
-            <div class="candles-row" id="candles-row"></div>
-          </div>
-          <div class="cake-base"></div>
-        </div>
-      </div>
-
-      <p class="candles-hint" id="candles-hint">Bujhao sab diye — ek ek karke 🕯️</p>
-      <p class="candles-status" id="candles-status">0 / 5 bujhe</p>
-    </div>
-  </section>
-
-  <!-- ── ACT 6: FINALE ────────────────────────────────────── -->
-  <section id="act-finale" class="act ui-hidden">
-    <canvas id="finale-canvas" class="bg-canvas"></canvas>
-    <div id="finale-fireworks" class="fireworks-wrap"></div>
-    <div id="finale-lanterns"  class="lanterns-wrap"></div>
-
-    <div class="act-content finale-content">
-      <div class="finale-bday">
-        <h1 class="finale-title">Happy Birthday</h1>
-        <p class="finale-name">Pratibha Pareek 🎂</p>
-        <p class="finale-anni">Pehla Saal • Pehli Anniversary ❤️</p>
-      </div>
-
-      <div id="finale-envelope" class="finale-envelope" role="button" tabindex="0" aria-label="Open letter">
-        <span class="env-icon">💌</span>
-        <p class="env-text">Ek khat hai tumhare liye...</p>
-        <span class="env-tap">Tap karo</span>
-      </div>
-
-      <div id="finale-letter" class="finale-letter ui-hidden">
         <div class="letter-deco">❤️</div>
         <div id="letter-body" class="letter-body"></div>
-      </div>
 
-      <div id="finale-closing" class="finale-closing ui-hidden">
-        <p id="closing-line" class="closing-line"></p>
+        <div id="finale-closing" class="finale-closing ui-hidden">
+          <p id="closing-line" class="closing-line"></p>
+          <p class="the-end-line">The End 🎬</p>
+          <button id="replay-btn" class="replay-btn">Phir Se Dekho ↻</button>
+        </div>
       </div>
     </div>
-  </section>
 
-</main>
+  </main>
 
-<!-- Act transition overlay -->
-<div id="act-transition" class="act-transition ui-hidden"></div>
+  <!-- Act transition overlay -->
+  <div id="act-transition" class="act-transition ui-hidden"></div>
 
-<!-- SPARK container -->
-<div id="sparks-layer" style="position:fixed;inset:0;pointer-events:none;z-index:9000;"></div>
+  <!-- SPARK container -->
+  <div id="sparks-layer" style="position:fixed;inset:0;pointer-events:none;z-index:9000;"></div>
 
-<!-- Audio -->
-<audio id="music-main" loop preload="auto">
-  <source src="yourmusic.mp3" type="audio/mpeg"/>
-</audio>
-<audio id="music-ambient" loop preload="auto">
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg"/>
-</audio>
+  <!-- Audio -->
+  <audio id="music-main" loop preload="auto">
+    <source src="yourmusic.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="music-ambient" loop preload="auto">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg" />
+  </audio>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
