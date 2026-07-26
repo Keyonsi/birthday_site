@@ -780,6 +780,10 @@ function stopCricketsSound() {
 // ══════════════════════════════════════════════════════════════════
 let momentsRevealed = 0;
 
+// Starry night Leo constellation artwork background
+const leoBgImg = new Image();
+leoBgImg.src = 'images/leo.png';
+
 // Cloud data for the moments scene
 let cloudData = [];
 // State for the final moon flare burst drawn on canvas
@@ -804,11 +808,11 @@ function startMoments() {
   cv.height = window.innerHeight;
   const W = cv.width, H = cv.height;
 
-  // ── Moon — single source of truth for position ──
-  const moonR = Math.min(W, H) * 0.11;   // bigger, more premium
+  // ── Moon — aligned with Leo artwork full moon in top-right ──
+  const moonR = Math.min(W, H) * 0.11;
   const moon = {
-    cx: W * 0.72,
-    cy: H * 0.18,
+    cx: W * 0.83,
+    cy: H * 0.14,
     r: moonR,
     glow: 0.15
   };
@@ -1225,14 +1229,18 @@ function startMoments() {
 
     ctx.clearRect(0, 0, W, H);
 
-    // ── Deep midnight sky gradient ──
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-    skyGrad.addColorStop(0, '#020510');
-    skyGrad.addColorStop(0.45, '#060b1e');
-    skyGrad.addColorStop(0.75, '#0b0f28');
-    skyGrad.addColorStop(1, '#040812');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, W, H);
+    // ── Starry Night Leo Artwork Background ──
+    if (leoBgImg.complete && leoBgImg.naturalWidth > 0) {
+      ctx.drawImage(leoBgImg, 0, 0, W, H);
+    } else {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+      skyGrad.addColorStop(0, '#020510');
+      skyGrad.addColorStop(0.45, '#060b1e');
+      skyGrad.addColorStop(0.75, '#0b0f28');
+      skyGrad.addColorStop(1, '#040812');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, W, H);
+    }
 
     // ── Subtle nebula/galaxy smear top-left ──
     const neb = ctx.createRadialGradient(W * 0.18, H * 0.22, 0, W * 0.18, H * 0.22, W * 0.35);
