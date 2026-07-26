@@ -808,49 +808,38 @@ function startMoments() {
   cv.height = window.innerHeight;
   const W = cv.width, H = cv.height;
 
-  // ── Moon — aligned with Leo artwork full moon in top-right ──
-  const moonR = Math.min(W, H) * 0.11;
+  // ── Moon — single source of truth for position ──
   const moon = {
-    cx: W * 0.83,
-    cy: H * 0.14,
-    r: moonR,
+    cx: W * 0.851,
+    cy: H * 0.136,
+    r: Math.min(W, H) * 0.085,
     glow: 0.15
   };
 
-  // ── Constellation Star Positions for 39 memories (2 August 2003 Starry Sky) ──
+  // ── Precise Constellation Star Nodes matching leo.png artwork ──
   const nonMoonMemories = moments.filter(m => !m.isMoonClimax);
   cloudData = [];
 
-  // Moon fraction in normalized space
-  const moonXf = moon.cx / W, moonYf = moon.cy / H;
-  const moonExcludeRadius = 0.16; // don't place stars too close to moon
-
-  const cols = 6, rows = 7;
-  const positions = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const xf = 0.06 + (c + 0.5) * (0.88 / cols) + (Math.random() - 0.5) * 0.04;
-      const yf = 0.06 + (r + 0.5) * (0.65 / rows) + (Math.random() - 0.5) * 0.04;
-      const dx = xf - moonXf, dy = yf - moonYf;
-      if (Math.sqrt(dx * dx + dy * dy) > moonExcludeRadius) {
-        positions.push({ xf, yf });
-      }
-    }
-  }
-  // Shuffle positions for natural distribution
-  for (let i = positions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]];
-  }
+  const leoConstellationNodes = [
+    { xf: 0.625, yf: 0.163 }, { xf: 0.540, yf: 0.215 }, { xf: 0.390, yf: 0.290 }, { xf: 0.447, yf: 0.244 },
+    { xf: 0.275, yf: 0.183 }, { xf: 0.240, yf: 0.367 }, { xf: 0.224, yf: 0.511 }, { xf: 0.231, yf: 0.547 },
+    { xf: 0.372, yf: 0.380 }, { xf: 0.419, yf: 0.351 }, { xf: 0.550, yf: 0.375 }, { xf: 0.665, yf: 0.290 },
+    { xf: 0.698, yf: 0.345 }, { xf: 0.742, yf: 0.412 }, { xf: 0.748, yf: 0.490 }, { xf: 0.740, yf: 0.555 },
+    { xf: 0.730, yf: 0.625 }, { xf: 0.445, yf: 0.605 }, { xf: 0.428, yf: 0.605 }, { xf: 0.485, yf: 0.672 },
+    { xf: 0.410, yf: 0.655 }, { xf: 0.290, yf: 0.582 }, { xf: 0.335, yf: 0.530 }, { xf: 0.228, yf: 0.552 },
+    { xf: 0.260, yf: 0.675 }, { xf: 0.305, yf: 0.700 }, { xf: 0.355, yf: 0.530 }, { xf: 0.478, yf: 0.555 },
+    { xf: 0.485, yf: 0.482 }, { xf: 0.605, yf: 0.460 }, { xf: 0.618, yf: 0.535 }, { xf: 0.528, yf: 0.585 },
+    { xf: 0.650, yf: 0.620 }, { xf: 0.648, yf: 0.655 }, { xf: 0.590, yf: 0.700 }, { xf: 0.615, yf: 0.745 },
+    { xf: 0.705, yf: 0.685 }, { xf: 0.528, yf: 0.765 }, { xf: 0.420, yf: 0.765 }
+  ];
 
   nonMoonMemories.forEach((m, i) => {
-    const pos = positions[i % positions.length] || { xf: 0.1 + Math.random() * 0.8, yf: 0.1 + Math.random() * 0.55 };
-    const baseScale = 0.7 + Math.random() * 0.4;
+    const pos = leoConstellationNodes[i % leoConstellationNodes.length];
     cloudData.push({
       idx: i, interactive: true,
+      xf: pos.xf, yf: pos.yf,
       cx: W * pos.xf, cy: H * pos.yf,
-      scale: baseScale,
-      // Twinkle animation state
+      scale: 0.8 + Math.random() * 0.3,
       twinklePhase: Math.random() * Math.PI * 2,
       twinkleSpeed: 0.02 + Math.random() * 0.03,
       litAlpha: 0, revealed: false, done: false,
@@ -970,34 +959,27 @@ function startMoments() {
   function drawMoon(ctx, cx, cy, r, glowFrac) {
     ctx.save();
 
-    // Outermost diffuse atmospheric halo (3 layers)
-    const haloSizes = [r * 4.5, r * 3.0, r * 1.8];
-    const haloAlphas = [0.022, 0.055, 0.12];
+    // Soft celestial atmospheric halo around the artwork moon
+    const haloSizes = [r * 3.8, r * 2.5, r * 1.5];
+    const haloAlphas = [0.03, 0.08, 0.18];
     haloSizes.forEach((hr, i) => {
-      const h = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, hr);
-      h.addColorStop(0, `rgba(255,245,200,${(haloAlphas[i] + glowFrac * 0.12) * glowFrac})`);
-      h.addColorStop(1, 'rgba(255,235,150,0)');
+      const h = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, hr);
+      h.addColorStop(0, `rgba(255,245,200,${(haloAlphas[i] + glowFrac * 0.25) * glowFrac})`);
+      h.addColorStop(0.5, `rgba(255,220,130,${glowFrac * 0.15})`);
+      h.addColorStop(1, 'rgba(255,200,100,0)');
       ctx.beginPath(); ctx.arc(cx, cy, hr, 0, Math.PI * 2);
       ctx.fillStyle = h; ctx.fill();
     });
 
-    // Inner close glow ring
-    const innerGlowR = r * 1.6 + r * 0.9 * glowFrac;
-    const ig = ctx.createRadialGradient(cx, cy, r * 0.85, cx, cy, innerGlowR);
-    ig.addColorStop(0, `rgba(255,250,220,${0.15 + glowFrac * 0.55})`);
-    ig.addColorStop(0.6, `rgba(255,235,150,${glowFrac * 0.28})`);
-    ig.addColorStop(1, 'rgba(255,220,100,0)');
-    ctx.beginPath(); ctx.arc(cx, cy, innerGlowR, 0, Math.PI * 2);
-    ctx.fillStyle = ig; ctx.fill();
-
-    // Moon surface body — warm cream/ivory to golden edge
-    const moonGrad = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, 0, cx, cy, r);
-    moonGrad.addColorStop(0, `rgba(255,255,252,${0.55 + glowFrac * 0.45})`);
-    moonGrad.addColorStop(0.4, `rgba(255,252,230,${0.42 + glowFrac * 0.5})`);
-    moonGrad.addColorStop(0.8, `rgba(245,235,195,${0.28 + glowFrac * 0.5})`);
-    moonGrad.addColorStop(1, `rgba(220,210,170,${0.12 + glowFrac * 0.38})`);
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = moonGrad; ctx.fill();
+    // Outer radiant lens ring on full glow
+    if (glowFrac > 0.4) {
+      const outerRing = ctx.createRadialGradient(cx, cy, r * 0.8, cx, cy, r * 1.8);
+      outerRing.addColorStop(0, `rgba(255,255,220,${glowFrac * 0.4})`);
+      outerRing.addColorStop(0.7, `rgba(255,235,160,${glowFrac * 0.2})`);
+      outerRing.addColorStop(1, 'rgba(255,220,100,0)');
+      ctx.beginPath(); ctx.arc(cx, cy, r * 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = outerRing; ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -1229,9 +1211,23 @@ function startMoments() {
 
     ctx.clearRect(0, 0, W, H);
 
-    // ── Starry Night Leo Artwork Background ──
+    // Helper: draw image with aspect-ratio cover scaling
+    let bounds = { offsetX: 0, offsetY: 0, renderW: W, renderH: H };
     if (leoBgImg.complete && leoBgImg.naturalWidth > 0) {
-      ctx.drawImage(leoBgImg, 0, 0, W, H);
+      const imgRatio = leoBgImg.naturalWidth / leoBgImg.naturalHeight;
+      const screenRatio = W / H;
+      if (screenRatio > imgRatio) {
+        bounds.renderW = W;
+        bounds.renderH = W / imgRatio;
+        bounds.offsetX = 0;
+        bounds.offsetY = (H - bounds.renderH) / 2;
+      } else {
+        bounds.renderH = H;
+        bounds.renderW = H * imgRatio;
+        bounds.offsetX = (W - bounds.renderW) / 2;
+        bounds.offsetY = 0;
+      }
+      ctx.drawImage(leoBgImg, bounds.offsetX, bounds.offsetY, bounds.renderW, bounds.renderH);
     } else {
       const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
       skyGrad.addColorStop(0, '#020510');
@@ -1241,6 +1237,17 @@ function startMoments() {
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, W, H);
     }
+
+    // Dynamic Moon alignment over artwork moon
+    moon.cx = bounds.offsetX + 0.851 * bounds.renderW;
+    moon.cy = bounds.offsetY + 0.136 * bounds.renderH;
+    moon.r  = Math.min(bounds.renderW, bounds.renderH) * 0.085;
+
+    // Dynamic Star alignment over artwork constellation nodes
+    cloudData.filter(c => c.interactive).forEach(c => {
+      c.cx = bounds.offsetX + c.xf * bounds.renderW;
+      c.cy = bounds.offsetY + c.yf * bounds.renderH;
+    });
 
     // ── Subtle nebula/galaxy smear top-left ──
     const neb = ctx.createRadialGradient(W * 0.18, H * 0.22, 0, W * 0.18, H * 0.22, W * 0.35);
@@ -1260,23 +1267,10 @@ function startMoments() {
       ctx.restore();
     });
 
-    // ── Moon glow aura ──
+    // ── Moon celestial glow aura ──
     const glowPulse = 0.03 * Math.sin(ts * 0.0009);
     const effectiveGlow = Math.max(0.15, moon.glow + glowPulse);
     drawMoon(ctx, moon.cx, moon.cy, moon.r, effectiveGlow);
-
-    // ── Moon craters (when glow < 0.6, show crescent-ish detail) ──
-    if (moon.glow < 0.6) {
-      ctx.save();
-      ctx.globalAlpha = (0.6 - moon.glow) * 0.18;
-      [[0.28, -0.32, 0.18], [-0.15, 0.1, 0.12], [0.1, 0.35, 0.09]].forEach(([ox, oy, rf]) => {
-        ctx.beginPath();
-        ctx.arc(moon.cx + ox * moon.r, moon.cy + oy * moon.r, rf * moon.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(60,80,100,0.5)';
-        ctx.fill();
-      });
-      ctx.restore();
-    }
 
     // ── Moon "Chhoo kar dekho" hint label ──
     if (moon.glow >= 0.98) {
