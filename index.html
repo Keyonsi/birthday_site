@@ -13,10 +13,88 @@
     rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="config.js"></script>
+  <!-- SVG defs for heart clip-path (heart-shaped photo) -->
+  <svg width="0" height="0" style="position:absolute;pointer-events:none;">
+    <defs>
+      <clipPath id="heart-photo-clip" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0.22 C0.5,0.08 0.37,0 0.25,0.08 C0.1,0.18 0.1,0.4 0.5,0.78 C0.9,0.4 0.9,0.18 0.75,0.08 C0.63,0 0.5,0.08 0.5,0.22 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
   <link rel="stylesheet" href="style.css" />
+  <script>
+    window.skipToAct = function(targetId) {
+      // Unhide main experience container so acts are visible immediately
+      var exp = document.getElementById('experience');
+      if (exp) {
+        exp.classList.remove('ui-hidden');
+        exp.style.display = 'block';
+        exp.style.opacity = '1';
+      }
+
+      // Hide decoy, reveal overlay, gate overlay, and holding hands overlay
+      var decoy = document.getElementById('decoy-site');
+      if (decoy) {
+        decoy.classList.add('fade-out');
+        decoy.style.display = 'none';
+      }
+      var overlay = document.getElementById('reveal-overlay');
+      if (overlay) overlay.classList.add('ui-hidden');
+      var gate = document.getElementById('gate-wrap');
+      if (gate) gate.classList.add('ui-hidden');
+      var handsOverlay = document.getElementById('holding-hands-overlay');
+      if (handsOverlay) handsOverlay.classList.add('ui-hidden');
+
+      // Hide all acts
+      document.querySelectorAll('.act').forEach(function(act) { act.classList.add('ui-hidden'); });
+
+      // Stop current sounds if functions exist
+      try { if (window.stopCricketsSound) window.stopCricketsSound(); } catch(e) {}
+      try { if (window.stopRainSound) window.stopRainSound(); } catch(e) {}
+
+      if (targetId === 'decoy') {
+        if (decoy) {
+          decoy.style.display = 'block';
+          decoy.style.opacity = '1';
+          decoy.style.pointerEvents = 'all';
+          decoy.classList.remove('fade-out');
+        }
+        return;
+      }
+
+      var actMap = {
+        'intro': { id: 'act-intro', fnName: 'startIntro' },
+        'cinema': { id: 'act-cinema', fnName: 'startCinema' },
+        'moments': { id: 'act-moments', fnName: 'startMoments' },
+        'hearts': { id: 'act-hearts', fnName: 'startHearts' },
+        'proposal': { id: 'act-proposal', fnName: 'startProposal' },
+        'candles': { id: 'act-candles', fnName: 'startCandles' }
+      };
+
+      var target = actMap[targetId];
+      if (target) {
+        var el = document.getElementById(target.id);
+        if (el) el.classList.remove('ui-hidden');
+        if (target.fnName && typeof window[target.fnName] === 'function') {
+          try { window[target.fnName](); } catch(err) { console.log('Act init:', err); }
+        }
+      }
+    };
+  </script>
 </head>
 
 <body>
+
+  <!-- Quick Testing Navigation Bar (For instant testing of any scene) -->
+  <div class="quick-testing-bar" id="quick-testing-bar">
+    <button onclick="skipToAct('decoy')" title="Decoy Site">🃏 Decoy</button>
+    <button onclick="skipToAct('intro')" title="Safar Intro">🌸 Intro</button>
+    <button onclick="skipToAct('cinema')" title="Cinema Film">🎬 Cinema</button>
+    <button onclick="skipToAct('moments')" title="Monsoon Baarish">🌧️ Monsoon</button>
+    <button onclick="skipToAct('hearts')" title="Hearts Raazein">❤️ Hearts</button>
+    <button onclick="skipToAct('proposal')" title="Proposal Ring">💍 Proposal</button>
+    <button onclick="skipToAct('candles')" title="Birthday Candles">🎂 Candles</button>
+  </div>
 
   <!-- ══ DECOY ══════════════════════════════════════════════════════ -->
   <div id="decoy-site">
@@ -26,44 +104,81 @@
       <span>🎈</span><span>🎉</span><span>🎈</span><span>🎊</span><span>🎈</span><span>🎈</span>
     </div>
 
+    <!-- Rocket fireworks 23-year counter overlay -->
+    <div id="decoy-rocket-counter" class="decoy-rocket-counter ui-hidden">
+      <div class="rocket-count-badge" id="rocket-count-badge">Year 2003 ✨</div>
+    </div>
+
     <!-- The flip card container -->
     <div class="decoy-flip-wrapper" id="decoy-flip-wrapper">
       <!-- FRONT face: simple birthday card -->
       <div class="decoy-face decoy-face-front">
+        <div class="iphone-notch"></div>
         <div class="decoy-cake">🎂</div>
         <h1 class="decoy-title">Happy Birthday!</h1>
         <p class="decoy-subtitle">Wishing you a wonderful day full of joy and smiles!</p>
-        <p class="decoy-name">— From a special someone 💝</p>
+        <p class="decoy-name">— From yours and only yours, Koustoobh 💝</p>
         <button id="decoy-btn" class="decoy-btn">Open Card 🎁</button>
       </div>
 
-      <!-- BACK face: collage + fireworks + countdown -->
+      <!-- BACK face: Scrapbook card style -->
       <div class="decoy-face decoy-face-back">
-        <div class="decoy-back-header">
-          <span class="decoy-back-emoji">🎉</span>
-          <h2 class="decoy-back-title">Happy Birthday Pranu! 🥳</h2>
+        <div class="iphone-notch"></div>
+        
+        <!-- Scrapbook paper flags banner -->
+        <div class="scrapbook-flags-row">
+          <span>H</span><span>A</span><span>P</span><span>P</span><span>Y</span>
+          <span>B</span><span>I</span><span>R</span><span>T</span><span>H</span><span>D</span><span>A</span><span>Y</span>
         </div>
 
-        <!-- Photo collage grid -->
-        <div class="decoy-collage" id="decoy-collage">
-          <img class="decoy-col-img" src="images/teeth/2.jpg" alt="" />
-          <img class="decoy-col-img" src="images/saree/1.jpg" alt="" />
-          <img class="decoy-col-img" src="images/saree/2.jpg" alt="" />
-        </div>
-
-        <!-- Countdown ring button -->
-        <div class="decoy-end-wrap" id="decoy-end-wrap">
-          <div class="decoy-ring-btn" id="decoy-ring-btn">
-            <svg class="decoy-ring-svg" viewBox="0 0 80 80">
-              <circle class="decoy-ring-track" cx="40" cy="40" r="34" />
-              <circle class="decoy-ring-progress" id="decoy-ring-progress" cx="40" cy="40" r="34" />
-            </svg>
-            <button id="decoy-continue-btn" class="decoy-continue-inner">
-              <span class="decoy-continue-text">Theek hai...</span>
-              <span class="decoy-continue-sub">par ruko 😏</span>
-            </button>
+        <div class="scrapbook-inner">
+          <!-- Polaroid photos spread across all corners of the scrapbook sheet -->
+          <div class="polaroids-container">
+            <div class="polaroid-frame pol-1">
+              <div class="washi-tape tape-yellow"></div>
+              <img src="images/collages/Collage1.png" alt="" />
+              <div class="polaroid-label">Hum Dono ❤️</div>
+            </div>
+            <div class="polaroid-frame pol-2">
+              <div class="washi-tape tape-pink"></div>
+              <img src="images/collages/Collage2.png" alt="" />
+              <div class="polaroid-label">Cute Pout 🥰</div>
+            </div>
+            <div class="polaroid-frame pol-3">
+              <div class="washi-tape tape-blue"></div>
+              <img src="images/collages/Collage3.png" alt="" />
+              <div class="polaroid-label">Safar ✨</div>
+            </div>
+            <div class="polaroid-frame pol-4">
+              <div class="washi-tape tape-green"></div>
+              <img src="images/collages/Collage4.png" alt="" />
+              <div class="polaroid-label">Hasi 😊</div>
+            </div>
           </div>
-          <p class="decoy-ring-hint" id="decoy-ring-hint">Ek secret hai... 8 second mein khulega ✨</p>
+
+          <!-- Handwritten-style notebook paper sticker -->
+          <div class="scrapbook-note-card">
+            <div class="washi-tape tape-pattern"></div>
+            <div class="note-card-text">
+              <p class="note-to">To my partner in crime!!!</p>
+              <p class="note-wish">Wishing you the happiest Birthday...</p>
+              <p class="note-keep">Keep Smiling...</p>
+            </div>
+          </div>
+
+          <!-- Rich doodles & stickers filled across dark sheet -->
+          <div class="sticker-flower-bouquet" title="Bouquet">💐🌸</div>
+          <div class="sticker-girl-badge">🎀 I'm just a girl</div>
+          <div class="sticker-headphones">🎧</div>
+          <div class="sticker-music-note">🎵✨</div>
+          <div class="sticker-love-stamp">💌 02.08</div>
+          <div class="sticker-sparkles-cluster">✨💖⭐</div>
+          <div class="sticker-camera">📷</div>
+        </div>
+
+        <!-- iPhone Home Touch Bar at bottom -->
+        <div class="iphone-home-wrap">
+          <div class="iphone-home-bar"></div>
         </div>
       </div>
     </div>
@@ -152,23 +267,31 @@
       <!-- White flash on lightning -->
       <div id="lightning-flash" class="lightning-flash"></div>
 
-      <!-- Minimal HUD at bottom -->
-      <div class="moments-hud">
-        <p class="moments-count" id="moments-count">0 / 8 yaadein khuli...</p>
-      </div>
 
-      <!-- Floating instruction at top -->
+
+      <!-- Floating instruction at bottom ground area -->
       <div class="moments-header">
-        <div class="chapter-label">🌙 सुनहरी यादें</div>
-        <h2 class="act-title moments-title">Baarish Mein...</h2>
-        <p class="act-subtitle moments-subtitle">Badalon ko chhoo kar dekho — bijli kadkegi aur yaadein khulengi ✨</p>
+        <div class="chapter-label">🌙  2 August 2003 • तारों भरी रात  ✦</div>
+        <h2 class="act-title moments-title">Yaadon Ka Aasman</h2>
+        <p class="act-subtitle moments-subtitle">Aasman ke har sitare aur Chand mein ek yaad chhupi hai... inhe chhoo kar dekho ✨</p>
+        <!-- Audio waveform equalizer visualizer -->
+        <div class="equalizer-wrap">
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+        </div>
       </div>
 
       <!-- Transition message overlay (shown after all 8 done) -->
       <div id="moments-transition-msg" class="moments-transition-msg ui-hidden">
-        <p class="moments-trans-text">Acha... tumne soch hi liya 💫</p>
-        <p class="moments-trans-sub">Main kyu tumhe itna pyaar karta hoon?</p>
-        <p class="moments-trans-cta">Chalo, aa jaan lo ❤️</p>
+        <p class="moments-trans-text">Acha... kya tumne kabhi socha hai</p>
+        <p class="moments-trans-sub">ki mai tumse itna pyar kyu karta hu...</p>
+        <p class="moments-trans-cta">aaj tum jaan logi ❤️</p>
       </div>
 
       <!-- Moment popup -->
@@ -206,34 +329,31 @@
                 <stop offset="50%" stop-color="#ff6b9d"/>
                 <stop offset="100%" stop-color="#ffb3c8"/>
               </linearGradient>
-              <linearGradient id="petalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#c41e6a"/>
-                <stop offset="100%" stop-color="#ff6b9d"/>
-              </linearGradient>
             </defs>
+
+            <!-- Fill rect clipped to heart shape -->
+            <rect id="heart-fill-rect" x="0" y="180" width="200" height="180" fill="url(#heartFillGrad)" clip-path="url(#heart-clip)"/>
 
             <!-- Heart outline (always visible) -->
             <path class="big-heart-outline"
               d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z"/>
 
-            <!-- Fill rect clipped to heart shape -->
-            <rect id="heart-fill-rect" x="0" y="180" width="200" height="180" fill="url(#heartFillGrad)" clip-path="url(#heart-clip)"/>
-
             <!-- Petal decorations (revealed one by one) -->
             <g id="heart-petals" clip-path="url(#heart-clip)" opacity="0.6"></g>
           </svg>
 
-          <!-- Center photo (fades in after 7+ hearts) -->
+          <!-- Center photo: Beautiful large circular container inside the heart -->
           <div class="heart-center-photo-wrap" id="heart-center-photo-wrap">
-            <img class="heart-center-photo" id="heart-center-photo" src="images/teeth/2.jpg" alt="Pranu's smile" />
-            <div class="heart-center-glow"></div>
+            <img class="heart-center-photo" id="heart-center-photo" src="images/teeth/3.jpeg" alt="Pranu's smile" />
           </div>
+
+          <!-- Heart glow burst (radiates outward from center heart when all revealed) -->
+          <div class="heart-glow-burst" id="heart-glow-burst"></div>
         </div>
 
         <!-- HUD: progress text -->
         <div class="hearts-hud">
           <p class="hearts-hint" id="hearts-hint-text">Udte hue dil pakdo — ek ek raaz khulega ✨</p>
-          <p class="hearts-count" id="hearts-count">0 / 15 raazein khuli...</p>
         </div>
       </div>
 
@@ -267,41 +387,45 @@
       <div id="proposal-particles" class="proposal-particles"></div>
 
       <div class="proposal-scene">
-        <!-- Silhouette Characters -->
-        <div class="silhouette-wrap" id="silhouette-wrap">
-          <div class="silhouette-container">
-            <!-- Girl Silhouette -->
-            <div class="silhouette-girl" id="sil-girl">
-              <svg viewBox="0 0 100 200" class="svg-sil">
-                <defs>
-                  <linearGradient id="girlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff758c" />
-                    <stop offset="100%" stop-color="#ff7eb3" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M50,18 C56,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44,18 50,18 Z M45,39 L55,39 C64,39 68,52 64,74 L58,135 L66,192 L54,192 L51,142 L49,142 L46,192 L34,192 L42,135 L36,74 C32,52 36,39 45,39 Z"
-                  fill="url(#girlGrad)" />
-              </svg>
-            </div>
-            <!-- Boy Silhouette -->
-            <div class="silhouette-boy" id="sil-boy">
-              <svg viewBox="0 0 100 200" class="svg-sil">
-                <defs>
-                  <linearGradient id="boyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#c47bff" />
-                    <stop offset="100%" stop-color="#9a4dff" />
-                  </linearGradient>
-                </defs>
-                <!-- Standing state -->
-                <path class="boy-standing"
-                  d="M50,16 C55.5,16 60,20.5 60,26 C60,31.5 55.5,36 50,36 C44.5,36 40,31.5 40,26 C40,20.5 44.5,16 50,16 Z M45,37 L55,37 C63,37 67,46 67,66 L62,126 L67,192 L57,192 L53,138 L47,138 L43,192 L33,192 L38,126 L33,66 C33,46 37,37 45,37 Z"
-                  fill="url(#boyGrad)" />
-                <!-- Kneeling state (offering ring) -->
-                <path class="boy-kneeling"
-                  d="M38,48 C43.5,48 48,43.5 48,38 C48,32.5 43.5,28 38,28 C32.5,28 28,32.5 28,38 C28,43.5 32.5,48 38,48 Z M34,49 L42,49 C50,49 53,58 52,74 L48,105 L72,110 L70,122 L40,122 L30,146 L18,146 L29,105 L27,74 C26,58 29,49 34,49 Z M55,80 L62,80 C65,80 67,82 67,85 L67,90 L55,90 Z"
-                  fill="url(#boyGrad)" style="opacity:0;" />
-              </svg>
+        <!-- Proposal Artwork Container (looks for proposal.gif, falls back to silhouettes) -->
+        <div class="proposal-artwork-wrap" id="proposal-artwork-wrap">
+          <img id="proposal-artwork-img" class="proposal-artwork-img" src="images/final/proposal.gif" alt="Proposal Illustration" onerror="this.style.display='none'; document.getElementById('silhouette-wrap').style.display='block';" />
+          
+          <div class="silhouette-wrap" id="silhouette-wrap" style="display: none;">
+            <div class="silhouette-container">
+              <!-- Girl Silhouette -->
+              <div class="silhouette-girl" id="sil-girl">
+                <svg viewBox="0 0 100 200" class="svg-sil">
+                  <defs>
+                    <linearGradient id="girlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#ff758c" />
+                      <stop offset="100%" stop-color="#ff7eb3" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M50,18 C56,18 60,22.5 60,28 C60,33.5 55.5,38 50,38 C44.5,38 40,33.5 40,28 C40,22.5 44,18 50,18 Z M45,39 L55,39 C64,39 68,52 64,74 L58,135 L66,192 L54,192 L51,142 L49,142 L46,192 L34,192 L42,135 L36,74 C32,52 36,39 45,39 Z"
+                    fill="url(#girlGrad)" />
+                </svg>
+              </div>
+              <!-- Boy Silhouette -->
+              <div class="silhouette-boy" id="sil-boy">
+                <svg viewBox="0 0 100 200" class="svg-sil">
+                  <defs>
+                    <linearGradient id="boyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#c47bff" />
+                      <stop offset="100%" stop-color="#9a4dff" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Standing state -->
+                  <path class="boy-standing"
+                    d="M50,16 C55.5,16 60,20.5 60,26 C60,31.5 55.5,36 50,36 C44.5,36 40,31.5 40,26 C40,20.5 44.5,16 50,16 Z M45,37 L55,37 C63,37 67,46 67,66 L62,126 L67,192 L57,192 L53,138 L47,138 L43,192 L33,192 L38,126 L33,66 C33,46 37,37 45,37 Z"
+                    fill="url(#boyGrad)" />
+                  <!-- Kneeling state (offering ring) -->
+                  <path class="boy-kneeling"
+                    d="M38,48 C43.5,48 48,43.5 48,38 C48,32.5 43.5,28 38,28 C32.5,28 28,32.5 28,38 C28,43.5 32.5,48 38,48 Z M34,49 L42,49 C50,49 53,58 52,74 L48,105 L72,110 L70,122 L40,122 L30,146 L18,146 L29,105 L27,74 C26,58 29,49 34,49 Z M55,80 L62,80 C65,80 67,82 67,85 L67,90 L55,90 Z"
+                    fill="url(#boyGrad)" style="opacity:0;" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -329,6 +453,28 @@
         </div>
       </div>
     </section>
+
+    <!-- ── HOLDING HANDS SCREEN / OVERLAY ──────────────────── -->
+    <div id="holding-hands-overlay" class="holding-hands-overlay ui-hidden">
+      <div class="holding-hands-container">
+        <!-- User's holding hands gif -->
+        <img id="holding-hands-gif" class="holding-hands-gif" src="images/final/holding_hands.gif" alt="" onerror="this.style.display='none'; document.getElementById('custom-hands-fallback').style.display='block';" />
+        
+        <!-- Custom Hand-Holding SVG fallback animation -->
+        <div id="custom-hands-fallback" class="custom-hands-fallback" style="display: none;">
+          <div class="hands-svg-wrap">
+            <svg viewBox="0 0 200 120" class="custom-hands-svg">
+              <path class="left-hand-line" d="M10,60 C40,60 65,45 92,60" fill="none" stroke="#ff758c" stroke-width="8" stroke-linecap="round" />
+              <path class="right-hand-line" d="M190,60 C160,60 135,45 108,60" fill="none" stroke="#c47bff" stroke-width="8" stroke-linecap="round" />
+              <g class="glow-heart-wrap">
+                <path d="M100,55 C100,55 94,48 94,43 C94,38 97.5,35 100,35 C102.5,35 106,38 106,43 C106,48 100,55 100,55 Z" fill="#ff2d55" class="pulse-heart" />
+              </g>
+            </svg>
+          </div>
+        </div>
+        <p class="holding-hands-title">Holding your hand, today and forever... ❤️</p>
+      </div>
+    </div>
 
     <!-- ── ACT 5: BIRTHDAY CANDLES ──────────────────────────── -->
     <section id="act-candles" class="act ui-hidden">
