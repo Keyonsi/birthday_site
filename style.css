@@ -1175,7 +1175,59 @@ body {
    ACT 3 — HEARTS (REDESIGNED: BIG HEART + FLOATING)
 ════════════════════════════════════════ */
 #act-hearts {
-  background: radial-gradient(ellipse at 40% 30%, #120020 0%, #03030a 70%);
+  background: #090310;
+}
+
+/* Hearts Header Card positioned over bottom bench area */
+.hearts-header {
+  position: absolute;
+  bottom: 1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  width: 88%;
+  max-width: 380px;
+  padding: 0.6rem 1rem 0.5rem;
+  text-align: center;
+  background: rgba(12, 4, 20, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 107, 157, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 24px rgba(255, 107, 157, 0.15);
+  pointer-events: none;
+}
+
+.hearts-title {
+  font-family: var(--font-d);
+  font-size: clamp(1.05rem, 4.5vw, 1.45rem);
+  color: #ffd6e7;
+  font-style: italic;
+  margin: 0.15rem 0 0.1rem;
+  text-shadow: 0 0 16px rgba(255, 107, 157, 0.5);
+}
+
+.hearts-subtitle {
+  font-family: var(--font-s);
+  font-size: 0.78rem;
+  color: rgba(255, 214, 231, 0.88);
+  line-height: 1.35;
+}
+
+/* Love Shower Falling Hearts */
+.falling-heart-drop {
+  position: absolute;
+  top: -35px;
+  pointer-events: none;
+  animation: heartDropFall linear infinite;
+  will-change: transform;
+}
+
+@keyframes heartDropFall {
+  0%   { transform: translateY(-35px) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.65; }
+  90%  { opacity: 0.45; }
+  100% { transform: translateY(115dvh) rotate(360deg); opacity: 0; }
 }
 
 .love-shower-bg {

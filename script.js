@@ -216,6 +216,27 @@ function drawLightningBolt(startX, startY, endX, endY) {
   });
 }
 
+// Helper: draw image with aspect-ratio cover scaling
+function drawImageCover(ctx, img, W, H) {
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const screenRatio = W / H;
+  let renderW, renderH, offsetX, offsetY;
+
+  if (screenRatio > imgRatio) {
+    renderW = W;
+    renderH = W / imgRatio;
+    offsetX = 0;
+    offsetY = (H - renderH) / 2;
+  } else {
+    renderH = H;
+    renderW = H * imgRatio;
+    offsetX = (W - renderW) / 2;
+    offsetY = 0;
+  }
+  ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
+  return { offsetX, offsetY, renderW, renderH };
+}
+
 // ══════════════════════════════════════════════════════════════════
 // RAIN DROPS
 // ══════════════════════════════════════════════════════════════════
@@ -235,6 +256,24 @@ function createRain(id, count = 110, color = 'rgba(174,220,180,0.3)') {
     d.style.animationDuration = isForeground ? `${0.45 + Math.random() * 0.5}s` : `${0.8 + Math.random() * 0.9}s`;
     d.style.animationDelay = `${Math.random() * 2}s`;
     d.style.setProperty('--sway', `${-14 + Math.random() * 28}px`);
+    wrap.appendChild(d);
+  }
+}
+
+function createHeartShower(id, count = 28) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const emojis = ['💖', '💕', '❤️', '✨', '🌸', '💓', '💗'];
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'falling-heart-drop';
+    d.textContent = emojis[i % emojis.length];
+    d.style.left = `${Math.random() * 95}%`;
+    d.style.fontSize = `${14 + Math.random() * 16}px`;
+    d.style.opacity = `${0.35 + Math.random() * 0.45}`;
+    d.style.animationDuration = `${3.5 + Math.random() * 4.5}s`;
+    d.style.animationDelay = `${Math.random() * 4}s`;
     wrap.appendChild(d);
   }
 }
@@ -1211,24 +1250,10 @@ function startMoments() {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Helper: draw image with aspect-ratio cover scaling
-    let bounds = { offsetX: 0, offsetY: 0, renderW: W, renderH: H };
-    if (leoBgImg.complete && leoBgImg.naturalWidth > 0) {
-      const imgRatio = leoBgImg.naturalWidth / leoBgImg.naturalHeight;
-      const screenRatio = W / H;
-      if (screenRatio > imgRatio) {
-        bounds.renderW = W;
-        bounds.renderH = W / imgRatio;
-        bounds.offsetX = 0;
-        bounds.offsetY = (H - bounds.renderH) / 2;
-      } else {
-        bounds.renderH = H;
-        bounds.renderW = H * imgRatio;
-        bounds.offsetX = (W - bounds.renderW) / 2;
-        bounds.offsetY = 0;
-      }
-      ctx.drawImage(leoBgImg, bounds.offsetX, bounds.offsetY, bounds.renderW, bounds.renderH);
-    } else {
+    let bounds = (leoBgImg.complete && leoBgImg.naturalWidth > 0)
+      ? drawImageCover(ctx, leoBgImg, W, H)
+      : { offsetX: 0, offsetY: 0, renderW: W, renderH: H };
+    if (!leoBgImg.complete || leoBgImg.naturalWidth === 0) {
       const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
       skyGrad.addColorStop(0, '#020510');
       skyGrad.addColorStop(0.45, '#060b1e');
@@ -1485,6 +1510,10 @@ function startMoments() {
 let heartsRevealed = 0;
 const HEARTS = BIRTHDAY_CONFIG.hearts;
 
+// Purple romantic starry lake garden background for Hearts Act 3
+const heartsBgImg = new Image();
+heartsBgImg.src = 'images/hearts_bg.jpg';
+
 // Heart particle state for velocity-based movement
 let heartParticles = [];
 let heartsAnimRunning = false;
@@ -1499,9 +1528,9 @@ function startHearts() {
     document.getElementById('hearts-count').textContent = `0 / ${HEARTS.length} raazein khuli...`;
   }
 
-  createRain('hearts-rain', 95, 'rgba(255,107,157,0.22)');
-  startRainSound(0.03);
-  startLoveShowerBg();
+  // Create falling emoji hearts love shower layer
+  createHeartShower('hearts-rain', 28);
+  startRainSound(0.02);
 
   // Background canvas: orbs + fireflies
   const cv = document.getElementById('hearts-canvas');
@@ -1525,6 +1554,17 @@ function startHearts() {
     if (document.getElementById('act-hearts').classList.contains('ui-hidden')) return;
     ctx.clearRect(0, 0, cv.width, cv.height);
     const W = cv.width, H = cv.height;
+
+    // Draw heartsBgImg image background with aspect ratio cover scaling
+    if (heartsBgImg.complete && heartsBgImg.naturalWidth > 0) {
+      drawImageCover(ctx, heartsBgImg, W, H);
+    } else {
+      const bgGrad = ctx.createRadialGradient(W * 0.4, H * 0.3, 0, W * 0.4, H * 0.3, Math.max(W, H) * 0.8);
+      bgGrad.addColorStop(0, '#120020');
+      bgGrad.addColorStop(0.7, '#03030a');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+    }
     orbs.forEach(o => {
       o.x = Math.max(0, Math.min(1, o.x + o.vx));
       o.y = Math.max(0, Math.min(1, o.y + o.vy));
@@ -1550,7 +1590,7 @@ function startHearts() {
     requestAnimationFrame(renderHeartsCanvas);
   })();
 
-  // ── Spawn 16 floating heart bubbles (8 real + 8 decoy) with Organic Spacing ──
+  // ── Spawn 24 floating heart bubbles (non-climax) + 8 decoy bubbles ──
   const floatingLayer = document.getElementById('hearts-floating-layer');
   floatingLayer.innerHTML = '';
 
@@ -1558,26 +1598,26 @@ function startHearts() {
   const BUBBLE_R = Math.min(28, W * 0.07);
   const margin = BUBBLE_R + 12;
 
-  // Generate 16 organic random coordinates with distance verification to prevent clumping
+  const nonClimaxHearts = HEARTS.filter(h => !h.isHeartClimax);
+  const totalItems = nonClimaxHearts.length + 8; // 24 + 8 = 32
+
   const spawnPoints = [];
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < totalItems; i++) {
     let x, y, overlap = false, attempts = 0;
     do {
       overlap = false;
       x = margin + Math.random() * (W - margin * 2);
       y = margin + Math.random() * (H * 0.72);
       
-      // Avoid spawning directly over the center heart container!
       const cx = W / 2, cy = H / 2;
       const distToCenter = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
       if (distToCenter < 120) {
         overlap = true;
       } else {
-        // Avoid spawning directly on top of other points
         for (let j = 0; j < spawnPoints.length; j++) {
           const pt = spawnPoints[j];
           const dist = Math.sqrt((x - pt.x) * (x - pt.x) + (y - pt.y) * (y - pt.y));
-          if (dist < BUBBLE_R * 2.3) {
+          if (dist < BUBBLE_R * 2.1) {
             overlap = true;
             break;
           }
@@ -1636,7 +1676,61 @@ function startHearts() {
   const popMsg   = document.getElementById('popup-msg');
   document.getElementById('popup-close').onclick = () => popup.classList.add('ui-hidden');
 
-  HEARTS.forEach((h, i) => {
+  function triggerHeartClimax() {
+    sfxPlay('chime');
+    const climaxHeart = HEARTS.find(h => h.isHeartClimax) || HEARTS[HEARTS.length - 1];
+    popEmoji.textContent = climaxHeart.emoji || "❤️";
+    popMsg.textContent   = climaxHeart.reason;
+    popup.classList.remove('ui-hidden');
+
+    const closeBtn = document.getElementById('popup-close');
+    const onClimaxClose = () => {
+      closeBtn.removeEventListener('click', onClimaxClose);
+      heartsAnimRunning = false;
+      const bigContainer = document.getElementById('big-heart-container');
+      if (bigContainer) bigContainer.classList.add('fully-revealed');
+
+      // Heart glow burst radiates from center heart
+      setTimeout(() => {
+        const burst = document.getElementById('heart-glow-burst');
+        if (burst) {
+          burst.classList.add('burst');
+          [0, 400, 800].forEach(delay => {
+            setTimeout(() => {
+              const ripple = burst.cloneNode(false);
+              ripple.style.opacity = '1';
+              ripple.classList.add('burst');
+              document.getElementById('big-heart-container').appendChild(ripple);
+              setTimeout(() => ripple.remove(), 1900);
+            }, delay);
+          });
+        }
+      }, 400);
+
+      // Achievement popup banner
+      setTimeout(() => {
+        const achievement = document.getElementById('heart-achievement');
+        if (achievement) {
+          achievement.classList.remove('ui-hidden');
+          gsap.fromTo(achievement.querySelector('.achievement-inner'),
+            { scale: 0.6, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1, 0.6)' });
+        }
+      }, 1400);
+
+      // Auto transition to Act 4 Proposal
+      setTimeout(() => {
+        clearInterval(starDecoyInterval);
+        document.querySelectorAll('#act-hearts .decoy-active-item').forEach(el => el.remove());
+        const achievement = document.getElementById('heart-achievement');
+        if (achievement) achievement.classList.add('ui-hidden');
+        switchAct('act-hearts', 'act-proposal', startProposal);
+      }, 4800);
+    };
+    closeBtn.addEventListener('click', onClimaxClose);
+  }
+
+  nonClimaxHearts.forEach((h, i) => {
     const bbl = document.createElement('div');
     bbl.className = 'heart-bubble';
     bbl.textContent = '\u2764\uFE0F';
@@ -1678,10 +1772,10 @@ function startHearts() {
 
         if (document.getElementById('hearts-count')) {
           document.getElementById('hearts-count').textContent =
-            `${heartsRevealed} / ${HEARTS.length} raazein khuli...`;
+            `${heartsRevealed} / ${nonClimaxHearts.length} raazein khuli...`;
         }
 
-        updateBigHeart(heartsRevealed, HEARTS.length);
+        updateBigHeart(heartsRevealed, nonClimaxHearts.length);
 
         // Reveal full heart photo starting from first heart caught!
         if (heartsRevealed >= 1) {
@@ -1757,19 +1851,24 @@ function startHearts() {
     const W2 = window.innerWidth, H2 = window.innerHeight;
     heartParticles.forEach(p => {
       if (p.done) return;
-      // Add gentle sine drift
-      p.vx += Math.sin(ts * 0.0006 + p.i) * 0.003;
-      p.vy += Math.cos(ts * 0.0005 + p.i * 1.3) * 0.002;
-      // Speed cap: reduced speed cap for slow elegant floating
+      // Add gentle organic floating drift
+      p.vx += Math.sin(ts * 0.0008 + p.i * 1.7) * 0.006;
+      p.vy += Math.cos(ts * 0.0007 + p.i * 1.3) * 0.005;
+      
+      // Speed cap for lively floating
       const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      if (speed > 0.45) { p.vx *= 0.45 / speed; p.vy *= 0.45 / speed; }
+      if (speed > 0.85) { p.vx *= 0.85 / speed; p.vy *= 0.85 / speed; }
+      
       p.x += p.vx;
       p.y += p.vy;
-      // Bounce off edges
-      if (p.x < margin)       { p.x = margin;       p.vx = Math.abs(p.vx) * 0.85; }
-      if (p.x > W2 - margin)  { p.x = W2 - margin;  p.vx = -Math.abs(p.vx) * 0.85; }
-      if (p.y < margin)       { p.y = margin;       p.vy = Math.abs(p.vy) * 0.85; }
-      if (p.y > H2 - margin - 80) { p.y = H2 - margin - 80; p.vy = -Math.abs(p.vy) * 0.85; }
+
+      // Soft boundary rebound within top sky area (above bottom header card)
+      const maxBottom = H2 - margin - 120;
+      if (p.x < margin)       { p.x = margin;       p.vx = Math.abs(p.vx) * 0.9; }
+      if (p.x > W2 - margin)  { p.x = W2 - margin;  p.vx = -Math.abs(p.vx) * 0.9; }
+      if (p.y < margin + 40)  { p.y = margin + 40;  p.vy = Math.abs(p.vy) * 0.9; }
+      if (p.y > maxBottom)    { p.y = maxBottom;    p.vy = -Math.abs(p.vy) * 0.9; }
+
       p.el.style.left = `${p.x - BUBBLE_R}px`;
       p.el.style.top  = `${p.y - BUBBLE_R}px`;
     });
