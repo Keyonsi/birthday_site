@@ -17,13 +17,14 @@
   <svg width="0" height="0" style="position:absolute;pointer-events:none;">
     <defs>
       <clipPath id="heart-photo-clip" clipPathUnits="objectBoundingBox">
-        <path d="M0.5,0.22 C0.5,0.08 0.37,0 0.25,0.08 C0.1,0.18 0.1,0.4 0.5,0.78 C0.9,0.4 0.9,0.18 0.75,0.08 C0.63,0 0.5,0.08 0.5,0.22 Z"/>
+        <path
+          d="M0.5,0.22 C0.5,0.08 0.37,0 0.25,0.08 C0.1,0.18 0.1,0.4 0.5,0.78 C0.9,0.4 0.9,0.18 0.75,0.08 C0.63,0 0.5,0.08 0.5,0.22 Z" />
       </clipPath>
     </defs>
   </svg>
   <link rel="stylesheet" href="style.css" />
   <script>
-    window.skipToAct = function(targetId) {
+    window.skipToAct = function (targetId) {
       // Unhide main experience container so acts are visible immediately
       var exp = document.getElementById('experience');
       if (exp) {
@@ -46,11 +47,11 @@
       if (handsOverlay) handsOverlay.classList.add('ui-hidden');
 
       // Hide all acts
-      document.querySelectorAll('.act').forEach(function(act) { act.classList.add('ui-hidden'); });
+      document.querySelectorAll('.act').forEach(function (act) { act.classList.add('ui-hidden'); });
 
       // Stop current sounds if functions exist
-      try { if (window.stopCricketsSound) window.stopCricketsSound(); } catch(e) {}
-      try { if (window.stopRainSound) window.stopRainSound(); } catch(e) {}
+      try { if (window.stopCricketsSound) window.stopCricketsSound(); } catch (e) { }
+      try { if (window.stopRainSound) window.stopRainSound(); } catch (e) { }
 
       if (targetId === 'decoy') {
         if (decoy) {
@@ -58,6 +59,16 @@
           decoy.style.opacity = '1';
           decoy.style.pointerEvents = 'all';
           decoy.classList.remove('fade-out');
+          var wrapper = document.getElementById('decoy-flip-wrapper');
+          if (wrapper) wrapper.classList.remove('flipped');
+          var counterEl = document.getElementById('decoy-rocket-counter');
+          if (counterEl) counterEl.classList.add('ui-hidden');
+          var balloons = document.getElementById('decoy-balloons');
+          if (balloons) {
+            Array.from(balloons.children).forEach(function (b) {
+              b.classList.remove('balloon-fly');
+            });
+          }
         }
         return;
       }
@@ -76,7 +87,7 @@
         var el = document.getElementById(target.id);
         if (el) el.classList.remove('ui-hidden');
         if (target.fnName && typeof window[target.fnName] === 'function') {
-          try { window[target.fnName](); } catch(err) { console.log('Act init:', err); }
+          try { window[target.fnName](); } catch (err) { console.log('Act init:', err); }
         }
       }
     };
@@ -124,7 +135,7 @@
       <!-- BACK face: Scrapbook card style -->
       <div class="decoy-face decoy-face-back">
         <div class="iphone-notch"></div>
-        
+
         <!-- Scrapbook paper flags banner -->
         <div class="scrapbook-flags-row">
           <span>H</span><span>A</span><span>P</span><span>P</span><span>Y</span>
@@ -137,22 +148,22 @@
             <div class="polaroid-frame pol-1">
               <div class="washi-tape tape-yellow"></div>
               <img src="images/collages/Collage1.png" alt="" />
-              <div class="polaroid-label">Hum Dono ❤️</div>
+              <div class="polaroid-label">Blue Cutie 💙</div>
             </div>
             <div class="polaroid-frame pol-2">
               <div class="washi-tape tape-pink"></div>
               <img src="images/collages/Collage2.png" alt="" />
-              <div class="polaroid-label">Cute Pout 🥰</div>
+              <div class="polaroid-label">Saree Grace 🥻</div>
             </div>
             <div class="polaroid-frame pol-3">
               <div class="washi-tape tape-blue"></div>
               <img src="images/collages/Collage3.png" alt="" />
-              <div class="polaroid-label">Safar ✨</div>
+              <div class="polaroid-label">Bossy Era 😤</div>
             </div>
             <div class="polaroid-frame pol-4">
               <div class="washi-tape tape-green"></div>
               <img src="images/collages/Collage4.png" alt="" />
-              <div class="polaroid-label">Hasi 😊</div>
+              <div class="polaroid-label">Garden Smiles 🌿</div>
             </div>
           </div>
 
@@ -271,19 +282,36 @@
 
       <!-- Floating instruction at bottom ground area -->
       <div class="moments-header">
-        <div class="chapter-label">🌙  2 August 2003 • तारों भरी रात  ✦</div>
+        <div class="chapter-label">🌙 2 August 2003 • तारों भरी रात ✦</div>
         <h2 class="act-title moments-title">Yaadon Ka Aasman</h2>
-        <p class="act-subtitle moments-subtitle">Aasman ke har sitare aur Chand mein ek yaad chhupi hai... inhe chhoo kar dekho ✨</p>
+        <p class="act-subtitle moments-subtitle">Aasman ke har sitare aur Chand mein ek yaad chhupi hai... inhe chhoo
+          kar dekho ✨</p>
         <!-- Audio waveform equalizer visualizer -->
         <div class="equalizer-wrap">
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
-          <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
         </div>
       </div>
 
@@ -317,7 +345,7 @@
 
       <!-- Hearts Header Card -->
       <div class="hearts-header">
-        <div class="chapter-label">💖 25 Heartbeats  ✦</div>
+        <div class="chapter-label">💖 25 Heartbeats ✦</div>
         <h2 class="act-title hearts-title">My ❤️ 25 Heartbeats</h2>
         <p class="act-subtitle hearts-subtitle">"Har dhadkan ke saath ek wajah... aur har wajah ke peeche sirf tum."</p>
       </div>
@@ -329,21 +357,23 @@
           <svg class="big-heart-svg" id="big-heart-svg" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <clipPath id="heart-clip">
-                <path d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z"/>
+                <path
+                  d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z" />
               </clipPath>
               <linearGradient id="heartFillGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stop-color="#ff2d55"/>
-                <stop offset="50%" stop-color="#ff6b9d"/>
-                <stop offset="100%" stop-color="#ffb3c8"/>
+                <stop offset="0%" stop-color="#ff2d55" />
+                <stop offset="50%" stop-color="#ff6b9d" />
+                <stop offset="100%" stop-color="#ffb3c8" />
               </linearGradient>
             </defs>
 
             <!-- Fill rect clipped to heart shape -->
-            <rect id="heart-fill-rect" x="0" y="180" width="200" height="180" fill="url(#heartFillGrad)" clip-path="url(#heart-clip)"/>
+            <rect id="heart-fill-rect" x="0" y="180" width="200" height="180" fill="url(#heartFillGrad)"
+              clip-path="url(#heart-clip)" />
 
             <!-- Heart outline (always visible) -->
             <path class="big-heart-outline"
-              d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z"/>
+              d="M100,160 C100,160 20,110 20,60 C20,35 40,18 60,18 C75,18 88,26 100,38 C112,26 125,18 140,18 C160,18 180,35 180,60 C180,110 100,160 100,160 Z" />
 
             <!-- Petal decorations (revealed one by one) -->
             <g id="heart-petals" clip-path="url(#heart-clip)" opacity="0.6"></g>
@@ -396,8 +426,10 @@
       <div class="proposal-scene">
         <!-- Proposal Artwork Container (looks for proposal.gif, falls back to silhouettes) -->
         <div class="proposal-artwork-wrap" id="proposal-artwork-wrap">
-          <img id="proposal-artwork-img" class="proposal-artwork-img" src="images/final/proposal.gif" alt="Proposal Illustration" onerror="this.style.display='none'; document.getElementById('silhouette-wrap').style.display='block';" />
-          
+          <img id="proposal-artwork-img" class="proposal-artwork-img" src="images/final/proposal.gif"
+            alt="Proposal Illustration"
+            onerror="this.style.display='none'; document.getElementById('silhouette-wrap').style.display='block';" />
+
           <div class="silhouette-wrap" id="silhouette-wrap" style="display: none;">
             <div class="silhouette-container">
               <!-- Girl Silhouette -->
@@ -445,7 +477,14 @@
         <!-- Ring box (hidden until dialogue done) -->
         <div class="ring-box ui-hidden" id="ring-box">
           <div class="ring-glow-aura"></div>
-          <div class="half-moon-ring">
+
+          <!-- Real ring photo/gif — falls back to the drawn CSS ring if missing -->
+          <div class="ring-photo-wrap" id="ring-photo-wrap">
+            <img id="ring-photo-img" class="ring-photo-img" src="images/final/ring.gif" alt="The ring"
+              onerror="this.style.display='none'; document.getElementById('half-moon-ring').style.display='flex';" />
+          </div>
+
+          <div class="half-moon-ring" id="half-moon-ring" style="display:none;">
             <div class="ring-band-left"></div>
             <div class="ring-band-right"></div>
             <div class="emerald-gem">
@@ -454,9 +493,14 @@
               <div class="gem-shine"></div>
             </div>
           </div>
+
           <p class="ring-title">I love you today, tomorrow, and forever.</p>
           <p class="ring-sub">Pran + U = Meri Pranu ❤️</p>
           <button id="proposal-accept-btn" class="accept-btn">Haath Thamo ❤️</button>
+
+          <!-- Little celebratory sticker that pops in once she accepts -->
+          <img id="ring-celebrate-sticker" class="ring-celebrate-sticker ui-hidden" src="images/final/blowkiss.gif"
+            alt="" />
         </div>
       </div>
     </section>
@@ -465,21 +509,27 @@
     <div id="holding-hands-overlay" class="holding-hands-overlay ui-hidden">
       <div class="holding-hands-container">
         <!-- User's holding hands gif -->
-        <img id="holding-hands-gif" class="holding-hands-gif" src="images/final/holding_hands.gif" alt="" onerror="this.style.display='none'; document.getElementById('custom-hands-fallback').style.display='block';" />
-        
+        <img id="holding-hands-gif" class="holding-hands-gif" src="images/final/holding_hands.gif" alt=""
+          onerror="this.style.display='none'; document.getElementById('custom-hands-fallback').style.display='block';" />
+
         <!-- Custom Hand-Holding SVG fallback animation -->
         <div id="custom-hands-fallback" class="custom-hands-fallback" style="display: none;">
           <div class="hands-svg-wrap">
             <svg viewBox="0 0 200 120" class="custom-hands-svg">
-              <path class="left-hand-line" d="M10,60 C40,60 65,45 92,60" fill="none" stroke="#ff758c" stroke-width="8" stroke-linecap="round" />
-              <path class="right-hand-line" d="M190,60 C160,60 135,45 108,60" fill="none" stroke="#c47bff" stroke-width="8" stroke-linecap="round" />
+              <path class="left-hand-line" d="M10,60 C40,60 65,45 92,60" fill="none" stroke="#ff758c" stroke-width="8"
+                stroke-linecap="round" />
+              <path class="right-hand-line" d="M190,60 C160,60 135,45 108,60" fill="none" stroke="#c47bff"
+                stroke-width="8" stroke-linecap="round" />
               <g class="glow-heart-wrap">
-                <path d="M100,55 C100,55 94,48 94,43 C94,38 97.5,35 100,35 C102.5,35 106,38 106,43 C106,48 100,55 100,55 Z" fill="#ff2d55" class="pulse-heart" />
+                <path
+                  d="M100,55 C100,55 94,48 94,43 C94,38 97.5,35 100,35 C102.5,35 106,38 106,43 C106,48 100,55 100,55 Z"
+                  fill="#ff2d55" class="pulse-heart" />
               </g>
             </svg>
           </div>
         </div>
         <p class="holding-hands-title">Holding your hand, today and forever... ❤️</p>
+        <img class="holding-hands-kiss-sticker" src="images/final/kiss.webp" alt="" />
       </div>
     </div>
 

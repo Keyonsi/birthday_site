@@ -5,6 +5,11 @@ const BIRTHDAY_CONFIG = {
   birthday: "2003-08-02",
   anniversaryMessage: "Pehla Saal • Pehli Anniversary ❤️",
 
+  // Testing controls — set to true before sending the real link so nobody sees the
+  // quick-nav bar (🃏 Decoy / 🌸 Intro / etc.) or the "Skip ⏩" button in the cinema scene.
+  // Set back to false whenever you want those testing shortcuts visible again.
+  hideQuickNav: false,
+
   decoy: {
     title: "Happy Birthday! 🎂",
     subtitle: "Wishing you a wonderful day!",

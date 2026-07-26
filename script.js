@@ -11,6 +11,17 @@
 'use strict';
 
 // ══════════════════════════════════════════════════════════════════
+// DEV / TESTING CONTROLS VISIBILITY (config: hideQuickNav)
+// ══════════════════════════════════════════════════════════════════
+(function applyQuickNavVisibility() {
+  const hideNav = !!(typeof BIRTHDAY_CONFIG !== 'undefined' && BIRTHDAY_CONFIG.hideQuickNav);
+  const bar = document.getElementById('quick-testing-bar');
+  if (bar) bar.style.display = hideNav ? 'none' : '';
+  const skipBtn = document.getElementById('cinema-skip-btn');
+  if (skipBtn) skipBtn.style.display = hideNav ? 'none' : '';
+})();
+
+// ══════════════════════════════════════════════════════════════════
 // AUDIO
 // ══════════════════════════════════════════════════════════════════
 let currentAudio = null;
@@ -171,6 +182,47 @@ function burstSpark(cx, cy, count = 10) {
   }
 }
 
+// Wispy smoke curl rising from a just-blown-out candle
+function spawnSmoke(cx, cy, count = 3) {
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'candle-smoke';
+    s.style.left = `${cx - 1.5 + (Math.random() - 0.5) * 4}px`;
+    s.style.top = `${cy - i * 3}px`;
+    s.style.setProperty('--sx1', `${(Math.random() - 0.5) * 10}px`);
+    s.style.setProperty('--sx2', `${(Math.random() - 0.5) * 16}px`);
+    s.style.setProperty('--sx3', `${(Math.random() - 0.5) * 22}px`);
+    s.style.animationDelay = `${i * 0.12}s`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 2200);
+  }
+}
+
+// Warm confetti fall for the birthday reveal moment
+function launchConfettiFall(count = 40) {
+  const colors = ['#ffd700', '#ff9a9e', '#c47bff', '#ff6b9d', '#fff8dc'];
+  const shapes = ['🎉', '✨', '🎊'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    const useEmoji = Math.random() > 0.55;
+    el.className = 'confetti-fall-piece';
+    el.style.left = `${Math.random() * 100}vw`;
+    el.style.setProperty('--fall-dur', `${2.6 + Math.random() * 2.2}s`);
+    el.style.setProperty('--fall-delay', `${Math.random() * 0.9}s`);
+    el.style.setProperty('--drift', `${(Math.random() - 0.5) * 140}px`);
+    el.style.setProperty('--spin', `${360 * (Math.random() > 0.5 ? 1 : -1)}deg`);
+    if (useEmoji) {
+      el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+      el.style.fontSize = `${0.9 + Math.random() * 0.7}rem`;
+    } else {
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width = el.style.height = `${5 + Math.random() * 5}px`;
+    }
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5200);
+  }
+}
+
 function drawLightningBolt(startX, startY, endX, endY) {
   const cv = document.getElementById('lightning-canvas');
   if (!cv) return;
@@ -313,6 +365,26 @@ let decoyCountdownInterval = null;
 
 document.getElementById('decoy-btn').addEventListener('click', openDecoyCard);
 
+// Add click interaction for polaroid frames on Decoy 2
+document.querySelectorAll('.polaroid-frame').forEach((pol) => {
+  pol.addEventListener('click', (e) => {
+    e.stopPropagation();
+    try { sfxPlay('heart'); } catch (err) { }
+    gsap.fromTo(pol, { scale: 0.92, rotate: (Math.random() - 0.5) * 10 }, { scale: 1.08, rotate: 0, duration: 0.35, ease: 'back.out(2)' });
+    setTimeout(() => {
+      gsap.to(pol, { scale: 1, duration: 0.3, ease: 'power2.out' });
+    }, 450);
+  });
+});
+
+// Also allow tapping on decoy card back to trigger reveal immediately if tapped
+const decoyBack = document.querySelector('.decoy-face-back');
+if (decoyBack) {
+  decoyBack.addEventListener('click', () => {
+    triggerDecoyReveal();
+  });
+}
+
 function openDecoyCard() {
   const wrapper = document.getElementById('decoy-flip-wrapper');
   const balloons = document.getElementById('decoy-balloons');
@@ -369,7 +441,7 @@ function startDecoyFireworks() {
     if (!decoyFwRunning) return;
     const startX = (0.2 + Math.random() * 0.6) * cv.width;
     const targetY = (0.12 + Math.random() * 0.28) * cv.height;
-    
+
     rockets.push({
       x: startX,
       y: cv.height,
@@ -394,8 +466,7 @@ function startDecoyFireworks() {
   // Main render loop for rockets & firework explosions
   (function renderRocketFw() {
     if (!decoyFwRunning) { ctx.clearRect(0, 0, cv.width, cv.height); return; }
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
-    ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.clearRect(0, 0, cv.width, cv.height);
 
     // Update and draw active rockets
     rockets.forEach((r, idx) => {
@@ -429,11 +500,11 @@ function startDecoyFireworks() {
             badgeEl.textContent = `Happy 23rd Birthday, My Baby! 🥳🎂🎉`;
             badgeEl.style.background = 'linear-gradient(135deg, #ff2d55, #c47bff)';
             badgeEl.style.fontSize = 'clamp(1.2rem, 5vw, 1.8rem)';
-            
-            // Start 8-second countdown to main reveal AFTER final 23rd rocket burst
+
+            // Start 2.2-second countdown to main reveal AFTER final 23rd rocket burst
             setTimeout(() => {
               triggerDecoyReveal();
-            }, 8000);
+            }, 2200);
           }
           // Bounce badge
           gsap.fromTo(badgeEl, { scale: 0.85 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
@@ -632,17 +703,20 @@ function startIntro() {
   })();
 
   // Begin button
-  document.getElementById('intro-begin-btn').addEventListener('click', () => {
-    sfxPlay('chime');
-    switchAct('act-intro', 'act-cinema', startCinema);
-  }, { once: true });
+  const beginBtn = document.getElementById('intro-begin-btn');
+  if (beginBtn) {
+    beginBtn.onclick = () => {
+      sfxPlay('chime');
+      switchAct('act-intro', 'act-cinema', startCinema);
+    };
+  }
 
   // Update intro text with more cinematic wording
   const titleEl = document.querySelector('.intro-title');
-  const subEl   = document.querySelector('.intro-subtitle');
+  const subEl = document.querySelector('.intro-subtitle');
   const subText = document.querySelector('.intro-subtext');
   if (titleEl) titleEl.innerHTML = 'Tumhari Yaadein 🌸';
-  if (subEl)   subEl.textContent = 'Kuch pal hote hain jo zindagi bhar yaad rehte hain...';
+  if (subEl) subEl.textContent = 'Kuch pal hote hain jo zindagi bhar yaad rehte hain...';
   if (subText) subText.textContent = 'Aaj main tumhein unhi palon mein le jaana chahta hoon.';
 }
 
@@ -766,7 +840,7 @@ function startCricketsSound() {
   try {
     const ctx = getACtx();
     const now = ctx.currentTime;
-    
+
     cricketHumOsc = ctx.createOscillator();
     cricketHumGain = ctx.createGain();
     cricketHumOsc.type = 'sine';
@@ -799,7 +873,7 @@ function startCricketsSound() {
         o.stop(t + offset + 0.05);
       }
     }, 1800 + Math.random() * 800);
-  } catch(e) {}
+  } catch (e) { }
 }
 
 function stopCricketsSound() {
@@ -808,10 +882,10 @@ function stopCricketsSound() {
     if (cricketHumGain) {
       cricketHumGain.gain.setTargetAtTime(0, getACtx().currentTime, 0.4);
       setTimeout(() => {
-        try { if (cricketHumOsc) { cricketHumOsc.stop(); cricketHumOsc = null; } } catch(e){}
+        try { if (cricketHumOsc) { cricketHumOsc.stop(); cricketHumOsc = null; } } catch (e) { }
       }, 1000);
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -821,7 +895,7 @@ let momentsRevealed = 0;
 
 // Starry night Leo constellation artwork background
 const leoBgImg = new Image();
-leoBgImg.src = 'images/leo.png';
+leoBgImg.src = 'images/bg-assets/leo-bg.png';
 
 // Cloud data for the moments scene
 let cloudData = [];
@@ -859,17 +933,22 @@ function startMoments() {
   const nonMoonMemories = moments.filter(m => !m.isMoonClimax);
   cloudData = [];
 
+  // Coordinates derived from pixel-analysis of the actual leo-bg.png artwork
+  // (bright-blob detection over the real image) then spacing-relaxed so no
+  // two stars sit closer than a comfortable tap-distance apart on mobile —
+  // keeps the same overall mane/back/tail/leg shape but makes every star
+  // reliably tappable.
   const leoConstellationNodes = [
-    { xf: 0.625, yf: 0.163 }, { xf: 0.540, yf: 0.215 }, { xf: 0.390, yf: 0.290 }, { xf: 0.447, yf: 0.244 },
-    { xf: 0.275, yf: 0.183 }, { xf: 0.240, yf: 0.367 }, { xf: 0.224, yf: 0.511 }, { xf: 0.231, yf: 0.547 },
-    { xf: 0.372, yf: 0.380 }, { xf: 0.419, yf: 0.351 }, { xf: 0.550, yf: 0.375 }, { xf: 0.665, yf: 0.290 },
-    { xf: 0.698, yf: 0.345 }, { xf: 0.742, yf: 0.412 }, { xf: 0.748, yf: 0.490 }, { xf: 0.740, yf: 0.555 },
-    { xf: 0.730, yf: 0.625 }, { xf: 0.445, yf: 0.605 }, { xf: 0.428, yf: 0.605 }, { xf: 0.485, yf: 0.672 },
-    { xf: 0.410, yf: 0.655 }, { xf: 0.290, yf: 0.582 }, { xf: 0.335, yf: 0.530 }, { xf: 0.228, yf: 0.552 },
-    { xf: 0.260, yf: 0.675 }, { xf: 0.305, yf: 0.700 }, { xf: 0.355, yf: 0.530 }, { xf: 0.478, yf: 0.555 },
-    { xf: 0.485, yf: 0.482 }, { xf: 0.605, yf: 0.460 }, { xf: 0.618, yf: 0.535 }, { xf: 0.528, yf: 0.585 },
-    { xf: 0.650, yf: 0.620 }, { xf: 0.648, yf: 0.655 }, { xf: 0.590, yf: 0.700 }, { xf: 0.615, yf: 0.745 },
-    { xf: 0.705, yf: 0.685 }, { xf: 0.528, yf: 0.765 }, { xf: 0.420, yf: 0.765 }
+    { xf: 0.492, yf: 0.065 }, { xf: 0.363, yf: 0.124 }, { xf: 0.434, yf: 0.206 }, { xf: 0.343, yf: 0.264 },
+    { xf: 0.352, yf: 0.336 }, { xf: 0.504, yf: 0.340 }, { xf: 0.475, yf: 0.434 }, { xf: 0.347, yf: 0.481 },
+    { xf: 0.332, yf: 0.408 }, { xf: 0.203, yf: 0.447 }, { xf: 0.204, yf: 0.369 }, { xf: 0.206, yf: 0.297 },
+    { xf: 0.089, yf: 0.250 }, { xf: 0.057, yf: 0.469 }, { xf: 0.217, yf: 0.519 }, { xf: 0.108, yf: 0.653 },
+    { xf: 0.356, yf: 0.554 }, { xf: 0.483, yf: 0.514 }, { xf: 0.504, yf: 0.586 }, { xf: 0.606, yf: 0.471 },
+    { xf: 0.605, yf: 0.396 }, { xf: 0.656, yf: 0.328 }, { xf: 0.559, yf: 0.272 }, { xf: 0.732, yf: 0.221 },
+    { xf: 0.785, yf: 0.289 }, { xf: 0.887, yf: 0.235 }, { xf: 0.954, yf: 0.304 }, { xf: 0.969, yf: 0.396 },
+    { xf: 0.970, yf: 0.514 }, { xf: 0.881, yf: 0.455 }, { xf: 0.739, yf: 0.507 }, { xf: 0.736, yf: 0.433 },
+    { xf: 0.790, yf: 0.365 }, { xf: 0.818, yf: 0.569 }, { xf: 0.866, yf: 0.639 }, { xf: 0.970, yf: 0.587 },
+    { xf: 0.586, yf: 0.201 }, { xf: 0.646, yf: 0.101 }, { xf: 0.514, yf: 0.137 }
   ];
 
   nonMoonMemories.forEach((m, i) => {
@@ -894,6 +973,26 @@ function startMoments() {
     phase: Math.random() * Math.PI * 2,
     speed: 0.015 + Math.random() * 0.025
   }));
+
+  // ── Shooting stars streaking across the sky (echoing the artwork's meteor trails) ──
+  const shootingStars = [];
+  function spawnShootingStar() {
+    const fromLeft = Math.random() > 0.5;
+    const y0 = H * (0.03 + Math.random() * 0.35);
+    shootingStars.push({
+      x: fromLeft ? -40 : W + 40,
+      y: y0,
+      vx: (fromLeft ? 1 : -1) * (7 + Math.random() * 4),
+      vy: 3 + Math.random() * 2,
+      len: 90 + Math.random() * 60,
+      life: 1
+    });
+  }
+  (function shootingStarLoop() {
+    if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
+    spawnShootingStar();
+    setTimeout(shootingStarLoop, 6000 + Math.random() * 9000);
+  })();
 
   // ── Fireflies ──
   const flies = Array.from({ length: 14 }, () => ({
@@ -922,7 +1021,7 @@ function startMoments() {
   // ── Spawn interactive falling leaf decoys ──
   const leafContainer = document.getElementById('act-moments');
   const leafEmojis = ['🍁', '🍂', '🍃'];
-  
+
   function spawnDecoyLeaf() {
     if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
     const leaf = document.createElement('div');
@@ -930,16 +1029,16 @@ function startMoments() {
     leaf.textContent = leafEmojis[Math.floor(Math.random() * leafEmojis.length)];
     leaf.style.left = `${10 + Math.random() * 80}%`;
     leaf.style.top = `-30px`;
-    
+
     // Slow fall rotation drift
     const startX = Math.random() * 10;
-    gsap.fromTo(leaf, 
+    gsap.fromTo(leaf,
       { y: -30, rotation: 0, x: startX },
-      { 
-        y: window.innerHeight + 50, 
-        rotation: 360 + Math.random() * 360, 
+      {
+        y: window.innerHeight + 50,
+        rotation: 360 + Math.random() * 360,
         x: startX + (Math.random() > 0.5 ? 40 : -40),
-        duration: 8 + Math.random() * 6, 
+        duration: 8 + Math.random() * 6,
         ease: 'none',
         onComplete: () => leaf.remove()
       }
@@ -955,7 +1054,7 @@ function startMoments() {
 
     leafContainer.appendChild(leaf);
   }
-  
+
   // Spawn a leaf decoy every 4 seconds
   leafDecoyInterval = setInterval(spawnDecoyLeaf, 4000);
 
@@ -984,11 +1083,11 @@ function startMoments() {
     const lum = Math.round(litAlpha * 60);
     ctx.fillStyle = `rgb(${185 + lum},${210 + lum},${200 + lum})`;
 
-    ctx.beginPath(); ctx.arc(cx,           cy,           36 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx - 28 * s,  cy + 8 * s,   26 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx + 28 * s,  cy + 8 * s,   24 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx - 14 * s,  cy - 22 * s,  22 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx + 16 * s,  cy - 18 * s,  18 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 36 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 28 * s, cy + 8 * s, 26 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 28 * s, cy + 8 * s, 24 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 14 * s, cy - 22 * s, 22 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 16 * s, cy - 18 * s, 18 * s, 0, Math.PI * 2); ctx.fill();
     ctx.fillRect(cx - 62 * s, cy, 124 * s, 28 * s);
 
     ctx.shadowBlur = 0; ctx.globalAlpha = 1;
@@ -1121,7 +1220,7 @@ function startMoments() {
     // ── Arched window in center (warm golden-yellow glow inside) ──
     const aw = hw * 0.24, ah = hh * 0.65;
     const ax = hx - hw * 0.05, ay = hy - ah;
-    
+
     // Golden glow cone casting on wet lawn
     const windowGlow = ctx.createRadialGradient(ax, ay + ah / 2, 0, ax, ay + ah / 2, ah * 1.8);
     windowGlow.addColorStop(0, 'rgba(255,180,50,0.22)');
@@ -1134,7 +1233,7 @@ function startMoments() {
     insideGrad.addColorStop(0, 'rgba(255,215,80,0.92)');
     insideGrad.addColorStop(1, 'rgba(255,160,40,0.95)');
     ctx.fillStyle = insideGrad;
-    
+
     // Draw Arched window polygon
     ctx.beginPath();
     ctx.arc(ax, ay + aw / 2, aw / 2, Math.PI, 0); // top arch
@@ -1266,7 +1365,7 @@ function startMoments() {
     // Dynamic Moon alignment over artwork moon
     moon.cx = bounds.offsetX + 0.851 * bounds.renderW;
     moon.cy = bounds.offsetY + 0.136 * bounds.renderH;
-    moon.r  = Math.min(bounds.renderW, bounds.renderH) * 0.085;
+    moon.r = Math.min(bounds.renderW, bounds.renderH) * 0.085;
 
     // Dynamic Star alignment over artwork constellation nodes
     cloudData.filter(c => c.interactive).forEach(c => {
@@ -1291,6 +1390,30 @@ function startMoments() {
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     });
+
+    // ── Shooting stars ──
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const sh = shootingStars[i];
+      sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.012;
+      if (sh.life <= 0 || sh.x < -150 || sh.x > W + 150) { shootingStars.splice(i, 1); continue; }
+      const angle = Math.atan2(sh.vy, sh.vx);
+      const tailX = sh.x - Math.cos(angle) * sh.len;
+      const tailY = sh.y - Math.sin(angle) * sh.len;
+      const grad = ctx.createLinearGradient(sh.x, sh.y, tailX, tailY);
+      grad.addColorStop(0, `rgba(255,255,255,${0.9 * sh.life})`);
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.save();
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(sh.x, sh.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+      ctx.fillStyle = `rgba(255,255,255,${sh.life})`;
+      ctx.beginPath(); ctx.arc(sh.x, sh.y, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
 
     // ── Moon celestial glow aura ──
     const glowPulse = 0.03 * Math.sin(ts * 0.0009);
@@ -1407,21 +1530,37 @@ function startMoments() {
   // ── Touch/click detection ──
   const popup = document.getElementById('moment-popup');
   const popIcon = document.getElementById('moment-popup-icon');
-  const popMsg  = document.getElementById('moment-popup-msg');
-  document.getElementById('moment-popup-close').onclick = () => popup.classList.add('ui-hidden');
+  const popMsg = document.getElementById('moment-popup-msg');
+  const closeBtn = document.getElementById('moment-popup-close');
+  let climaxPending = false;
+  let climaxDone = false;
+
+  function closeMomentPopup() {
+    popup.classList.add('ui-hidden');
+    if (climaxPending && !climaxDone) {
+      climaxDone = true;
+      clearInterval(leafDecoyInterval);
+      stopCricketsSound();
+      stopRainSound();
+      switchAct('act-moments', 'act-hearts', startHearts);
+    }
+  }
+  closeBtn.addEventListener('click', closeMomentPopup);
 
   // Hit radius: larger for mobile touch
-  const hitRadius = Math.max(36, Math.min(W, H) * 0.06);
+  const hitRadius = Math.max(44, Math.min(W, H) * 0.065);
 
   function findStarAt(x, y) {
+    let best = null, bestD = Infinity;
     for (let i = cloudData.length - 1; i >= 0; i--) {
       const c = cloudData[i];
       if (!c.interactive) continue;
       const dx = x - c.cx, dy = y - c.cy;
-      const r = Math.max(hitRadius, 28 * c.scale);
-      if (dx * dx + dy * dy < r * r) return c;
+      const d = dx * dx + dy * dy;
+      const r = Math.max(hitRadius, 30 * c.scale);
+      if (d < r * r && d < bestD) { best = c; bestD = d; }
     }
-    return null;
+    return best;
   }
 
   function isMoonHit(x, y) {
@@ -1430,6 +1569,7 @@ function startMoments() {
   }
 
   function triggerMoonClimax() {
+    if (climaxPending) return; // avoid double-trigger
     moon.glow = 1.0;
     moonFlareState = { startTs: performance.now(), progress: 0 };
     sfxPlay('chime');
@@ -1438,19 +1578,12 @@ function startMoments() {
     setTimeout(() => {
       const climaxMemory = moments.find(m => m.isMoonClimax) || moments[moments.length - 1];
       popIcon.textContent = climaxMemory.icon || "🌕";
-      popMsg.textContent  = climaxMemory.text;
+      popMsg.textContent = climaxMemory.text;
       popup.classList.remove('ui-hidden');
+      climaxPending = true;
 
-      // Add auto-transition listener when closing climax modal
-      const closeBtn = document.getElementById('moment-popup-close');
-      const onClimaxClose = () => {
-        closeBtn.removeEventListener('click', onClimaxClose);
-        clearInterval(leafDecoyInterval);
-        stopCricketsSound();
-        stopRainSound();
-        switchAct('act-moments', 'act-hearts', startHearts);
-      };
-      closeBtn.addEventListener('click', onClimaxClose);
+      // Safety net: auto-advance even if the person never taps close
+      setTimeout(() => closeMomentPopup(), 9000);
     }, 400);
   }
 
@@ -1491,7 +1624,7 @@ function startMoments() {
 
     setTimeout(() => {
       popIcon.textContent = star.icon;
-      popMsg.textContent  = star.moment.text;
+      popMsg.textContent = star.moment.text;
       popup.classList.remove('ui-hidden');
     }, 300);
 
@@ -1512,7 +1645,7 @@ const HEARTS = BIRTHDAY_CONFIG.hearts;
 
 // Purple romantic starry lake garden background for Hearts Act 3
 const heartsBgImg = new Image();
-heartsBgImg.src = 'images/hearts_bg.jpg';
+heartsBgImg.src = 'images/bg-assets/hearts-bg.jpg';
 
 // Heart particle state for velocity-based movement
 let heartParticles = [];
@@ -1608,7 +1741,7 @@ function startHearts() {
       overlap = false;
       x = margin + Math.random() * (W - margin * 2);
       y = margin + Math.random() * (H * 0.72);
-      
+
       const cx = W / 2, cy = H / 2;
       const distToCenter = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
       if (distToCenter < 120) {
@@ -1637,7 +1770,7 @@ function startHearts() {
     bbl.className = 'heart-bubble decoy-bubble';
     bbl.textContent = '❤️';
     bbl.style.position = 'absolute';
-    bbl.style.width  = `${BUBBLE_R * 2}px`;
+    bbl.style.width = `${BUBBLE_R * 2}px`;
     bbl.style.height = `${BUBBLE_R * 2}px`;
 
     const pt = spawnPoints[spawnIdx++] || { x: W * Math.random(), y: H * 0.5 * Math.random() };
@@ -1671,64 +1804,10 @@ function startHearts() {
     });
   }
 
-  const popup    = document.getElementById('heart-popup');
+  const popup = document.getElementById('heart-popup');
   const popEmoji = document.getElementById('popup-emoji');
-  const popMsg   = document.getElementById('popup-msg');
+  const popMsg = document.getElementById('popup-msg');
   document.getElementById('popup-close').onclick = () => popup.classList.add('ui-hidden');
-
-  function triggerHeartClimax() {
-    sfxPlay('chime');
-    const climaxHeart = HEARTS.find(h => h.isHeartClimax) || HEARTS[HEARTS.length - 1];
-    popEmoji.textContent = climaxHeart.emoji || "❤️";
-    popMsg.textContent   = climaxHeart.reason;
-    popup.classList.remove('ui-hidden');
-
-    const closeBtn = document.getElementById('popup-close');
-    const onClimaxClose = () => {
-      closeBtn.removeEventListener('click', onClimaxClose);
-      heartsAnimRunning = false;
-      const bigContainer = document.getElementById('big-heart-container');
-      if (bigContainer) bigContainer.classList.add('fully-revealed');
-
-      // Heart glow burst radiates from center heart
-      setTimeout(() => {
-        const burst = document.getElementById('heart-glow-burst');
-        if (burst) {
-          burst.classList.add('burst');
-          [0, 400, 800].forEach(delay => {
-            setTimeout(() => {
-              const ripple = burst.cloneNode(false);
-              ripple.style.opacity = '1';
-              ripple.classList.add('burst');
-              document.getElementById('big-heart-container').appendChild(ripple);
-              setTimeout(() => ripple.remove(), 1900);
-            }, delay);
-          });
-        }
-      }, 400);
-
-      // Achievement popup banner
-      setTimeout(() => {
-        const achievement = document.getElementById('heart-achievement');
-        if (achievement) {
-          achievement.classList.remove('ui-hidden');
-          gsap.fromTo(achievement.querySelector('.achievement-inner'),
-            { scale: 0.6, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1, 0.6)' });
-        }
-      }, 1400);
-
-      // Auto transition to Act 4 Proposal
-      setTimeout(() => {
-        clearInterval(starDecoyInterval);
-        document.querySelectorAll('#act-hearts .decoy-active-item').forEach(el => el.remove());
-        const achievement = document.getElementById('heart-achievement');
-        if (achievement) achievement.classList.add('ui-hidden');
-        switchAct('act-hearts', 'act-proposal', startProposal);
-      }, 4800);
-    };
-    closeBtn.addEventListener('click', onClimaxClose);
-  }
 
   nonClimaxHearts.forEach((h, i) => {
     const bbl = document.createElement('div');
@@ -1737,7 +1816,7 @@ function startHearts() {
     bbl.style.position = 'absolute';
     bbl.style.setProperty('--fDur', `${2.2 + Math.random() * 1.2}s`);
     bbl.style.setProperty('--fDel', `${Math.random() * 0.8}s`);
-    bbl.style.width  = `${BUBBLE_R * 2}px`;
+    bbl.style.width = `${BUBBLE_R * 2}px`;
     bbl.style.height = `${BUBBLE_R * 2}px`;
 
     const pt = spawnPoints[spawnIdx++] || { x: W * Math.random(), y: H * 0.5 * Math.random() };
@@ -1792,14 +1871,16 @@ function startHearts() {
           bbl.classList.add('dissolve');
         }, 300);
 
-        if (heartsRevealed === HEARTS.length) {
+        if (heartsRevealed === nonClimaxHearts.length) {
           heartsAnimRunning = false;
           const bigContainer = document.getElementById('big-heart-container');
           if (bigContainer) bigContainer.classList.add('fully-revealed');
 
+          const climaxHeart = HEARTS.find(hh => hh.isHeartClimax) || HEARTS[HEARTS.length - 1];
+
           setTimeout(() => popup.classList.add('ui-hidden'), 2200);
 
-          // ❤ Glow burst radiates FROM the center heart shape
+          // ❤ Glow burst radiates FROM the center heart shape, paired with the final message
           setTimeout(() => {
             const burst = document.getElementById('heart-glow-burst');
             if (burst) {
@@ -1815,7 +1896,15 @@ function startHearts() {
                 }, delay);
               });
             }
+
+            // The most important heart message, shown together with the glow
+            popEmoji.textContent = climaxHeart.emoji || "❤️";
+            popMsg.textContent = climaxHeart.reason;
+            popup.classList.remove('ui-hidden');
           }, 2600);
+
+          // Give enough time to read the final message before moving on
+          setTimeout(() => popup.classList.add('ui-hidden'), 8600);
 
           // Achievement popup
           setTimeout(() => {
@@ -1826,7 +1915,7 @@ function startHearts() {
                 { scale: 0.6, opacity: 0 },
                 { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1, 0.6)' });
             }
-          }, 3600);
+          }, 9000);
 
           // Pink flash → transition
           setTimeout(() => {
@@ -1835,7 +1924,7 @@ function startHearts() {
             document.querySelectorAll('#act-hearts .decoy-active-item').forEach(el => el.remove());
             stopRainSound();
             switchAct('act-hearts', 'act-proposal', startProposal);
-          }, 5200);
+          }, 10600);
         }
       } else {
         popEmoji.textContent = h.emoji;
@@ -1854,23 +1943,23 @@ function startHearts() {
       // Add gentle organic floating drift
       p.vx += Math.sin(ts * 0.0008 + p.i * 1.7) * 0.006;
       p.vy += Math.cos(ts * 0.0007 + p.i * 1.3) * 0.005;
-      
+
       // Speed cap for lively floating
       const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
       if (speed > 0.85) { p.vx *= 0.85 / speed; p.vy *= 0.85 / speed; }
-      
+
       p.x += p.vx;
       p.y += p.vy;
 
       // Soft boundary rebound within top sky area (above bottom header card)
       const maxBottom = H2 - margin - 120;
-      if (p.x < margin)       { p.x = margin;       p.vx = Math.abs(p.vx) * 0.9; }
-      if (p.x > W2 - margin)  { p.x = W2 - margin;  p.vx = -Math.abs(p.vx) * 0.9; }
-      if (p.y < margin + 40)  { p.y = margin + 40;  p.vy = Math.abs(p.vy) * 0.9; }
-      if (p.y > maxBottom)    { p.y = maxBottom;    p.vy = -Math.abs(p.vy) * 0.9; }
+      if (p.x < margin) { p.x = margin; p.vx = Math.abs(p.vx) * 0.9; }
+      if (p.x > W2 - margin) { p.x = W2 - margin; p.vx = -Math.abs(p.vx) * 0.9; }
+      if (p.y < margin + 40) { p.y = margin + 40; p.vy = Math.abs(p.vy) * 0.9; }
+      if (p.y > maxBottom) { p.y = maxBottom; p.vy = -Math.abs(p.vy) * 0.9; }
 
       p.el.style.left = `${p.x - BUBBLE_R}px`;
-      p.el.style.top  = `${p.y - BUBBLE_R}px`;
+      p.el.style.top = `${p.y - BUBBLE_R}px`;
     });
     requestAnimationFrame(animateHearts);
   })(0);
@@ -1956,7 +2045,21 @@ function startProposal() {
     const silWrap = document.getElementById('silhouette-wrap');
     if (silWrap) silWrap.classList.add('in');
     const artWrap = document.getElementById('proposal-artwork-wrap');
-    if (artWrap) artWrap.classList.add('in');
+    if (artWrap) {
+      artWrap.classList.add('in');
+      // Scatter a few soft sparkle motes across the artwork frame for a lived-in, magical feel
+      for (let i = 0; i < 6; i++) {
+        const sp = document.createElement('div');
+        sp.className = 'art-sparkle';
+        const size = 3 + Math.random() * 4;
+        sp.style.width = sp.style.height = `${size}px`;
+        sp.style.left = `${8 + Math.random() * 84}%`;
+        sp.style.top = `${15 + Math.random() * 70}%`;
+        sp.style.animationDuration = `${3 + Math.random() * 2.4}s`;
+        sp.style.animationDelay = `${Math.random() * 3}s`;
+        artWrap.appendChild(sp);
+      }
+    }
   }, 300);
 
   const cfg = BIRTHDAY_CONFIG.proposal;
@@ -2002,15 +2105,22 @@ function startProposal() {
 
   document.getElementById('proposal-accept-btn').onclick = () => {
     sfxPlay('chime');
-    
+
+    // Pop the little congratulations sticker onto the ring box
+    const celebrateSticker = document.getElementById('ring-celebrate-sticker');
+    if (celebrateSticker) {
+      celebrateSticker.classList.remove('ui-hidden');
+      requestAnimationFrame(() => celebrateSticker.classList.add('pop-in'));
+    }
+
     // Spark particles at click
     burstSpark(window.innerWidth / 2, window.innerHeight * 0.4, 25);
-    
+
     // Display the romantic holding hands overlay screen
     const handsOverlay = document.getElementById('holding-hands-overlay');
     if (handsOverlay) {
       handsOverlay.classList.remove('ui-hidden');
-      
+
       // Let's spawn some rising hearts inside the overlay for extra romance!
       let heartBurstInterval = setInterval(() => {
         if (handsOverlay.classList.contains('ui-hidden')) {
@@ -2086,17 +2196,13 @@ function startCandles() {
       blown++;
       document.getElementById('candles-status').textContent = `${blown} / ${total} bujhe`;
       burstSpark(e.clientX, e.clientY, 8);
-
-      const puff = document.createElement('div');
-      puff.className = 'candle-puff'; puff.textContent = '💨';
-      puff.style.left = `${e.clientX - 20}px`; puff.style.top = `${e.clientY - 30}px`;
-      document.body.appendChild(puff);
-      setTimeout(() => puff.remove(), 1000);
+      spawnSmoke(e.clientX, e.clientY - 10, 4);
 
       if (blown === total) {
         sfxPlay('allBlown');
         document.getElementById('candles-hint').textContent = 'Happy Birthday Pranu! 🎉🎂';
         launchFireworks('candles-fw', 7);
+        launchConfettiFall(46);
         setTimeout(() => {
           switchAct('act-candles', 'act-finale', startFinale);
         }, 3000);
@@ -2219,8 +2325,8 @@ function skipToAct(targetId) {
   document.querySelectorAll('.act').forEach(act => act.classList.add('ui-hidden'));
 
   // Stop current sounds
-  try { stopCricketsSound(); } catch(e) {}
-  try { stopRainSound(); } catch(e) {}
+  try { stopCricketsSound(); } catch (e) { }
+  try { stopRainSound(); } catch (e) { }
 
   if (targetId === 'decoy') {
     if (decoy) {
@@ -2233,7 +2339,7 @@ function skipToAct(targetId) {
   }
 
   const actMap = {
-    'intro': { id: 'act-intro', fn: null },
+    'intro': { id: 'act-intro', fn: startIntro },
     'cinema': { id: 'act-cinema', fn: startCinema },
     'moments': { id: 'act-moments', fn: startMoments },
     'hearts': { id: 'act-hearts', fn: startHearts },
@@ -2247,10 +2353,6 @@ function skipToAct(targetId) {
     if (el) el.classList.remove('ui-hidden');
     if (target.fn) target.fn();
   }
-}
-
-function startIntro() {
-  playTrack('bg-music-main', 0.45);
 }
 
 // Expose functions globally
