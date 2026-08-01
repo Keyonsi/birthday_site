@@ -517,555 +517,124 @@ const BIRTHDAY_CONFIG = {
         }
     ],
     "galleryPhotos": [
-        {
-            "src": "images/kid/1.jpg",
-            "caption": "Bachpan ka innocent savera 🌸",
-            "cat": "kid"
-        },
-        {
-            "src": "images/kid/2.jpg",
-            "caption": "Masoom aankhein ✨",
-            "cat": "kid"
-        },
-        {
-            "src": "images/kid/3.jpg",
-            "caption": "Little Pranu 🧸",
-            "cat": "kid"
-        },
-        {
-            "src": "images/kid/4.jpg",
-            "caption": "Sweet memories 🎈",
-            "cat": "kid"
-        },
-        {
-            "src": "images/kid/5.jpg",
-            "caption": "Cutest bachi 💕",
-            "cat": "kid"
-        },
-        {
-            "src": "images/bossy/1.jpg",
-            "caption": "Bossy era 😤",
-            "cat": "bossy"
-        },
-        {
-            "src": "images/bossy/2.jpg",
-            "caption": "Attitude & style 🔥",
-            "cat": "bossy"
-        },
-        {
-            "src": "images/bossy/3.jpg",
-            "caption": "Cute naughtiness 😄",
-            "cat": "bossy"
-        },
-        {
-            "src": "images/bossy/4.jpg",
-            "caption": "Swag & grace ✨",
-            "cat": "bossy"
-        },
-        {
-            "src": "images/bossy/5.jpg",
-            "caption": "Little boss girl 👑",
-            "cat": "bossy"
-        },
-        {
-            "src": "images/teeth/1.jpg",
-            "caption": "Chulbuli smile 😄",
-            "cat": "teeth"
-        },
-        {
-            "src": "images/teeth/2.jpg",
-            "caption": "Meri kamzori 💖",
-            "cat": "teeth"
-        },
-        {
-            "src": "images/teeth/3.jpeg",
-            "caption": "Beautiful laugh 🥰",
-            "cat": "teeth"
-        },
-        {
-            "src": "images/saree/4.jpg",
-            "caption": "Graceful saree 🥻",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/garden_day_27.jpg",
-            "caption": "Khoobsurat avatar ✨",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_1.jpg",
-            "caption": "Traditional elegance 🌹",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_2.jpg",
-            "caption": "Stunning look 🌸",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_3.jpg",
-            "caption": "Bas dekhta reh gaya 💖",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_4.jpg",
-            "caption": "Har rang mein khoobsurat 🌷",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_5.jpeg",
-            "caption": "Pure magic ✨",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_6.jpeg",
-            "caption": "Simply divine 🥰",
-            "cat": "saree"
-        },
-        {
-            "src": "images/saree/saree_7.jpeg",
-            "caption": "Regal grace 💍",
-            "cat": "saree"
-        },
-        {
-            "src": "images/her/1.jpg",
-            "caption": "Bas tum 🌸",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/cafe_date_1.jpg",
-            "caption": "Meri jaan ❤️",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/cafe_date_12.jpg",
-            "caption": "My everything 💖",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/couple_2.jpg",
-            "caption": "Teri aankhein ✨",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/couple_3.jpg",
-            "caption": "My universe 🌌",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_12.jpg",
-            "caption": "Bas tum 🌸",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_19.jpg",
-            "caption": "Meri jaan ❤️",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_2.jpg",
-            "caption": "My everything 💖",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_6.jpg",
-            "caption": "Teri aankhein ✨",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_7.jpg",
-            "caption": "My universe 🌌",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_day_9.jpg",
-            "caption": "Bas tum 🌸",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_night_12.jpg",
-            "caption": "Meri jaan ❤️",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_night_14.jpg",
-            "caption": "My everything 💖",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_night_3.jpg",
-            "caption": "Teri aankhein ✨",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_night_4.jpg",
-            "caption": "My universe 🌌",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/garden_night_5.jpg",
-            "caption": "Bas tum 🌸",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/memory_final_1.jpg",
-            "caption": "Meri jaan ❤️",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/memory_final_3.jpg",
-            "caption": "My everything 💖",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/memory_final_4.jpg",
-            "caption": "Teri aankhein ✨",
-            "cat": "her"
-        },
-        {
-            "src": "images/her/memory_final_5.jpg",
-            "caption": "My universe 🌌",
-            "cat": "her"
-        },
-        {
-            "src": "images/stories/garden_night_1.jpg",
-            "caption": "Kuch khas lamhe 🌙",
-            "cat": "stories"
-        },
-        {
-            "src": "images/stories/garden_night_13.jpg",
-            "caption": "Special moments ✨",
-            "cat": "stories"
-        },
-        {
-            "src": "images/stories/garden_night_2.jpg",
-            "caption": "Unforgettable nights 🌿",
-            "cat": "stories"
-        },
-        {
-            "src": "images/calls/1.jpg",
-            "caption": "Late night calls 📞",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_1.jpg",
-            "caption": "Ghanto ki baatein 🌙",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_2.jpg",
-            "caption": "Khamoshi aur tumhari aawaz 💬",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_3.jpg",
-            "caption": "Endless conversation ✨",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_5.jpg",
-            "caption": "Unforgettable proof 💖",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_6.jpg",
-            "caption": "Call pe milna 📱",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_7.jpg",
-            "caption": "4 ghante ki call 🌃",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_8.jpg",
-            "caption": "Hamesha saath 💕",
-            "cat": "calls"
-        },
-        {
-            "src": "images/calls/call_9.jpg",
-            "caption": "Raat bhar 🌙",
-            "cat": "calls"
-        },
-        {
-            "src": "images/collages/Collage1.png",
-            "caption": "Blue cutie 💙",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/Collage2.png",
-            "caption": "Saree scrapbook 🥻",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/Collage3.png",
-            "caption": "Bossy grid 💫",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/Collage4.png",
-            "caption": "Garden memory grid 🌿",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/couple_12.jpg",
-            "caption": "Together collage 🫂",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/garden_day_1.jpg",
-            "caption": "Our memories 💖",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/garden_night_10.jpg",
-            "caption": "Mixed feelings 🌸",
-            "cat": "collages"
-        },
-        {
-            "src": "images/collages/garden_night_7.jpg",
-            "caption": "Garden nights 🌙",
-            "cat": "collages"
-        },
-        {
-            "src": "images/us/cafe_date_5.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/cafe_date_6.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/cafe_date_7.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/cafe_date_9.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_10.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_11.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_13.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_14.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_15.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_16.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_17.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_18.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_19.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_20.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_21.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_22.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_23.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_24.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_5.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_6.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_7.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_8.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/couple_9.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_10.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_11.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_13.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_14.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_15.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_16.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_17.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_18.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_20.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_21.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_22.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_23.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_24.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_25.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_26.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_29.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_30.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_31.jpg",
-            "caption": "Hum dono 🫂",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_32.jpg",
-            "caption": "Together forever ❤️",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_33.jpg",
-            "caption": "Sweet moments 💑",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_34.jpg",
-            "caption": "Love & laughter 💖",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_35.jpg",
-            "caption": "Forever us 💍",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_36.jpg",
-            "caption": "Best memories ✨",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_37.jpg",
-            "caption": "Always together 🌸",
-            "cat": "us"
-        },
-        {
-            "src": "images/us/garden_day_38.jpg",
-            "caption": "Garden romance 🌿",
-            "cat": "us"
-        }
+        { "src": "images/kid/1.jpg", "caption": "Bachpan ka innocent savera... tab se pyari ho 🌸", "cat": "kid" },
+        { "src": "images/kid/2.jpg", "caption": "Masoom aankhein aur ye pyari si smile ✨", "cat": "kid" },
+        { "src": "images/kid/3.jpg", "caption": "Little Pranu... chhotu si bachi era 🧸", "cat": "kid" },
+        { "src": "images/kid/4.jpg", "caption": "Tab bhi utni hi dramebaaz thi jitni aaj ho! 🎈", "cat": "kid" },
+        { "src": "images/kid/5.jpg", "caption": "Duniya ki sabse cute aur masoom bachi 💕", "cat": "kid" },
+
+        { "src": "images/bossy/1.jpg", "caption": "Full attitude... meri little boss girl 😤", "cat": "bossy" },
+        { "src": "images/bossy/2.jpg", "caption": "Jab tum bossy mode mein aati ho, maza aa jata hai 🔥", "cat": "bossy" },
+        { "src": "images/bossy/3.jpg", "caption": "Thoda gussa, thodi masti, poori chulbuli 😄", "cat": "bossy" },
+        { "src": "images/bossy/4.jpg", "caption": "Swag aesa ki sab dekhte reh jaayein ✨", "cat": "bossy" },
+        { "src": "images/bossy/5.jpg", "caption": "Meri pyaari si gusse wali rani 👑", "cat": "bossy" },
+
+        { "src": "images/teeth/1.jpg", "caption": "Daant dikha kar hasna... meri sabse badi kamzori 😄", "cat": "teeth" },
+        { "src": "images/teeth/2.jpg", "caption": "Yeh wali smile dekh kar poora din ban jata hai 💖", "cat": "teeth" },
+        { "src": "images/teeth/3.jpeg", "caption": "Koshish karta hoon hamesha tumhari yeh laugh barkaraar rahe 🥰", "cat": "teeth" },
+
+        { "src": "images/saree/4.jpg", "caption": "Saree mein tum kisi fairy se kam nahi lagti 🥻", "cat": "saree" },
+        { "src": "images/saree/garden_day_27.jpg", "caption": "Garden day par tumhara yeh khoobsurat traditional look ✨", "cat": "saree" },
+        { "src": "images/saree/saree_1.jpg", "caption": "Desi look... bilkul royal elegance 🌹", "cat": "saree" },
+        { "src": "images/saree/saree_2.jpg", "caption": "Bas ek tak dekhta hi reh gaya tha 🌸", "cat": "saree" },
+        { "src": "images/saree/saree_3.jpg", "caption": "Jitna bhi dekhu, kam hi lagta hai 💖", "cat": "saree" },
+        { "src": "images/saree/saree_4.jpg", "caption": "Har rang tum par aesa khilta hai jaise gulab 🌷", "cat": "saree" },
+        { "src": "images/saree/saree_5.jpeg", "caption": "Pura magic... mera dil chura liya ✨", "cat": "saree" },
+        { "src": "images/saree/saree_6.jpeg", "caption": "Saree wali Pranu = ultimate perfection 🥰", "cat": "saree" },
+        { "src": "images/saree/saree_7.jpeg", "caption": "Karwa Chauth par tum sabse pyari lag rahi thi 💍", "cat": "saree" },
+
+        { "src": "images/her/1.jpg", "caption": "Bas tum aur tumhari pyari muskaan 🌸", "cat": "her" },
+        { "src": "images/her/cafe_date_1.jpg", "caption": "Cafe date par tumhari aankhon ka nasha ❤️", "cat": "her" },
+        { "src": "images/her/cafe_date_12.jpg", "caption": "Tum samne baithi ho aur duniya ki parwah nahi 💖", "cat": "her" },
+        { "src": "images/her/couple_2.jpg", "caption": "Teri aankhein bolti hain... bina bole sab keh deti hain ✨", "cat": "her" },
+        { "src": "images/her/couple_3.jpg", "caption": "Meri poori duniya bas tum mein simat jaati hai 🌌", "cat": "her" },
+        { "src": "images/her/garden_day_12.jpg", "caption": "Dhoop mein chamakti tumhari khoobsurati ☀️", "cat": "her" },
+        { "src": "images/her/garden_day_19.jpg", "caption": "Har mulakaat mein tum pehle se zyada pyari lagti ho ❤️", "cat": "her" },
+        { "src": "images/her/garden_day_2.jpg", "caption": "Garden ki thandi hawa aur tumhara pyara saath 🌿", "cat": "her" },
+        { "src": "images/her/garden_day_6.jpg", "caption": "Bina kisi filter ke bhi duniya ki sabse pyari ladki 🌸", "cat": "her" },
+        { "src": "images/her/garden_day_7.jpg", "caption": "Tumhari muskurahat mere har gham ki dawai hai ✨", "cat": "her" },
+        { "src": "images/her/garden_day_9.jpg", "caption": "Ek pal ke liye tumhe dekhoon to poora din ban jata hai 💖", "cat": "her" },
+        { "src": "images/her/garden_night_12.jpg", "caption": "Andheri raat mein bhi tumhara chehra aasmaan ke chaand se roshan 🌙", "cat": "her" },
+        { "src": "images/her/garden_night_14.jpg", "caption": "Raat ke waqt tumhare saath bitaye lamhe subah tak yaad rehte hain 💕", "cat": "her" },
+        { "src": "images/her/garden_night_3.jpg", "caption": "Chandni raat mein tumhari pyari si batein 🌟", "cat": "her" },
+        { "src": "images/her/garden_night_4.jpg", "caption": "Tumhare paas rehne se dil ko ek alag sukoon milta hai 🌌", "cat": "her" },
+        { "src": "images/her/garden_night_5.jpg", "caption": "Har taare se zyada chamak tumhari aankhon mein hai ✨", "cat": "her" },
+        { "src": "images/her/memory_final_1.jpg", "caption": "Yeh photo mere dil ke sabse kareeb hai ❤️", "cat": "her" },
+        { "src": "images/her/memory_final_3.jpg", "caption": "Meri life ki sabse khoobsurat memory 💖", "cat": "her" },
+        { "src": "images/her/memory_final_4.jpg", "caption": "Tumhari yeh adaa... hamesha ke liye dil mein bas gayi 🌹", "cat": "her" },
+        { "src": "images/her/memory_final_5.jpg", "caption": "Rab se maangi hui sabse pyari dua ho tum 💍", "cat": "her" },
+
+        { "src": "images/stories/garden_night_1.jpg", "caption": "Ek anokhi raat ki anokhi kahani 🌙", "cat": "stories" },
+        { "src": "images/stories/garden_night_13.jpg", "caption": "Bina plan ke bane hue sabse khas pal ✨", "cat": "stories" },
+        { "src": "images/stories/garden_night_2.jpg", "caption": "Wo lamha jab humne future ke baare mein socha tha 🌿", "cat": "stories" },
+
+        { "src": "images/calls/1.jpg", "caption": "Late night phone calls... neend se zyada tumhari aawaz zaroori thi 📞", "cat": "calls" },
+        { "src": "images/calls/call_1.jpg", "caption": "Ghanto tak baatein aur pata hi nahi chalta kab subah ho gayi 🌙", "cat": "calls" },
+        { "src": "images/calls/call_2.jpg", "caption": "Phone screen par tumhara pyara sa chehra dekhna 💬", "cat": "calls" },
+        { "src": "images/calls/call_3.jpg", "caption": "Neend aane ke baad bhi phone cut na karne ki zidd ✨", "cat": "calls" },
+        { "src": "images/calls/call_5.jpg", "caption": "4-4 ghante ki calls aur endless baatein 💖", "cat": "calls" },
+        { "src": "images/calls/call_6.jpg", "caption": "Distance tha lekin call par lagta tha tum paas hi ho 📱", "cat": "calls" },
+        { "src": "images/calls/call_7.jpg", "caption": "Raat ke 3 baje bhi hamari baatein khatam nahi hoti thin 🌃", "cat": "calls" },
+        { "src": "images/calls/call_8.jpg", "caption": "Tumhari aawaz sun kar hi sukoon ki neend aati thi 💕", "cat": "calls" },
+        { "src": "images/calls/call_9.jpg", "caption": "Har late night call par tumhara cute sa 'Good Night' 🌙", "cat": "calls" },
+
+        { "src": "images/collages/Collage1.png", "caption": "Blue dress mein cute Pranu ki scrapbook grid 💙", "cat": "collages" },
+        { "src": "images/collages/Collage2.png", "caption": "Saree wali memories ka khoobsurat collage 🥻", "cat": "collages" },
+        { "src": "images/collages/Collage3.png", "caption": "Bossy + Cute expressions ki sari photos 💫", "cat": "collages" },
+        { "src": "images/collages/Collage4.png", "caption": "Garden ke har kone mein bitaye hue pyare pal 🌿", "cat": "collages" },
+        { "src": "images/collages/couple_12.jpg", "caption": "Hamare saath bitaye hue khoobsurat lamhon ki memory card 🫂", "cat": "collages" },
+        { "src": "images/collages/garden_day_1.jpg", "caption": "Saath mein bitaye har ek din ka memorable album 💖", "cat": "collages" },
+        { "src": "images/collages/garden_night_10.jpg", "caption": "Garden night ki sari khass memories ka frame 🌸", "cat": "collages" },
+        { "src": "images/collages/garden_night_7.jpg", "caption": "Chupkar milne wale dino ki scrapbook page 🌙", "cat": "collages" },
+
+        { "src": "images/us/cafe_date_5.jpg", "caption": "Vitthal Cafe date: Pasta, Cold Coffee aur tumhari pyaari baatein 🍝", "cat": "us" },
+        { "src": "images/us/cafe_date_6.jpg", "caption": "Haath se fries khilana aur saath mein muskurana ❤️", "cat": "us" },
+        { "src": "images/us/cafe_date_7.jpg", "caption": "Hamari pehli perfect date ki sabse pyari photo 💑", "cat": "us" },
+        { "src": "images/us/cafe_date_9.jpg", "caption": "Coffee cup se zyada tumhari baaton mein mithaas thi 💖", "cat": "us" },
+        { "src": "images/us/couple_10.jpg", "caption": "Ek doosre ke haath pakadkar aage badhna 💍", "cat": "us" },
+        { "src": "images/us/couple_11.jpg", "caption": "Tumhara mere kaandhe par sar rakhna ✨", "cat": "us" },
+        { "src": "images/us/couple_13.jpg", "caption": "Hamari Jodi: Sabse alag, sabse pyari 🌸", "cat": "us" },
+        { "src": "images/us/couple_14.jpg", "caption": "Garden ki bench par saath baithkar sapne dekhna 🌿", "cat": "us" },
+        { "src": "images/us/couple_15.jpg", "caption": "Har mushkil mein ek doosre ka haath nahi chhodna 🫂", "cat": "us" },
+        { "src": "images/us/couple_16.jpg", "caption": "Tumhare saath har jagah romantic ban jaati hai ❤️", "cat": "us" },
+        { "src": "images/us/couple_17.jpg", "caption": "Sirf tum aur main... aur baaki duniya pause 💑", "cat": "us" },
+        { "src": "images/us/couple_18.jpg", "caption": "Tumhara mere gaal par halka sa haath rakhna 💖", "cat": "us" },
+        { "src": "images/us/couple_19.jpg", "caption": "Jaipur ke park mein milkar saare jhagde khatam karna 💍", "cat": "us" },
+        { "src": "images/us/couple_20.jpg", "caption": "Bheed mein bhi sirf ek doosre mein khoye rehna ✨", "cat": "us" },
+        { "src": "images/us/couple_21.jpg", "caption": "Har photo mein pehle se zyada pyaar 🌸", "cat": "us" },
+        { "src": "images/us/couple_22.jpg", "caption": "Tumhe chhodne jaate waqt bas ek hi khayal... 'phir kab milenge?' 🌿", "cat": "us" },
+        { "src": "images/us/couple_23.jpg", "caption": "Mummy ke operation wale din tumhara mere saath hona 🫂", "cat": "us" },
+        { "src": "images/us/couple_24.jpg", "caption": "Saath milkar purani pareshaniyon ko alvida kehna ❤️", "cat": "us" },
+        { "src": "images/us/couple_5.jpg", "caption": "Ek doosre ko dekh kar bina baat ke hasna 💑", "cat": "us" },
+        { "src": "images/us/couple_6.jpg", "caption": "Hamari smile aesi jaise poori duniya mil gayi ho 💖", "cat": "us" },
+        { "src": "images/us/couple_7.jpg", "caption": "Karwa Chauth ki night par pehnayi hui ring 💍", "cat": "us" },
+        { "src": "images/us/couple_8.jpg", "caption": "Suar wale garden ke pedon ke neeche wali bench ✨", "cat": "us" },
+        { "src": "images/us/couple_9.jpg", "caption": "Vrindavan ka locket pehnate waqt ki memory 🌸", "cat": "us" },
+        { "src": "images/us/garden_day_10.jpg", "caption": "Dharmendra bhaiya ke garden ke puppies aur hum 🌿", "cat": "us" },
+        { "src": "images/us/garden_day_11.jpg", "caption": "Chhata maarna, bhaagna aur phir manana 🫂", "cat": "us" },
+        { "src": "images/us/garden_day_13.jpg", "caption": "Hamara favourite corner jahan sirf hum dono the ❤️", "cat": "us" },
+        { "src": "images/us/garden_day_14.jpg", "caption": "Rama wale ka masala Pineapple juice date 💑", "cat": "us" },
+        { "src": "images/us/garden_day_15.jpg", "caption": "Lassi peete hue aane wale saalon ki baatein 💖", "cat": "us" },
+        { "src": "images/us/garden_day_16.jpg", "caption": "DMart ke har aisle mein shopping se zyada masti 💍", "cat": "us" },
+        { "src": "images/us/garden_day_17.jpg", "caption": "Tumhara gussa hona aur mera 100 baar manana ✨", "cat": "us" },
+        { "src": "images/us/garden_day_18.jpg", "caption": "Bus stand par baithkar shaam beetana 🌸", "cat": "us" },
+        { "src": "images/us/garden_day_20.jpg", "caption": "Hospital visit ke baad wala chhota sa romance 🌿", "cat": "us" },
+        { "src": "images/us/garden_day_21.jpg", "caption": "Chhoti Diwali par saath baithkar baatein karna 🫂", "cat": "us" },
+        { "src": "images/us/garden_day_22.jpg", "caption": "Abandond building ke kone mein chhupna ❤️", "cat": "us" },
+        { "src": "images/us/garden_day_23.jpg", "caption": "Ludo mein tumhara mujhe 7 baar harana! 😂 💑", "cat": "us" },
+        { "src": "images/us/garden_day_24.jpg", "caption": "Devgara hospital ke paas ki quick meeting 💖", "cat": "us" },
+        { "src": "images/us/garden_day_25.jpg", "caption": "Purani yaadein, purane dard bhoolkar aage badhna 💍", "cat": "us" },
+        { "src": "images/us/garden_day_26.jpg", "caption": "Andheri raat mein gali ke paas milne aana ✨", "cat": "us" },
+        { "src": "images/us/garden_day_29.jpg", "caption": "Puchku shopping ke liye bazaar mein ghoomna 🌸", "cat": "us" },
+        { "src": "images/us/garden_day_30.jpg", "caption": "Hidden garden ki tunnel mein tumhe chhedna 🌿", "cat": "us" },
+        { "src": "images/us/garden_day_31.jpg", "caption": "Waiting corner mein sirf tumhari raah dekhna 🫂", "cat": "us" },
+        { "src": "images/us/garden_day_32.jpg", "caption": "Raj Pan ke bahar wait karne wale pyare pal ❤️", "cat": "us" },
+        { "src": "images/us/garden_day_33.jpg", "caption": "Coaching aur PG ke rounds lagana tumse milne 💑", "cat": "us" },
+        { "src": "images/us/garden_day_34.jpg", "caption": "Patasi khate hue logon ka hume dekhte rehna 💖", "cat": "us" },
+        { "src": "images/us/garden_day_35.jpg", "caption": "Nehru Garden ki pehli mulakaat ka magical moment 💍", "cat": "us" },
+        { "src": "images/us/garden_day_36.jpg", "caption": "Birla Mandir ki seedhiyon par mila sukoon ✨", "cat": "us" },
+        { "src": "images/us/garden_day_37.jpg", "caption": "Office se return aate hue sirf tumhe dekh lena 🌸", "cat": "us" },
+        { "src": "images/us/garden_day_38.jpg", "caption": "Jab tumne pehli baar kaha... 'Koustoobh... I Love You.' ❤️", "cat": "us" }
     ]
 };
+
