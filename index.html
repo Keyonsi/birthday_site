@@ -96,15 +96,32 @@
 
 <body>
 
+  <!-- ══ BACKGROUND MUSIC PLAYLIST ════════════════════════════════ -->
+  <div id="music-player-wrap" style="display:none">
+    <audio id="track-0" src="music/song1_yourmusic.mp3" preload="none" loop></audio>
+    <audio id="track-1" src="music/song2_tum_hi_ho.mp3" preload="none"></audio>
+    <audio id="track-2" src="music/song3_jo_tum_mere_ho.mp3" preload="none"></audio>
+    <audio id="track-3" src="music/song4_deewana_kar_raha_hai.mp3" preload="none"></audio>
+    <audio id="track-4" src="music/song5_arz_kiya_hai.mp3" preload="none"></audio>
+  </div>
+
+  <!-- ══ FLOATING MUSIC CONTROL ════════════════════════════════════ -->
+  <button class="music-fab" id="music-btn" title="Music On/Off">
+    <span id="music-icon">🎵</span>
+    <span class="music-fab-label" id="music-track-name">Music</span>
+  </button>
+
   <!-- Quick Testing Navigation Bar (For instant testing of any scene) -->
   <div class="quick-testing-bar" id="quick-testing-bar">
     <button onclick="skipToAct('decoy')" title="Decoy Site">🃏 Decoy</button>
     <button onclick="skipToAct('intro')" title="Safar Intro">🌸 Intro</button>
     <button onclick="skipToAct('cinema')" title="Cinema Film">🎬 Cinema</button>
-    <button onclick="skipToAct('moments')" title="Monsoon Baarish">🌧️ Monsoon</button>
+    <button onclick="skipToAct('moments')" title="Taaro Ka Saath">⭐ Taare</button>
     <button onclick="skipToAct('hearts')" title="Hearts Raazein">❤️ Hearts</button>
     <button onclick="skipToAct('proposal')" title="Proposal Ring">💍 Proposal</button>
     <button onclick="skipToAct('candles')" title="Birthday Candles">🎂 Candles</button>
+    <button onclick="skipToAct('moments-gallery')" title="Saath Ke Pal">📸 Pal</button>
+    <button onclick="skipToAct('finale')" title="Finale End Screen">🌸 Finale</button>
   </div>
 
   <!-- ══ DECOY ══════════════════════════════════════════════════════ -->
@@ -282,10 +299,10 @@
 
       <!-- Floating instruction at bottom ground area -->
       <div class="moments-header">
-        <div class="chapter-label">🌙 2 August 2003 • तारों भरी रात ✦</div>
-        <h2 class="act-title moments-title">Yaadon Ka Aasman</h2>
-        <p class="act-subtitle moments-subtitle">Aasman ke har sitare aur Chand mein ek yaad chhupi hai... inhe chhoo
-          kar dekho ✨</p>
+        <div class="chapter-label">⭐ Taaro Ka Saath • तारों भरी रात ✦</div>
+        <h2 class="act-title moments-title">Taaro Ke Saaye Mein</h2>
+        <p class="act-subtitle moments-subtitle">Aasman ke har sitare mein ek yaad chhupi hai... inhe chhoo kar dekho ✨
+        </p>
         <!-- Audio waveform equalizer visualizer -->
         <div class="equalizer-wrap">
           <div class="eq-bar"></div>
@@ -314,6 +331,11 @@
           <div class="eq-bar"></div>
         </div>
       </div>
+
+      <!-- Skip / Climax button for Taare scene -->
+      <button class="scene-skip-fab" id="moments-skip-btn" title="Moon Climax">
+        <span>Moon Climax 🌙</span>
+      </button>
 
       <!-- Transition message overlay (shown after all 8 done) -->
       <div id="moments-transition-msg" class="moments-transition-msg ui-hidden">
@@ -394,6 +416,11 @@
         </div>
       </div>
 
+      <!-- Skip / Next button for Hearts scene -->
+      <button class="scene-skip-fab" id="hearts-skip-btn" title="Next Scene">
+        <span>Aage Badhein 💖</span>
+      </button>
+
       <!-- Floating heart bubbles (rendered dynamically, outside big-heart-scene) -->
       <div id="hearts-floating-layer" class="hearts-floating-layer"></div>
 
@@ -426,7 +453,7 @@
       <div class="proposal-scene">
         <!-- Proposal Artwork Container (looks for proposal.gif, falls back to silhouettes) -->
         <div class="proposal-artwork-wrap" id="proposal-artwork-wrap">
-          <img id="proposal-artwork-img" class="proposal-artwork-img" src="images/final/proposal.gif"
+          <img id="proposal-artwork-img" class="proposal-artwork-img" src="images/bg-assets/Proposal.gif"
             alt="Proposal Illustration"
             onerror="this.style.display='none'; document.getElementById('silhouette-wrap').style.display='block';" />
 
@@ -480,7 +507,7 @@
 
           <!-- Real ring photo/gif — falls back to the drawn CSS ring if missing -->
           <div class="ring-photo-wrap" id="ring-photo-wrap">
-            <img id="ring-photo-img" class="ring-photo-img" src="images/final/ring.gif" alt="The ring"
+            <img id="ring-photo-img" class="ring-photo-img" src="images/bg-assets/ring.gif" alt="The ring"
               onerror="this.style.display='none'; document.getElementById('half-moon-ring').style.display='flex';" />
           </div>
 
@@ -499,7 +526,7 @@
           <button id="proposal-accept-btn" class="accept-btn">Haath Thamo ❤️</button>
 
           <!-- Little celebratory sticker that pops in once she accepts -->
-          <img id="ring-celebrate-sticker" class="ring-celebrate-sticker ui-hidden" src="images/final/blowkiss.gif"
+          <img id="ring-celebrate-sticker" class="ring-celebrate-sticker ui-hidden" src="images/bg-assets/blowkiss.gif"
             alt="" />
         </div>
       </div>
@@ -509,7 +536,7 @@
     <div id="holding-hands-overlay" class="holding-hands-overlay ui-hidden">
       <div class="holding-hands-container">
         <!-- User's holding hands gif -->
-        <img id="holding-hands-gif" class="holding-hands-gif" src="images/final/holding_hands.gif" alt=""
+        <img id="holding-hands-gif" class="holding-hands-gif" src="images/bg-assets/holding_hands.gif" alt=""
           onerror="this.style.display='none'; document.getElementById('custom-hands-fallback').style.display='block';" />
 
         <!-- Custom Hand-Holding SVG fallback animation -->
@@ -529,7 +556,7 @@
           </div>
         </div>
         <p class="holding-hands-title">Holding your hand, today and forever... ❤️</p>
-        <img class="holding-hands-kiss-sticker" src="images/final/kiss.webp" alt="" />
+        <img class="holding-hands-kiss-sticker" src="images/bg-assets/kiss.webp" alt="" />
       </div>
     </div>
 
@@ -539,45 +566,137 @@
       <div id="candles-fw" class="fireworks-wrap"></div>
 
       <div class="act-content candles-content">
-        <div class="chapter-label">🎂 Janamdin</div>
+        <div class="candles-chapter-badge">🎂 Janamdin Mubarak</div>
         <h2 class="bday-name" id="bday-name">Happy Birthday Pranu!</h2>
         <p class="bday-anni" id="bday-anni">Pehla Saal • Pehli Anniversary ❤️</p>
 
         <div class="cake-wrap" id="cake-wrap">
-          <div class="cake-body">
-            <div class="cake-tier top">
-              <div class="cake-deco">🌸 🌸</div>
-            </div>
-            <div class="cake-tier bottom">
-              <div class="candles-row" id="candles-row"></div>
-            </div>
-            <div class="cake-base"></div>
+          <!-- Top tier -->
+          <div class="cake-tier-top">
+            <div class="cake-top-deco">🌸 Pranu 🌸</div>
           </div>
+          <!-- Middle tier -->
+          <div class="cake-tier-mid">
+            <div class="cake-mid-deco">❤️ 23rd ❤️</div>
+          </div>
+          <!-- Bottom tier with candles -->
+          <div class="cake-tier-bot">
+            <div class="candles-row" id="candles-row"></div>
+          </div>
+          <!-- Plate -->
+          <div class="cake-plate"></div>
         </div>
 
-        <p class="candles-hint" id="candles-hint">Bujhao sab diye — ek ek karke 🕯️</p>
-        <p class="candles-status" id="candles-status">0 / 5 bujhe</p>
+        <p class="candles-hint" id="candles-hint">Candles bujhao ek ek karke... 🕯️</p>
+        <div class="candles-counter">
+          <span id="candles-status">0 / 5 bujhe</span>
+        </div>
       </div>
     </section>
 
-    <!-- ── ACT 6: FINALE ────────────────────────────────────── -->
+    <!-- ── ACT 5.5: SAATH KE PAL — MOMENTS GALLERY ──────── -->
+    <section id="act-moments-gallery" class="act ui-hidden">
+      <canvas id="gallery-canvas" class="bg-canvas"></canvas>
+      <div class="gallery-header">
+        <div class="gallery-chapter-label">📸 Saath Ke Pal</div>
+        <h2 class="gallery-title">Ek Ek Lamha...</h2>
+        <p class="gallery-subtitle">Har tasveer mein ek kahani chhupi hai</p>
+      </div>
+
+      <!-- Swipeable card stack -->
+      <div class="gallery-cards-container" id="gallery-cards-container">
+        <!-- Cards injected by JS -->
+      </div>
+
+      <!-- Navigation arrows (desktop/tablet) -->
+      <button class="gallery-nav-btn gallery-prev" id="gallery-prev">❮</button>
+      <button class="gallery-nav-btn gallery-next" id="gallery-next">❯</button>
+
+      <!-- Progress dots -->
+      <div class="gallery-progress-dots" id="gallery-progress-dots"></div>
+
+      <!-- Special Kiss Reveal Screen (appears when all albums end) -->
+      <div id="kiss-reveal-overlay" class="kiss-reveal-overlay ui-hidden">
+        <div class="kiss-card">
+          <div class="kiss-img-wrap">
+            <img id="kiss-img" src="images/bg-assets/kiss.webp" alt="Special Kiss" />
+            <div class="kiss-sparkles">💋 ✨ 💋</div>
+          </div>
+          <h2 class="kiss-title">Tera Pyaar Mere Liye Sab Kuch Hai... ❤️</h2>
+          <p class="kiss-subtitle">Har ek lamha tumhare saath ek khoobsurat tohfa hai.</p>
+          <button class="gallery-continue-btn" id="kiss-continue-btn">
+            <span>Khat Padhte Hain</span> 💌
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ACT 6: FINALE END SCREEN ─────────────────────── -->
     <section id="act-finale" class="act ui-hidden">
-      <canvas id="finale-canvas" class="bg-canvas"></canvas>
+      <!-- Background tree canvas -->
+      <canvas id="finale-tree-canvas" class="bg-canvas finale-tree-canvas"></canvas>
       <div id="finale-fireworks" class="fireworks-wrap"></div>
       <div id="finale-lanterns" class="lanterns-wrap"></div>
 
-      <div class="act-content finale-content">
-        <div class="finale-bday">
+      <!-- Mobile-first layout: stacked column. On tablet+ goes side by side -->
+      <div class="finale-mobile-layout">
+
+        <!-- TOP: Happy Birthday header -->
+        <div class="finale-header">
           <h1 class="finale-title">Happy Birthday</h1>
           <p class="finale-name">Pratibha Pareek 🎂</p>
           <p class="finale-anni">Pehla Saal • Pehli Anniversary ❤️</p>
         </div>
 
+        <!-- MIDDLE SPLIT: Left=Photo+Words  Right=Tree canvas lives behind -->
+        <div class="finale-split">
+
+          <!-- LEFT SIDE: Photo Player + Album Category Filter + 3 scrolling endearment words -->
+          <div class="finale-left-panel">
+            <div class="player-card-badge">✨ Teri Yaadein</div>
+
+            <!-- Album Category Filter Pills (Tapping any category filters the player!) -->
+            <div class="category-filter-bar" id="category-filter-bar">
+              <!-- Dynamically populated category buttons -->
+            </div>
+
+            <div class="player-image-wrap">
+              <img id="finale-player-img" src="images/kid/1.jpg" alt="Pranu" />
+              <div class="player-caption-overlay">
+                <span id="finale-player-caption">Bachi Era 🧸</span>
+              </div>
+            </div>
+            <div class="player-controls">
+              <button id="player-prev-btn">❮</button>
+              <button id="player-play-btn">❚❚</button>
+              <button id="player-next-btn">❯</button>
+            </div>
+            <div class="player-progress-bar">
+              <div id="player-progress-fill"></div>
+            </div>
+
+            <!-- 3 endearment words scrolling below the photo player -->
+            <div class="finale-words-strip">
+              <div class="finale-words-track" id="finale-words-track"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: The blooming tree canvas is the bg canvas above.
+               We add a translucent overlay panel here to show hearts falling -->
+          <div class="finale-right-panel" aria-hidden="true">
+            <!-- Hearts rain overlay rendered by JS -->
+            <div class="finale-hearts-rain" id="finale-hearts-rain"></div>
+          </div>
+
+        </div>
+
+        <!-- BOTTOM: Letter envelope -->
         <div id="finale-envelope" class="finale-envelope" role="button" tabindex="0" aria-label="Open letter">
           <span class="env-icon">💌</span>
           <p class="env-text">Ek khat hai tumhare liye...</p>
           <span class="env-tap">Tap karo</span>
         </div>
+
       </div>
     </section>
 
@@ -603,14 +722,6 @@
 
   <!-- SPARK container -->
   <div id="sparks-layer" style="position:fixed;inset:0;pointer-events:none;z-index:9000;"></div>
-
-  <!-- Audio -->
-  <audio id="music-main" loop preload="auto">
-    <source src="yourmusic.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="music-ambient" loop preload="auto">
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg" />
-  </audio>
 
   <script src="script.js"></script>
 </body>

@@ -22,51 +22,104 @@
 })();
 
 // ══════════════════════════════════════════════════════════════════
-// AUDIO
+// MUSIC PLAYLIST ENGINE
 // ══════════════════════════════════════════════════════════════════
-let currentAudio = null;
+const TRACKS = [
+  { id: 'track-0', name: 'Your Song 🎵' },
+  { id: 'track-1', name: 'Tum Hi Ho 💕' },
+  { id: 'track-2', name: 'Jo Tum Mere Ho ❤️' },
+  { id: 'track-3', name: 'Deewana Kar Raha Hai 🌹' },
+  { id: 'track-4', name: 'Arz Kiya Hai ✨' },
+];
+
+let currentTrackIdx = 0;
 let bgMusicPlaying = false;
+let currentAudio = null;
+let _musicFadeTimer = null;
+
+function getTrackEl(idx) {
+  return document.getElementById(TRACKS[idx].id);
+}
 
 function fadeVol(audio, target, ms, stopOnDone) {
+  if (_musicFadeTimer) clearInterval(_musicFadeTimer);
   const steps = 20, dt = ms / steps, delta = (target - audio.volume) / steps;
   let n = 0;
-  const t = setInterval(() => {
+  _musicFadeTimer = setInterval(() => {
     audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
     if (++n >= steps) {
       audio.volume = target;
-      clearInterval(t);
+      clearInterval(_musicFadeTimer);
+      _musicFadeTimer = null;
       if (stopOnDone && target === 0) audio.pause();
     }
   }, dt);
 }
 
-function playTrack(id, vol = 0.45) {
-  if (!bgMusicPlaying) return;
-  const next = document.getElementById(id);
-  if (!next) return;
-  if (currentAudio && currentAudio !== next) fadeVol(currentAudio, 0, 900, true);
-  const isSame = (currentAudio === next);
-  currentAudio = next;
-  if (!isSame) {
-    next.volume = 0;
-    next.play().then(() => fadeVol(next, vol, 1500, false)).catch(() => { });
-  } else {
-    fadeVol(next, vol, 1500, false);
-  }
+function updateTrackLabel(idx) {
+  const lbl = document.getElementById('music-track-name');
+  if (lbl) lbl.textContent = TRACKS[idx].name;
 }
 
-document.getElementById('music-btn').addEventListener('click', () => {
-  const icon = document.getElementById('music-icon');
-  if (bgMusicPlaying) {
-    bgMusicPlaying = false;
-    if (currentAudio) fadeVol(currentAudio, 0, 600, true);
-    icon.textContent = '▶';
-  } else {
-    bgMusicPlaying = true;
-    icon.textContent = '❚❚';
-    if (currentAudio) currentAudio.play().then(() => fadeVol(currentAudio, 0.45, 600, false)).catch(() => { });
+function playTrackByIdx(idx, vol = 0.42) {
+  if (!bgMusicPlaying) return;
+  const next = getTrackEl(idx);
+  if (!next) return;
+
+  // Fade out current
+  if (currentAudio && currentAudio !== next) {
+    const old = currentAudio;
+    fadeVol(old, 0, 800, true);
   }
-});
+
+  currentTrackIdx = idx;
+  currentAudio = next;
+  updateTrackLabel(idx);
+
+  next.volume = 0;
+  next.currentTime = 0;
+  next.play().then(() => fadeVol(next, vol, 1500, false)).catch(() => { });
+
+  // When track ends → play next
+  next.onended = () => {
+    const nextIdx = (idx + 1) % TRACKS.length;
+    playTrackByIdx(nextIdx);
+  };
+}
+
+// Legacy compatibility shim (existing code calls playTrack(id, vol))
+function playTrack(id, vol = 0.42) {
+  const idx = TRACKS.findIndex(t => t.id === id);
+  if (idx >= 0) playTrackByIdx(idx, vol);
+}
+
+// Music FAB button
+const _musicBtn = document.getElementById('music-btn');
+const _musicIcon = document.getElementById('music-icon');
+if (_musicBtn) {
+  _musicBtn.addEventListener('click', () => {
+    if (bgMusicPlaying) {
+      bgMusicPlaying = false;
+      if (currentAudio) fadeVol(currentAudio, 0, 600, true);
+      if (_musicIcon) _musicIcon.textContent = '🎵';
+    } else {
+      bgMusicPlaying = true;
+      if (_musicIcon) _musicIcon.textContent = '❚❚';
+      playTrackByIdx(currentTrackIdx);
+    }
+  });
+
+  // Long press on music btn → next track
+  let _pressTimer = null;
+  _musicBtn.addEventListener('touchstart', () => {
+    _pressTimer = setTimeout(() => {
+      currentTrackIdx = (currentTrackIdx + 1) % TRACKS.length;
+      playTrackByIdx(currentTrackIdx);
+    }, 600);
+  }, { passive: true });
+  _musicBtn.addEventListener('touchend', () => clearTimeout(_pressTimer), { passive: true });
+}
+
 
 // Web Audio — rain noise
 let audioCtx = null;
@@ -389,8 +442,16 @@ function openDecoyCard() {
   const wrapper = document.getElementById('decoy-flip-wrapper');
   const balloons = document.getElementById('decoy-balloons');
 
-  // Unlock audio early
-  try { getACtx(); } catch (e) { }
+  // Unlock audio & start background music playlist
+  try {
+    getACtx();
+    if (!bgMusicPlaying) {
+      bgMusicPlaying = true;
+      const icon = document.getElementById('music-icon');
+      if (icon) icon.textContent = '❚❚';
+      playTrackByIdx(0);
+    }
+  } catch (e) { }
 
   // 1. Flip the card
   wrapper.classList.add('flipped');
@@ -919,7 +980,7 @@ function startMoments() {
   const ctx = cv.getContext('2d');
   cv.width = window.innerWidth;
   cv.height = window.innerHeight;
-  const W = cv.width, H = cv.height;
+  let W = cv.width, H = cv.height;
 
   // ── Moon — single source of truth for position ──
   const moon = {
@@ -951,8 +1012,12 @@ function startMoments() {
     { xf: 0.586, yf: 0.201 }, { xf: 0.646, yf: 0.101 }, { xf: 0.514, yf: 0.137 }
   ];
 
-  nonMoonMemories.forEach((m, i) => {
-    const pos = leoConstellationNodes[i % leoConstellationNodes.length];
+  // Cap to exactly the available star nodes so every star is always reachable
+  const MAX_STARS = Math.min(nonMoonMemories.length, leoConstellationNodes.length);
+  const starMemories = nonMoonMemories.slice(0, MAX_STARS);
+
+  starMemories.forEach((m, i) => {
+    const pos = leoConstellationNodes[i];
     cloudData.push({
       idx: i, interactive: true,
       xf: pos.xf, yf: pos.yf,
@@ -965,10 +1030,11 @@ function startMoments() {
     });
   });
 
-  // ── Background twinkling star field ──
+
+  // ── Background twinkling star field (fractional coords so a resize can't desync them) ──
   const bgStars = Array.from({ length: 120 }, () => ({
-    x: Math.random() * W,
-    y: Math.random() * H * 0.75,
+    xf: Math.random(),
+    yf: Math.random() * 0.75,
     r: Math.random() * 1.2 + 0.2,
     phase: Math.random() * Math.PI * 2,
     speed: 0.015 + Math.random() * 0.025
@@ -1347,6 +1413,14 @@ function startMoments() {
   (function render(ts) {
     if (document.getElementById('act-moments').classList.contains('ui-hidden')) return;
 
+    // Always sync to the canvas's real current size — a global resize
+    // listener may have changed cv.width/cv.height out from under us,
+    // and stale W/H here is what causes stars/moon to drift or miss taps.
+    if (cv.width !== W || cv.height !== H) {
+      W = cv.width;
+      H = cv.height;
+    }
+
     ctx.clearRect(0, 0, W, H);
 
     let bounds = (leoBgImg.complete && leoBgImg.naturalWidth > 0)
@@ -1387,7 +1461,7 @@ function startMoments() {
       ctx.save();
       ctx.globalAlpha = a;
       ctx.fillStyle = '#e8eeff';
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(s.xf * W, s.yf * H, s.r, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     });
 
@@ -1547,10 +1621,10 @@ function startMoments() {
   }
   closeBtn.addEventListener('click', closeMomentPopup);
 
-  // Hit radius: larger for mobile touch
-  const hitRadius = Math.max(44, Math.min(W, H) * 0.065);
-
   function findStarAt(x, y) {
+    // Hit radius: larger for mobile touch. Computed live off W/H (kept in
+    // sync every frame by render()) so it never drifts after a resize.
+    const hitRadius = Math.max(44, Math.min(W, H) * 0.065);
     let best = null, bestD = Infinity;
     for (let i = cloudData.length - 1; i >= 0; i--) {
       const c = cloudData[i];
@@ -1629,12 +1703,21 @@ function startMoments() {
     }, 300);
 
     if (momentsRevealed >= cloudData.length) {
-      setTimeout(triggerMoonClimax, 2000);
+      setTimeout(triggerMoonClimax, 1500);
     }
   }
 
   cv.addEventListener('click', onMomentsClick);
   cv.addEventListener('touchstart', onMomentsClick, { passive: false });
+
+  // Skip / Climax button handler
+  const skipBtn = document.getElementById('moments-skip-btn');
+  if (skipBtn) {
+    skipBtn.onclick = (e) => {
+      e.stopPropagation();
+      triggerMoonClimax();
+    };
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1963,6 +2046,35 @@ function startHearts() {
     });
     requestAnimationFrame(animateHearts);
   })(0);
+
+  // Skip / Next button handler for Hearts scene
+  function skipToHeartsClimax() {
+    stopRainSound();
+    if (typeof starDecoyInterval !== 'undefined' && starDecoyInterval) clearInterval(starDecoyInterval);
+    document.querySelectorAll('#act-hearts .decoy-active-item').forEach(el => el.remove());
+    switchAct('act-hearts', 'act-proposal', startProposal);
+  }
+
+  const heartsSkipBtn = document.getElementById('hearts-skip-btn');
+  if (heartsSkipBtn) {
+    heartsSkipBtn.onclick = (e) => {
+      e.stopPropagation();
+      skipToHeartsClimax();
+    };
+  }
+
+  const centerPhotoWrap = document.getElementById('heart-center-photo-wrap');
+  if (centerPhotoWrap) {
+    centerPhotoWrap.onclick = (e) => {
+      e.stopPropagation();
+      const unrevealed = heartParticles.find(p => !p.done);
+      if (unrevealed && unrevealed.el) {
+        unrevealed.el.click();
+      } else {
+        skipToHeartsClimax();
+      }
+    };
+  }
 }
 
 // Update the big SVG heart fill (y attribute of the fill rect slides up)
@@ -2149,32 +2261,52 @@ function startProposal() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 5 — BIRTHDAY CANDLES
+// ACT 5 — BIRTHDAY CANDLES (Richer design)
 // ══════════════════════════════════════════════════════════════════
 function startCandles() {
   document.getElementById('bday-name').textContent = `Happy Birthday ${BIRTHDAY_CONFIG.nickname}! 🎂`;
   document.getElementById('bday-anni').textContent = BIRTHDAY_CONFIG.anniversaryMessage;
 
   const cv = document.getElementById('candles-canvas');
-  const cx = cv.getContext('2d');
-  cv.width = window.innerWidth; cv.height = window.innerHeight;
-  const stars = Array.from({ length: 70 }, () => ({
-    x: Math.random(), y: Math.random(), r: Math.random() * 1.5,
-    alpha: Math.random(),
-    speed: (Math.random() * 0.012 + 0.003) * (Math.random() > 0.5 ? 1 : -1)
-  }));
-  (function renderStars() {
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  const W = cv.width, H = cv.height;
+
+  // Rich festive gradient background
+  (function renderCandlesBg(ts) {
     if (document.getElementById('act-candles').classList.contains('ui-hidden')) return;
-    cx.clearRect(0, 0, cv.width, cv.height);
-    const W = cv.width, H = cv.height;
-    stars.forEach(s => {
-      s.alpha += s.speed;
-      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
-      cx.beginPath(); cx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
-      cx.fillStyle = `rgba(255,215,0,${Math.abs(s.alpha) * 0.65})`; cx.fill();
-    });
-    requestAnimationFrame(renderStars);
-  })();
+    ctx.clearRect(0, 0, W, H);
+
+    // Deep night-purple gradient
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#0a0013');
+    bgGrad.addColorStop(0.4, '#1a0030');
+    bgGrad.addColorStop(0.8, '#280040');
+    bgGrad.addColorStop(1, '#0d0018');
+    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
+
+    // Twinkling gold stars
+    for (let i = 0; i < 80; i++) {
+      const sx = ((i * 137.5) % W);
+      const sy = ((i * 97.3) % H) * 0.8;
+      const alpha = 0.3 + 0.5 * Math.abs(Math.sin(ts * 0.0012 + i));
+      const r = 0.6 + 0.8 * (i % 3) * 0.5;
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,215,0,${alpha})`; ctx.fill();
+    }
+
+    // Warm golden radial glow from center
+    const cx2 = W / 2, cy2 = H * 0.5;
+    const glowPulse = 0.5 + 0.5 * Math.sin(ts * 0.0015);
+    const glow = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, Math.max(W, H) * 0.6);
+    glow.addColorStop(0, `rgba(255,180,50,${0.12 * glowPulse})`);
+    glow.addColorStop(0.5, `rgba(255,100,50,${0.06 * glowPulse})`);
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+    requestAnimationFrame(renderCandlesBg);
+  })(performance.now());
 
   const row = document.getElementById('candles-row');
   row.innerHTML = '';
@@ -2185,8 +2317,12 @@ function startCandles() {
     const candle = document.createElement('div');
     candle.className = 'candle-item';
     candle.innerHTML = `
-      <div class="candle-flame" id="flame-${i}"></div>
-      <div class="candle-body"></div>
+      <div class="candle-flame" id="flame-${i}">
+        <div class="flame-inner"></div>
+      </div>
+      <div class="candle-stick">
+        <div class="candle-drip"></div>
+      </div>
     `;
     candle.addEventListener('click', e => {
       const flame = document.getElementById(`flame-${i}`);
@@ -2204,7 +2340,7 @@ function startCandles() {
         launchFireworks('candles-fw', 7);
         launchConfettiFall(46);
         setTimeout(() => {
-          switchAct('act-candles', 'act-finale', startFinale);
+          switchAct('act-candles', 'act-moments-gallery', startMomentsGallery);
         }, 3000);
       }
     });
@@ -2212,60 +2348,255 @@ function startCandles() {
   }
 }
 
+
 // ══════════════════════════════════════════════════════════════════
-// ACT 6 — FINALE
+// ACT 5.5 — SAATH KE PAL: Moments Gallery (Image + Message Cards)
 // ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// ACT 5.5 — SAATH KE PAL: Polaroid Album Scrapbook Gallery
+// ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// ACT 5.5 — SAATH KE PAL: Polaroid Album Scrapbook Gallery (Auto-Play + Tap Skip)
+// ══════════════════════════════════════════════════════════════════
+let galleryAutoPlayTimer = null;
+let isGalleryAutoPlaying = true;
+
+function startMomentsGallery() {
+  const photos = BIRTHDAY_CONFIG.galleryPhotos || [];
+  const categories = BIRTHDAY_CONFIG.categories || [];
+  const catMap = {};
+  categories.forEach(c => { catMap[c.id] = c; });
+
+  const container = document.getElementById('gallery-cards-container');
+  const dotsEl = document.getElementById('gallery-progress-dots');
+  const kissOverlay = document.getElementById('kiss-reveal-overlay');
+  const kissContinueBtn = document.getElementById('kiss-continue-btn');
+
+  if (container) container.innerHTML = '';
+  if (dotsEl) dotsEl.innerHTML = '';
+  if (kissOverlay) kissOverlay.classList.add('ui-hidden');
+
+  let currentCard = 0;
+  let startX = 0;
+  let isDragging = false;
+
+  // Render Polaroid Cards
+  photos.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'polaroid-card' + (i === 0 ? ' gallery-card-active' : '');
+
+    // Slight random rotation for scrapbook polaroid look (-2.5 deg to +2.5 deg)
+    const rot = ((i % 5) - 2) * 1.2;
+    el.style.transform = i === 0 ? `rotate(${rot}deg) scale(1)` : `rotate(${rot}deg) scale(0.96)`;
+
+    const catObj = catMap[p.cat] || { name: 'Yaadein', icon: '🌸' };
+
+    el.innerHTML = `
+      <div class="polaroid-tape"></div>
+      <div class="polaroid-img-frame">
+        <img src="${p.src}" alt="${p.caption}" loading="lazy" />
+      </div>
+      <div class="polaroid-footer">
+        <span class="polaroid-album-tag">${catObj.icon} ${catObj.name}</span>
+        <div class="polaroid-caption">${p.caption}</div>
+        <span class="polaroid-count">${i + 1} / ${photos.length}</span>
+      </div>
+    `;
+
+    // Tap/Click directly on the card to skip to next card
+    el.addEventListener('click', (e) => {
+      // Don't trigger if swiping
+      if (isDragging) return;
+      if (currentCard < photos.length - 1) {
+        goToCard(currentCard + 1);
+        resetGalleryAutoPlay();
+      } else {
+        if (kissOverlay) kissOverlay.classList.remove('ui-hidden');
+      }
+    });
+
+    container.appendChild(el);
+
+    // Render dot
+    const dot = document.createElement('div');
+    dot.className = 'gallery-dot' + (i === 0 ? ' gallery-dot-active' : '');
+    if (dotsEl) dotsEl.appendChild(dot);
+  });
+
+  // Soft atmospheric starfield canvas background
+  const cv = document.getElementById('gallery-canvas');
+  if (cv) {
+    const ctx = cv.getContext('2d');
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    (function renderGalleryBg(ts) {
+      if (document.getElementById('act-moments-gallery').classList.contains('ui-hidden')) return;
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      const W = cv.width, H = cv.height;
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, '#0a0018'); g.addColorStop(0.5, '#180033'); g.addColorStop(1, '#060010');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+      // Twinkling soft motes
+      for (let i = 0; i < 40; i++) {
+        const sx = ((i * 187.3) % W);
+        const sy = ((i * 123.7) % H);
+        const a = 0.2 + 0.45 * Math.abs(Math.sin((ts || 0) * 0.001 + i));
+        ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 180, 220, ${a})`; ctx.fill();
+      }
+
+      requestAnimationFrame(renderGalleryBg);
+    })(performance.now());
+  }
+
+  function goToCard(idx) {
+    const cardEls = container.querySelectorAll('.polaroid-card');
+    const dotEls = dotsEl ? dotsEl.querySelectorAll('.gallery-dot') : [];
+    cardEls.forEach((c, i) => {
+      const rot = ((i % 5) - 2) * 1.2;
+      c.classList.toggle('gallery-card-active', i === idx);
+      c.classList.toggle('gallery-card-prev', i < idx);
+      if (i === idx) c.style.transform = `rotate(${rot}deg) scale(1)`;
+    });
+    dotEls.forEach((d, i) => d.classList.toggle('gallery-dot-active', i === idx));
+    currentCard = idx;
+
+    // Scroll active dot into view
+    if (dotEls[idx]) {
+      dotEls[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    // When last card is reached -> show Kiss Reveal Overlay Screen
+    if (idx === photos.length - 1) {
+      stopGalleryAutoPlay();
+      setTimeout(() => {
+        if (kissOverlay) kissOverlay.classList.remove('ui-hidden');
+      }, 1500);
+    }
+  }
+
+  // Auto-Play Slideshow logic
+  function startGalleryAutoPlay() {
+    stopGalleryAutoPlay();
+    isGalleryAutoPlaying = true;
+    galleryAutoPlayTimer = setInterval(() => {
+      if (document.getElementById('act-moments-gallery').classList.contains('ui-hidden')) {
+        stopGalleryAutoPlay();
+        return;
+      }
+      if (currentCard < photos.length - 1) {
+        goToCard(currentCard + 1);
+      } else {
+        stopGalleryAutoPlay();
+      }
+    }, 3200);
+  }
+
+  function stopGalleryAutoPlay() {
+    if (galleryAutoPlayTimer) {
+      clearInterval(galleryAutoPlayTimer);
+      galleryAutoPlayTimer = null;
+    }
+    isGalleryAutoPlaying = false;
+  }
+
+  function resetGalleryAutoPlay() {
+    startGalleryAutoPlay();
+  }
+
+  // Touch / swipe support
+  container.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    isDragging = false;
+  }, { passive: true });
+
+  container.addEventListener('touchmove', e => {
+    if (Math.abs(e.touches[0].clientX - startX) > 10) {
+      isDragging = true;
+    }
+  }, { passive: true });
+
+  container.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 35) {
+      if (dx < 0 && currentCard < photos.length - 1) {
+        goToCard(currentCard + 1);
+        resetGalleryAutoPlay();
+      }
+      if (dx > 0 && currentCard > 0) {
+        goToCard(currentCard - 1);
+        resetGalleryAutoPlay();
+      }
+    }
+    setTimeout(() => { isDragging = false; }, 100);
+  });
+
+  // Navigation buttons
+  const prevBtn = document.getElementById('gallery-prev');
+  const nextBtn = document.getElementById('gallery-next');
+  if (prevBtn) prevBtn.onclick = () => { if (currentCard > 0) { goToCard(currentCard - 1); resetGalleryAutoPlay(); } };
+  if (nextBtn) nextBtn.onclick = () => { if (currentCard < photos.length - 1) { goToCard(currentCard + 1); resetGalleryAutoPlay(); } };
+
+  // Kiss Continue button -> Act 6 Finale
+  if (kissContinueBtn) {
+    kissContinueBtn.onclick = () => {
+      stopGalleryAutoPlay();
+      if (kissOverlay) kissOverlay.classList.add('ui-hidden');
+      switchAct('act-moments-gallery', 'act-finale', startFinale);
+    };
+  }
+
+  // Start auto-play automatically when gallery opens
+  startGalleryAutoPlay();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ACT 6 — FINALE (Blooming Heart Tree + Photo Player + 3 Words + Hearts Rain)
+// ══════════════════════════════════════════════════════════════════
+let finaleTreeRunning = false;
+let photoPlayerTimer = null;
+let currentPhotoIdx = 0;
+let isPhotoPlayerPlaying = true;
+
+let activeCategory = 'all';
+
 function startFinale() {
   launchFireworks('finale-fireworks', 6);
   startLanterns();
-
-  const cv = document.getElementById('finale-canvas');
-  const cx = cv.getContext('2d');
-  cv.width = window.innerWidth; cv.height = window.innerHeight;
-  const stars = Array.from({ length: 90 }, () => ({
-    x: Math.random(), y: Math.random(), r: Math.random() * 1.5,
-    alpha: Math.random(),
-    speed: (Math.random() * 0.01 + 0.003) * (Math.random() > 0.5 ? 1 : -1)
-  }));
-  (function renderStars() {
-    if (document.getElementById('act-finale').classList.contains('ui-hidden')) return;
-    cx.clearRect(0, 0, cv.width, cv.height);
-    const W = cv.width, H = cv.height;
-    stars.forEach(s => {
-      s.alpha += s.speed;
-      if (s.alpha >= 1 || s.alpha <= 0) s.speed = -s.speed;
-      cx.beginPath(); cx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
-      cx.fillStyle = `rgba(255,215,0,${Math.abs(s.alpha) * 0.65})`; cx.fill();
-    });
-    requestAnimationFrame(renderStars);
-  })();
+  initFinaleWordsStrip();
+  initCategoryFilterBar();
+  initFinalePhotoPlayer(activeCategory);
+  initFinaleTreeCanvas();
+  startFinaleHeartsRain();
 
   const env = document.getElementById('finale-envelope');
   const letterPop = document.getElementById('finale-letter-popup');
   const closing = document.getElementById('finale-closing');
 
-  env.addEventListener('click', () => {
-    gsap.to(env, {
-      opacity: 0, scale: 0.88, duration: 0.4,
-      onComplete: () => {
-        env.classList.add('ui-hidden');
-        document.getElementById('letter-body').textContent = BIRTHDAY_CONFIG.letter;
-        closing.classList.add('ui-hidden');
+  if (env) {
+    env.addEventListener('click', () => {
+      gsap.to(env, {
+        opacity: 0, scale: 0.88, duration: 0.4,
+        onComplete: () => {
+          env.classList.add('ui-hidden');
+          document.getElementById('letter-body').textContent = BIRTHDAY_CONFIG.letter;
+          closing.classList.add('ui-hidden');
 
-        letterPop.classList.remove('ui-hidden');
-        gsap.fromTo(letterPop.querySelector('.heart-popup-inner'),
-          { opacity: 0, y: 20, scale: 0.94 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.6 });
+          letterPop.classList.remove('ui-hidden');
+          gsap.fromTo(letterPop.querySelector('.heart-popup-inner'),
+            { opacity: 0, y: 20, scale: 0.94 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.6 });
 
-        setTimeout(() => {
-          closing.classList.remove('ui-hidden');
-          document.getElementById('closing-line').textContent = BIRTHDAY_CONFIG.closingLine;
-          gsap.fromTo(closing, { opacity: 0 }, { opacity: 1, duration: 1.2 });
-          launchFireworks('finale-fireworks', 5);
-        }, 3800);
-      }
+          setTimeout(() => {
+            closing.classList.remove('ui-hidden');
+            document.getElementById('closing-line').textContent = BIRTHDAY_CONFIG.closingLine;
+            gsap.fromTo(closing, { opacity: 0 }, { opacity: 1, duration: 1.2 });
+            launchFireworks('finale-fireworks', 5);
+          }, 3800);
+        }
+      });
     });
-  });
+  }
 
   const replayBtn = document.getElementById('replay-btn');
   if (replayBtn) {
@@ -2273,8 +2604,324 @@ function startFinale() {
   }
 }
 
+// ── Album Category Filter Bar rendering ───────────────────────
+function initCategoryFilterBar() {
+  const bar = document.getElementById('category-filter-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  const categories = BIRTHDAY_CONFIG.categories || [
+    { id: 'all', name: 'Sabhi Yaadein', icon: '🌸' },
+    { id: 'kid', name: 'Bachi Era', icon: '🧸' },
+    { id: 'bossy', name: 'Bossy Era', icon: '😤' },
+    { id: 'teeth', name: 'Chulbuli', icon: '😁' },
+    { id: 'saree', name: 'Graceful Saree', icon: '🥻' },
+    { id: 'calls', name: 'Call Proofs', icon: '📞' },
+    { id: 'us', name: 'Hum Dono', icon: '🫂' },
+    { id: 'final', name: 'Special Memories', icon: '💍' }
+  ];
+
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-pill' + (cat.id === activeCategory ? ' active' : '');
+    btn.textContent = `${cat.icon} ${cat.name}`;
+    btn.onclick = () => {
+      bar.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = cat.id;
+      initFinalePhotoPlayer(cat.id);
+    };
+    bar.appendChild(btn);
+  });
+}
+
+// ── 3 Word Endearments Strip (below photo player in finale) ─────
+function initFinaleWordsStrip() {
+  const track = document.getElementById('finale-words-track');
+  if (!track) return;
+  track.innerHTML = '';
+  const words = [
+    'My Girlfriend ❤️', 'My Future Wife 💍', 'My Life 🌸',
+    'My Soulmate ✨', 'My Queen 👑', 'My World 🌍',
+    'My Everything 💖', 'My Sunshine ☀️', 'My Angel 😇',
+    'Meri Pranu 🌷', 'My Home 🏡', 'My Forever ♾️'
+  ];
+  // Double for seamless loop
+  [...words, ...words].forEach(w => {
+    const tag = document.createElement('span');
+    tag.className = 'finale-word-tag';
+    tag.textContent = w;
+    track.appendChild(tag);
+  });
+}
+
+// ── Falling Hearts Rain (right side of finale) ──────────────────
+function startFinaleHeartsRain() {
+  const container = document.getElementById('finale-hearts-rain');
+  if (!container) return;
+  const heartChars = ['❤️', '💖', '💕', '🌸', '💓', '💗', '✨', '🌹'];
+
+  function spawnHeart() {
+    if (document.getElementById('act-finale').classList.contains('ui-hidden')) return;
+    const h = document.createElement('div');
+    h.className = 'finale-falling-heart';
+    h.textContent = heartChars[Math.floor(Math.random() * heartChars.length)];
+    h.style.left = `${Math.random() * 90}%`;
+    h.style.fontSize = `${0.9 + Math.random() * 1.1}rem`;
+    const dur = 4 + Math.random() * 4;
+    h.style.animationDuration = `${dur}s`;
+    h.style.animationDelay = `${Math.random() * 2}s`;
+    container.appendChild(h);
+    setTimeout(() => h.remove(), (dur + 2) * 1000);
+    setTimeout(spawnHeart, 600 + Math.random() * 800);
+  }
+  spawnHeart();
+}
+
+// ── Left Side Photo Player (Slideshow with category filtering) ─────
+function initFinalePhotoPlayer(catFilter = 'all') {
+  const imgEl = document.getElementById('finale-player-img');
+  const captionEl = document.getElementById('finale-player-caption');
+  const progressFill = document.getElementById('player-progress-fill');
+  const prevBtn = document.getElementById('player-prev-btn');
+  const nextBtn = document.getElementById('player-next-btn');
+  const playBtn = document.getElementById('player-play-btn');
+
+  if (!imgEl) return;
+
+  const allPhotos = BIRTHDAY_CONFIG.galleryPhotos || [];
+  const photos = (catFilter === 'all')
+    ? allPhotos
+    : allPhotos.filter(p => p.cat === catFilter);
+
+  if (photos.length === 0) return;
+
+  currentPhotoIdx = 0;
+  isPhotoPlayerPlaying = true;
+
+  function updatePhotoDisplay() {
+    const p = photos[currentPhotoIdx];
+    gsap.to(imgEl, {
+      opacity: 0, scale: 0.95, duration: 0.25,
+      onComplete: () => {
+        imgEl.src = p.src;
+        if (captionEl) captionEl.textContent = p.caption;
+        gsap.to(imgEl, { opacity: 1, scale: 1, duration: 0.35 });
+      }
+    });
+    if (progressFill) {
+      progressFill.style.width = '0%';
+      gsap.killTweensOf(progressFill);
+      if (isPhotoPlayerPlaying) {
+        gsap.to(progressFill, { width: '100%', duration: 3.5, ease: 'none' });
+      }
+    }
+  }
+
+  function nextPhoto() {
+    currentPhotoIdx = (currentPhotoIdx + 1) % photos.length;
+    updatePhotoDisplay();
+  }
+
+  function prevPhoto() {
+    currentPhotoIdx = (currentPhotoIdx - 1 + photos.length) % photos.length;
+    updatePhotoDisplay();
+  }
+
+  function startAutoPlay() {
+    if (photoPlayerTimer) clearInterval(photoPlayerTimer);
+    photoPlayerTimer = setInterval(() => {
+      if (isPhotoPlayerPlaying) nextPhoto();
+    }, 3500);
+  }
+
+  if (prevBtn) prevBtn.onclick = () => { prevPhoto(); startAutoPlay(); };
+  if (nextBtn) nextBtn.onclick = () => { nextPhoto(); startAutoPlay(); };
+  if (playBtn) {
+    playBtn.onclick = () => {
+      isPhotoPlayerPlaying = !isPhotoPlayerPlaying;
+      playBtn.textContent = isPhotoPlayerPlaying ? '❚❚' : '▶';
+      if (isPhotoPlayerPlaying) {
+        startAutoPlay();
+        updatePhotoDisplay();
+      } else {
+        if (photoPlayerTimer) clearInterval(photoPlayerTimer);
+        gsap.killTweensOf(progressFill);
+      }
+    };
+  }
+
+  updatePhotoDisplay();
+  startAutoPlay();
+}
+
+// ── Blooming Heart Tree Canvas Renderer ────────────────────────────
+function initFinaleTreeCanvas() {
+  const canvas = document.getElementById('finale-tree-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const BLOSSOM = [
+    { c0: '#ffe1ec', c1: '#ff80aa' },
+    { c0: '#ffd0e0', c1: '#f4577f' },
+    { c0: '#ffc4d2', c1: '#e23b67' },
+    { c0: '#ffd9c4', c1: '#ff8a5b' },
+    { c0: '#ffeec2', c1: '#f6b13e' },
+    { c0: '#ffd2e6', c1: '#e84d9a' }
+  ];
+
+  function heartShape(c, x, top, w, h) {
+    c.beginPath();
+    c.moveTo(x, top + h * 0.28);
+    c.bezierCurveTo(x, top, x - w * 0.5, top, x - w * 0.5, top + h * 0.28);
+    c.bezierCurveTo(x - w * 0.5, top + h * 0.60, x - w * 0.16, top + h * 0.80, x, top + h);
+    c.bezierCurveTo(x + w * 0.16, top + h * 0.80, x + w * 0.5, top + h * 0.60, x + w * 0.5, top + h * 0.28);
+    c.bezierCurveTo(x + w * 0.5, top, x, top, x, top + h * 0.28);
+    c.closePath();
+  }
+
+  function makeBlossomSprite({ c0, c1 }) {
+    const SS = 120;
+    const cv = document.createElement('canvas'); cv.width = cv.height = SS;
+    const c = cv.getContext('2d');
+    const w = SS * 0.62, h = SS * 0.58, x = SS / 2, top = SS * 0.17;
+    const g = c.createRadialGradient(x - w * 0.20, top + h * 0.20, h * 0.04, x, top + h * 0.42, h * 0.92);
+    g.addColorStop(0, c0); g.addColorStop(0.6, c1); g.addColorStop(1, '#800f35');
+    heartShape(c, x, top, w, h); c.fillStyle = g; c.fill();
+    return cv;
+  }
+
+  const sprites = BLOSSOM.map(makeBlossomSprite);
+
+  // Heart parametric polygon
+  const rawPoly = [];
+  for (let i = 0; i <= 160; i++) {
+    const t = (i / 160) * Math.PI * 2;
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+    rawPoly.push([x, y]);
+  }
+  const minX = Math.min(...rawPoly.map(p => p[0])), maxX = Math.max(...rawPoly.map(p => p[0]));
+  const minY = Math.min(...rawPoly.map(p => p[1])), maxY = Math.max(...rawPoly.map(p => p[1]));
+  const heartPoly = rawPoly.map(([x, y]) => [(x - (minX + maxX) / 2) / ((maxX - minX) / 2), (y - (minY + maxY) / 2) / ((maxY - minY) / 2)]);
+
+  function pointInHeart(x, y) {
+    let inside = false;
+    for (let i = 0, j = heartPoly.length - 1; i < heartPoly.length; j = i++) {
+      const xi = heartPoly[i][0], yi = heartPoly[i][1], xj = heartPoly[j][0], yj = heartPoly[j][1];
+      if (((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+
+  const W = canvas.width, H = canvas.height;
+  const cx = W * 0.5, cy = H * 0.38;
+  const ry = Math.min(H * 0.30, W * 0.32), rx = ry * 1.15;
+
+  const hearts = [];
+  const COUNT = Math.round(Math.min(320, (rx * ry) / 60));
+  let guard = 0;
+  while (hearts.length < COUNT && guard < COUNT * 40) {
+    guard++;
+    const u = (Math.random() * 2.12) - 1.06;
+    const v = (Math.random() * 2.12) - 1.06;
+    if (!pointInHeart(u, v)) continue;
+    hearts.push({
+      x: cx + u * rx,
+      y: cy - v * ry,
+      sprite: sprites[Math.floor(Math.random() * sprites.length)],
+      box: 24 + Math.random() * 32,
+      rot: (Math.random() - 0.5) * 0.8,
+      sway: Math.random() * Math.PI * 2,
+      t0: 0.5 + Math.random() * 2.0
+    });
+  }
+
+  const fallingPetals = [];
+  for (let i = 0; i < 40; i++) {
+    fallingPetals.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vy: 12 + Math.random() * 22,
+      sway: Math.random() * Math.PI * 2,
+      sprite: sprites[Math.floor(Math.random() * sprites.length)],
+      box: 14 + Math.random() * 16,
+      rot: Math.random() * Math.PI * 2
+    });
+  }
+
+  let startTime = performance.now();
+
+  function renderTree(now) {
+    if (document.getElementById('act-finale').classList.contains('ui-hidden')) return;
+    const elapsed = (now - startTime) / 1000;
+    ctx.clearRect(0, 0, W, H);
+
+    // Glowing Radial background behind tree
+    const glow = ctx.createRadialGradient(cx, cy, ry * 0.1, cx, cy, ry * 1.5);
+    glow.addColorStop(0, 'rgba(255, 107, 157, 0.28)');
+    glow.addColorStop(0.6, 'rgba(196, 77, 255, 0.12)');
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw Trunk & Main Branches
+    ctx.strokeStyle = '#5a1d2e';
+    ctx.lineWidth = Math.max(8, W * 0.018);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx, H);
+    ctx.quadraticCurveTo(cx, cy + ry * 0.7, cx, cy + ry * 0.5);
+    ctx.stroke();
+
+    // Main Limbs
+    ctx.lineWidth = Math.max(4, W * 0.01);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + ry * 0.5);
+    ctx.quadraticCurveTo(cx - rx * 0.3, cy + ry * 0.2, cx - rx * 0.5, cy);
+    ctx.moveTo(cx, cy + ry * 0.5);
+    ctx.quadraticCurveTo(cx + rx * 0.3, cy + ry * 0.2, cx + rx * 0.5, cy);
+    ctx.stroke();
+
+    // Draw Blooming Hearts Canopy
+    hearts.forEach(h => {
+      const p = Math.min(1, Math.max(0, (elapsed - h.t0) / 1.2));
+      if (p <= 0) return;
+      const scale = p;
+      const swayX = Math.sin(elapsed * 1.5 + h.sway) * 3;
+      ctx.save();
+      ctx.translate(h.x + swayX, h.y);
+      ctx.rotate(h.rot);
+      ctx.globalAlpha = Math.min(1, p * 1.2);
+      ctx.drawImage(h.sprite, -h.box * scale * 0.5, -h.box * scale * 0.5, h.box * scale, h.box * scale);
+      ctx.restore();
+    });
+
+    // Draw Falling Petals
+    fallingPetals.forEach(pt => {
+      pt.y += pt.vy * 0.016;
+      pt.x += Math.sin(elapsed * 2 + pt.sway) * 0.8;
+      if (pt.y > H + 20) { pt.y = -20; pt.x = Math.random() * W; }
+      ctx.save();
+      ctx.translate(pt.x, pt.y);
+      ctx.rotate(pt.rot + elapsed);
+      ctx.globalAlpha = 0.75;
+      ctx.drawImage(pt.sprite, -pt.box * 0.5, -pt.box * 0.5, pt.box, pt.box);
+      ctx.restore();
+    });
+
+    requestAnimationFrame(renderTree);
+  }
+
+  requestAnimationFrame(renderTree);
+}
+
 function startLanterns() {
   const container = document.getElementById('finale-lanterns');
+  if (!container) return;
   const items = ['🏮', '✨', '💛', '🌟', '🎇', '🪔', '💖'];
   (function spawnLantern() {
     if (document.getElementById('act-finale').classList.contains('ui-hidden')) return;
@@ -2290,12 +2937,22 @@ function startLanterns() {
   })();
 }
 
-// Canvas resize
+// Canvas resize (debounced + skips no-op events, since mobile browsers fire
+// 'resize' repeatedly for tiny address-bar/keyboard changes — resizing every
+// canvas on each of those was clearing/redrawing scenes mid-animation and
+// causing visible glitches, especially in the stars/moments scene).
+let _resizeDebounceTimer = null;
 window.addEventListener('resize', () => {
-  document.querySelectorAll('canvas').forEach(cv => {
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-  });
+  clearTimeout(_resizeDebounceTimer);
+  _resizeDebounceTimer = setTimeout(() => {
+    const w = window.innerWidth, h = window.innerHeight;
+    document.querySelectorAll('canvas').forEach(cv => {
+      if (cv.width !== w || cv.height !== h) {
+        cv.width = w;
+        cv.height = h;
+      }
+    });
+  }, 150);
 });
 
 // Universal Quick Testing Navigation Function
@@ -2344,7 +3001,9 @@ function skipToAct(targetId) {
     'moments': { id: 'act-moments', fn: startMoments },
     'hearts': { id: 'act-hearts', fn: startHearts },
     'proposal': { id: 'act-proposal', fn: startProposal },
-    'candles': { id: 'act-candles', fn: startCandles }
+    'candles': { id: 'act-candles', fn: startCandles },
+    'moments-gallery': { id: 'act-moments-gallery', fn: startMomentsGallery },
+    'finale': { id: 'act-finale', fn: startFinale }
   };
 
   const target = actMap[targetId];
@@ -2363,5 +3022,7 @@ window.startMoments = startMoments;
 window.startHearts = startHearts;
 window.startProposal = startProposal;
 window.startCandles = startCandles;
+window.startMomentsGallery = startMomentsGallery;
+window.startFinale = startFinale;
 window.stopCricketsSound = stopCricketsSound;
 window.stopRainSound = stopRainSound;
