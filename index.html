@@ -337,7 +337,18 @@
         <span>Moon Climax 🌙</span>
       </button>
 
+      <!-- Constellation line connectors overlay for P R A N U -->
+      <svg id="pranu-svg-lines" class="pranu-svg-lines"></svg>
+
+      <!-- Stars shower layer (HTML stars land here) -->
+      <div id="tara-stars-layer" class="tara-stars-layer"></div>
+
+
+      <!-- Stars counter HUD -->
+      <div id="tara-counter-hud" class="tara-counter-hud">✦ <span id="tara-count">0</span> / 40 yaadon ke taare</div>
+
       <!-- Transition message overlay (shown after all 8 done) -->
+
       <div id="moments-transition-msg" class="moments-transition-msg ui-hidden">
         <p class="moments-trans-text">Acha... kya tumne kabhi socha hai</p>
         <p class="moments-trans-sub">ki mai tumse itna pyar kyu karta hu...</p>
@@ -597,25 +608,43 @@
     <!-- ── ACT 5.5: SAATH KE PAL — MOMENTS GALLERY ──────── -->
     <section id="act-moments-gallery" class="act ui-hidden">
       <canvas id="gallery-canvas" class="bg-canvas"></canvas>
-      <div class="gallery-header">
-        <div class="gallery-chapter-label">📸 Saath Ke Pal</div>
-        <h2 class="gallery-title">Ek Ek Lamha...</h2>
-        <p class="gallery-subtitle">Har tasveer mein ek kahani chhupi hai</p>
+
+      <!-- PHASE 1: Album Picker Grid -->
+      <div id="gallery-album-picker" class="gallery-album-picker">
+        <div class="gallery-picker-header">
+          <div class="gallery-chapter-label">📸 Saath Ke Pal</div>
+          <h2 class="gallery-title">Kaunsa Album Dekhe? 🌸</h2>
+        </div>
+        <div class="gallery-album-grid" id="gallery-album-grid">
+          <!-- Album tiles injected by JS -->
+        </div>
       </div>
 
-      <!-- Swipeable card stack -->
-      <div class="gallery-cards-container" id="gallery-cards-container">
-        <!-- Cards injected by JS -->
+      <!-- PHASE 2: Full-Screen Photo Viewer -->
+      <div id="gallery-photo-viewer" class="gallery-photo-viewer ui-hidden">
+        <!-- Full-screen image -->
+        <img id="gallery-viewer-img" class="gallery-viewer-img" src="" alt="" />
+
+        <!-- Tap-to-advance overlay (tap anywhere = next photo) -->
+        <div id="gallery-viewer-tap" class="gallery-viewer-tap"></div>
+
+        <!-- Top bar: back button + counter -->
+        <div class="gallery-viewer-topbar">
+          <button id="gallery-viewer-back" class="gallery-viewer-back">← Wapas</button>
+          <span id="gallery-viewer-counter" class="gallery-viewer-counter">1 / 1</span>
+        </div>
+
+        <!-- Bottom caption strip -->
+        <div class="gallery-viewer-caption-strip">
+          <span id="gallery-viewer-album" class="gallery-viewer-album-label"></span>
+          <span id="gallery-viewer-caption" class="gallery-viewer-caption-text"></span>
+        </div>
+
+        <!-- Dot progress -->
+        <div id="gallery-viewer-dots" class="gallery-viewer-dots"></div>
       </div>
 
-      <!-- Navigation arrows (desktop/tablet) -->
-      <button class="gallery-nav-btn gallery-prev" id="gallery-prev">❮</button>
-      <button class="gallery-nav-btn gallery-next" id="gallery-next">❯</button>
-
-      <!-- Progress dots -->
-      <div class="gallery-progress-dots" id="gallery-progress-dots"></div>
-
-      <!-- Special Kiss Reveal Screen (appears when all albums end) -->
+      <!-- Special Kiss Reveal Screen (appears when all albums seen) -->
       <div id="kiss-reveal-overlay" class="kiss-reveal-overlay ui-hidden">
         <div class="kiss-card">
           <div class="kiss-img-wrap">

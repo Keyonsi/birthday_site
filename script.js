@@ -1517,57 +1517,8 @@ function startMoments() {
       ctx.restore();
     }
 
-    // ── Interactive constellation stars ──
-    cloudData.filter(c => c.interactive).forEach(c => {
-      c.twinklePhase += c.twinkleSpeed;
-      const twinkle = 0.6 + 0.4 * Math.abs(Math.sin(c.twinklePhase));
-      const revealed = c.revealed;
+    // Background twinkling stars only (cloudData interactive canvas dots removed per user request)
 
-      if (revealed) c.litAlpha = Math.min(1, (c.litAlpha || 0) + 0.035);
-
-      ctx.save();
-
-      // Outer glow halo
-      const glowSize = revealed ? 28 * c.scale : 18 * c.scale;
-      const starGlow = ctx.createRadialGradient(c.cx, c.cy, 0, c.cx, c.cy, glowSize);
-      if (revealed) {
-        starGlow.addColorStop(0, `rgba(255,235,130,${0.9 * twinkle})`);
-        starGlow.addColorStop(0.5, `rgba(255,190,80,${0.4 * twinkle})`);
-        starGlow.addColorStop(1, 'rgba(255,150,50,0)');
-      } else {
-        starGlow.addColorStop(0, `rgba(180,210,255,${0.75 * twinkle})`);
-        starGlow.addColorStop(0.5, `rgba(140,180,255,${0.3 * twinkle})`);
-        starGlow.addColorStop(1, 'rgba(100,140,255,0)');
-      }
-      ctx.fillStyle = starGlow;
-      ctx.beginPath(); ctx.arc(c.cx, c.cy, glowSize, 0, Math.PI * 2); ctx.fill();
-
-      // Star core (4-pointed sparkle style)
-      ctx.save();
-      ctx.translate(c.cx, c.cy);
-      ctx.rotate(ts * 0.0004 * (revealed ? 0.5 : 1));
-      const coreR = (revealed ? 5 : 3.5) * c.scale;
-      ctx.fillStyle = revealed ? '#fff8d0' : '#ddeeff';
-      ctx.globalAlpha = twinkle;
-      ctx.beginPath();
-      // 4-pointed star shape
-      for (let pt = 0; pt < 8; pt++) {
-        const a = (pt * Math.PI) / 4;
-        const r = pt % 2 === 0 ? coreR : coreR * 0.4;
-        pt === 0 ? ctx.moveTo(r * Math.cos(a), r * Math.sin(a)) : ctx.lineTo(r * Math.cos(a), r * Math.sin(a));
-      }
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-
-      // Revealed: show emoji icon floating above
-      if (revealed) {
-        ctx.globalAlpha = Math.min(1, (c.litAlpha || 0) * 1.5);
-        ctx.font = `${Math.round(18 * c.scale)}px serif`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(c.icon, c.cx, c.cy - 22 * c.scale);
-      }
-      ctx.restore();
-    });
 
     // ── Fireflies (lower half only) ──
     flies.forEach(f => {
@@ -1601,18 +1552,20 @@ function startMoments() {
     requestAnimationFrame(render);
   })(0);
 
-  // ── Touch/click detection ──
+  // ── Touch/click handler for Moon only (bypass & climax) ──
   const popup = document.getElementById('moment-popup');
   const popIcon = document.getElementById('moment-popup-icon');
   const popMsg = document.getElementById('moment-popup-msg');
   const closeBtn = document.getElementById('moment-popup-close');
   let climaxPending = false;
   let climaxDone = false;
+  let showerInterval = null;
 
   function closeMomentPopup() {
     popup.classList.add('ui-hidden');
     if (climaxPending && !climaxDone) {
       climaxDone = true;
+      if (showerInterval) clearInterval(showerInterval);
       clearInterval(leafDecoyInterval);
       stopCricketsSound();
       stopRainSound();
@@ -1621,104 +1574,256 @@ function startMoments() {
   }
   closeBtn.addEventListener('click', closeMomentPopup);
 
-  function findStarAt(x, y) {
-    // Hit radius: larger for mobile touch. Computed live off W/H (kept in
-    // sync every frame by render()) so it never drifts after a resize.
-    const hitRadius = Math.max(44, Math.min(W, H) * 0.065);
-    let best = null, bestD = Infinity;
-    for (let i = cloudData.length - 1; i >= 0; i--) {
-      const c = cloudData[i];
-      if (!c.interactive) continue;
-      const dx = x - c.cx, dy = y - c.cy;
-      const d = dx * dx + dy * dy;
-      const r = Math.max(hitRadius, 30 * c.scale);
-      if (d < r * r && d < bestD) { best = c; bestD = d; }
-    }
-    return best;
-  }
-
   function isMoonHit(x, y) {
     const dx = x - moon.cx, dy = y - moon.cy;
     return (dx * dx + dy * dy) < (moon.r * 1.8) ** 2;
   }
 
   function triggerMoonClimax() {
-    if (climaxPending) return; // avoid double-trigger
+    if (climaxPending) return;
+    if (showerInterval) clearInterval(showerInterval);
     moon.glow = 1.0;
     moonFlareState = { startTs: performance.now(), progress: 0 };
     sfxPlay('chime');
     burstSpark(moon.cx, moon.cy, 25);
-
     setTimeout(() => {
       const climaxMemory = moments.find(m => m.isMoonClimax) || moments[moments.length - 1];
-      popIcon.textContent = climaxMemory.icon || "🌕";
+      popIcon.textContent = climaxMemory.icon || '🌕';
       popMsg.textContent = climaxMemory.text;
       popup.classList.remove('ui-hidden');
       climaxPending = true;
-
-      // Safety net: auto-advance even if the person never taps close
       setTimeout(() => closeMomentPopup(), 9000);
     }, 400);
   }
 
-  function onMomentsClick(e) {
+  function onMoonClick(e) {
     e.preventDefault();
     const rect = cv.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
+    if (isMoonHit(x, y)) triggerMoonClimax();
+  }
+  cv.addEventListener('click', onMoonClick);
+  cv.addEventListener('touchstart', onMoonClick, { passive: false });
 
-    // Check Moon hit
-    if (isMoonHit(x, y)) {
-      triggerMoonClimax();
-      return;
-    }
+  // Skip / Climax button handler (bypass via button or moon tap)
+  const skipBtn = document.getElementById('moments-skip-btn');
+  if (skipBtn) {
+    skipBtn.onclick = (e) => { e.stopPropagation(); triggerMoonClimax(); };
+  }
 
-    const star = findStarAt(x, y);
-    if (!star) return;
+  // ══════════════════════════════════════════════════════════════════
+  // STAR SHOWER MECHANIC — 40 Stars fall & form "P R A N U"
+  // ✦ (sparkle) falls → lands as ⭐ in PRANU constellation shape
+  // Moon tap or button = bypass to next scene
+  // ══════════════════════════════════════════════════════════════════
+  const nonMoonMoments = moments.filter(m => !m.isMoonClimax);
+  const starsLayer = document.getElementById('tara-stars-layer');
+  const taraCountEl = document.getElementById('tara-count');
+  if (starsLayer) starsLayer.innerHTML = '';
 
-    if (star.done) {
-      popIcon.textContent = star.icon;
-      popMsg.textContent = star.moment.text;
-      popup.classList.remove('ui-hidden');
-      return;
-    }
+  // 40 PRANU constellation slot coordinates (left%, top%) - 8 stars per letter
+  const pranuSlots = [
+    // Letter P (8 stars: vertical stem + top loop)
+    { left: 6,    top: 25, letter: 'P' },
+    { left: 6,    top: 38, letter: 'P' },
+    { left: 6,    top: 51, letter: 'P' },
+    { left: 6,    top: 65, letter: 'P' },
+    { left: 11.5, top: 25, letter: 'P' },
+    { left: 17,   top: 31, letter: 'P' },
+    { left: 17,   top: 43, letter: 'P' },
+    { left: 11.5, top: 47, letter: 'P' },
 
-    star.done = true;
-    star.revealed = true;
-    star.litAlpha = 1;
-    momentsRevealed++;
+    // Letter R (8 stars: vertical stem + top loop + diagonal leg)
+    { left: 24,   top: 25, letter: 'R' },
+    { left: 24,   top: 38, letter: 'R' },
+    { left: 24,   top: 51, letter: 'R' },
+    { left: 24,   top: 65, letter: 'R' },
+    { left: 29.5, top: 25, letter: 'R' },
+    { left: 35,   top: 31, letter: 'R' },
+    { left: 32,   top: 43, letter: 'R' },
+    { left: 36,   top: 65, letter: 'R' },
 
-    sfxPlay('chime');
-    burstSpark(clientX, clientY, 12);
+    // Letter A (8 stars: left slant + peak + right slant + crossbar center)
+    { left: 41,   top: 65, letter: 'A' },
+    { left: 43.5, top: 51.5, letter: 'A' },
+    { left: 46,   top: 38, letter: 'A' },
+    { left: 49,   top: 25, letter: 'A' },
+    { left: 52,   top: 38, letter: 'A' },
+    { left: 54.5, top: 51.5, letter: 'A' },
+    { left: 57,   top: 65, letter: 'A' },
+    { left: 49,   top: 46, letter: 'A' },
 
-    // Increase moon glow dynamically as stars are discovered
-    moon.glow = Math.min(1.0, 0.2 + (momentsRevealed / Math.max(1, cloudData.length)) * 0.8);
+    // Letter N (8 stars: left stem + diagonal stroke + right stem)
+    { left: 61,   top: 65, letter: 'N' },
+    { left: 61,   top: 45, letter: 'N' },
+    { left: 61,   top: 25, letter: 'N' },
+    { left: 65.5, top: 38, letter: 'N' },
+    { left: 70.5, top: 52, letter: 'N' },
+    { left: 75,   top: 65, letter: 'N' },
+    { left: 75,   top: 45, letter: 'N' },
+    { left: 75,   top: 25, letter: 'N' },
 
-    setTimeout(() => {
-      popIcon.textContent = star.icon;
-      popMsg.textContent = star.moment.text;
-      popup.classList.remove('ui-hidden');
-    }, 300);
+    // Letter U (7 stars: left stem + bottom curve + right stem)
+    { left: 80,   top: 25, letter: 'U' },
+    { left: 80,   top: 42, letter: 'U' },
+    { left: 81,   top: 57, letter: 'U' },
+    { left: 87,   top: 65, letter: 'U' },
+    { left: 93,   top: 57, letter: 'U' },
+    { left: 94,   top: 42, letter: 'U' },
+    { left: 94,   top: 25, letter: 'U' }
+  ];
 
-    if (momentsRevealed >= cloudData.length) {
+  // Constellation SVG Line Connectors Definition for P R A N U
+  const svgLinesContainer = document.getElementById('pranu-svg-lines');
+  if (svgLinesContainer) svgLinesContainer.innerHTML = '';
+
+  const lineConnections = [
+    // Letter P (indices 0..7: stem 0-1-2-3, loop 0-4-5-6-7-2)
+    [0,1], [1,2], [2,3], [0,4], [4,5], [5,6], [6,7], [7,2],
+
+    // Letter R (indices 8..15: stem 8-9-10-11, loop 8-12-13-14-10, leg 10-15)
+    [8,9], [9,10], [10,11], [8,12], [12,13], [13,14], [14,10], [10,15],
+
+    // Letter A (indices 16..23: arch 16-17-18-19-20-21-22, crossbar 17-23-21)
+    [16,17], [17,18], [18,19], [19,20], [20,21], [21,22], [17,23], [23,21],
+
+    // Letter N (indices 24..31: left 24-25-26, diag 26-27-28-29, right 29-30-31)
+    [24,25], [25,26], [26,27], [27,28], [28,29], [29,30], [30,31],
+
+    // Letter U (indices 32..38: smooth U 32-33-34-35-36-37-38)
+    [32,33], [33,34], [34,35], [35,36], [36,37], [37,38]
+  ];
+
+
+  // Draw initial translucent constellation lines
+  const createdLines = [];
+  if (svgLinesContainer) {
+    lineConnections.forEach(([a, b], lineIdx) => {
+      const p1 = pranuSlots[a];
+      const p2 = pranuSlots[b];
+      if (!p1 || !p2) return;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', `${p1.left}%`);
+      line.setAttribute('y1', `${p1.top}%`);
+      line.setAttribute('x2', `${p2.left}%`);
+      line.setAttribute('y2', `${p2.top}%`);
+      line.setAttribute('class', `pranu-line letter-${p1.letter}`);
+      line.setAttribute('data-a', a);
+      line.setAttribute('data-b', b);
+      svgLinesContainer.appendChild(line);
+      createdLines.push({ el: line, a, b, letter: p1.letter });
+    });
+  }
+
+  let momentQueue = [...nonMoonMoments];
+  let slotIdx = 0;
+  let revealedCount = 0;
+
+  function updateTaraCounter() {
+    if (taraCountEl) taraCountEl.textContent = `${revealedCount} / ${nonMoonMoments.length}`;
+    moon.glow = Math.min(0.95, 0.15 + (revealedCount / nonMoonMoments.length) * 0.8);
+    if (revealedCount >= nonMoonMoments.length) {
       setTimeout(triggerMoonClimax, 1500);
     }
   }
 
-  cv.addEventListener('click', onMomentsClick);
-  cv.addEventListener('touchstart', onMomentsClick, { passive: false });
-
-  // Skip / Climax button handler
-  const skipBtn = document.getElementById('moments-skip-btn');
-  if (skipBtn) {
-    skipBtn.onclick = (e) => {
-      e.stopPropagation();
-      triggerMoonClimax();
-    };
+  function lightUpChainForLetter(letter) {
+    // Light up all SVG constellation lines of this letter
+    document.querySelectorAll(`.pranu-line.letter-${letter}`).forEach(line => {
+      line.classList.add('line-glowing');
+    });
+    // Light up all stars of this letter
+    document.querySelectorAll(`.tara-landed[data-letter="${letter}"]`).forEach(star => {
+      star.classList.add('tara-chain-active');
+    });
   }
+
+  function spawnFallingStar(moment, slot, currentSlotIdx) {
+    if (!starsLayer || !slot) return;
+
+    // Falling element (✦ sparkle)
+    const falling = document.createElement('div');
+    falling.className = 'tara-falling';
+    falling.textContent = '✦';
+    falling.style.left = slot.left + '%';
+    falling.style.top = '-6%';
+    starsLayer.appendChild(falling);
+
+    falling.style.setProperty('--targetTop', slot.top + '%');
+
+    // After falling animation, settle into PRANU position as interactive star (⭐)
+    setTimeout(() => {
+      if (falling.parentNode) falling.remove();
+
+      const star = document.createElement('button');
+      star.className = 'tara-landed';
+      star.textContent = '⭐';
+      star.style.left = slot.left + '%';
+      star.style.top = slot.top + '%';
+      star.setAttribute('data-letter', slot.letter);
+      star.setAttribute('data-slot-idx', currentSlotIdx);
+      star.style.animationDelay = (Math.random() * 2) + 's';
+      starsLayer.appendChild(star);
+
+      // Make SVG line segment visible as star lands
+      createdLines.forEach(l => {
+        if (l.a === currentSlotIdx || l.b === currentSlotIdx) {
+          l.el.classList.add('line-visible');
+        }
+      });
+
+      star.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (star.classList.contains('tara-revealed')) return;
+        star.classList.add('tara-revealed');
+        star.textContent = moment.icon || '✨';
+        sfxPlay('chime');
+        burstSpark(e.clientX, e.clientY, 14);
+
+        // Light up the entire constellation chain for this letter!
+        lightUpChainForLetter(slot.letter);
+
+        revealedCount++;
+        updateTaraCounter();
+
+        // Show memory popup
+        popIcon.textContent = moment.icon || '✨';
+        popMsg.textContent = moment.text;
+        popup.classList.remove('ui-hidden');
+      });
+    }, 1700);
+  }
+
+
+  function spawnBatch() {
+    if (momentQueue.length === 0 || slotIdx >= pranuSlots.length) return;
+    const BATCH = 3;
+    for (let i = 0; i < BATCH && momentQueue.length > 0 && slotIdx < pranuSlots.length; i++) {
+      const curIdx = slotIdx;
+      const m = momentQueue.shift();
+      const s = pranuSlots[slotIdx++];
+      setTimeout(() => spawnFallingStar(m, s, curIdx), i * 450);
+    }
+  }
+
+
+  // Shower stars in batches of 3 every 2.2 seconds until PRANU is formed
+  spawnBatch();
+  showerInterval = setInterval(() => {
+    if (document.getElementById('act-moments').classList.contains('ui-hidden')) {
+      clearInterval(showerInterval); return;
+    }
+    if (momentQueue.length === 0 || slotIdx >= pranuSlots.length) {
+      clearInterval(showerInterval); return;
+    }
+    spawnBatch();
+  }, 2200);
 }
+
+
 
 // ══════════════════════════════════════════════════════════════════
 // ACT 3 — HEARTS: Big SVG heart fill + floating hearts
@@ -2350,78 +2455,20 @@ function startCandles() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// ACT 5.5 — SAATH KE PAL: Moments Gallery (Image + Message Cards)
+// ACT 5.5 — SAATH KE PAL: Two-Phase Gallery (Album Picker + Full-Screen Viewer)
 // ══════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════
-// ACT 5.5 — SAATH KE PAL: Polaroid Album Scrapbook Gallery
-// ══════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════
-// ACT 5.5 — SAATH KE PAL: Polaroid Album Scrapbook Gallery (Auto-Play + Tap Skip)
-// ══════════════════════════════════════════════════════════════════
-let galleryAutoPlayTimer = null;
-let isGalleryAutoPlaying = true;
+const completedAlbums = new Set(); // tracks which albums user has finished
 
 function startMomentsGallery() {
-  const photos = BIRTHDAY_CONFIG.galleryPhotos || [];
-  const categories = BIRTHDAY_CONFIG.categories || [];
+  const allPhotos = BIRTHDAY_CONFIG.galleryPhotos || [];
+  const categories = (BIRTHDAY_CONFIG.categories || []).filter(c => c.id !== 'all');
   const catMap = {};
   categories.forEach(c => { catMap[c.id] = c; });
 
-  const container = document.getElementById('gallery-cards-container');
-  const dotsEl = document.getElementById('gallery-progress-dots');
   const kissOverlay = document.getElementById('kiss-reveal-overlay');
   const kissContinueBtn = document.getElementById('kiss-continue-btn');
-
-  if (container) container.innerHTML = '';
-  if (dotsEl) dotsEl.innerHTML = '';
-  if (kissOverlay) kissOverlay.classList.add('ui-hidden');
-
-  let currentCard = 0;
-  let startX = 0;
-  let isDragging = false;
-
-  // Render Polaroid Cards
-  photos.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'polaroid-card' + (i === 0 ? ' gallery-card-active' : '');
-
-    // Slight random rotation for scrapbook polaroid look (-2.5 deg to +2.5 deg)
-    const rot = ((i % 5) - 2) * 1.2;
-    el.style.transform = i === 0 ? `rotate(${rot}deg) scale(1)` : `rotate(${rot}deg) scale(0.96)`;
-
-    const catObj = catMap[p.cat] || { name: 'Yaadein', icon: '🌸' };
-
-    el.innerHTML = `
-      <div class="polaroid-tape"></div>
-      <div class="polaroid-img-frame">
-        <img src="${p.src}" alt="${p.caption}" loading="lazy" />
-      </div>
-      <div class="polaroid-footer">
-        <span class="polaroid-album-tag">${catObj.icon} ${catObj.name}</span>
-        <div class="polaroid-caption">${p.caption}</div>
-        <span class="polaroid-count">${i + 1} / ${photos.length}</span>
-      </div>
-    `;
-
-    // Tap/Click directly on the card to skip to next card
-    el.addEventListener('click', (e) => {
-      // Don't trigger if swiping
-      if (isDragging) return;
-      if (currentCard < photos.length - 1) {
-        goToCard(currentCard + 1);
-        resetGalleryAutoPlay();
-      } else {
-        if (kissOverlay) kissOverlay.classList.remove('ui-hidden');
-      }
-    });
-
-    container.appendChild(el);
-
-    // Render dot
-    const dot = document.createElement('div');
-    dot.className = 'gallery-dot' + (i === 0 ? ' gallery-dot-active' : '');
-    if (dotsEl) dotsEl.appendChild(dot);
-  });
+  const picker = document.getElementById('gallery-album-picker');
+  const viewer = document.getElementById('gallery-photo-viewer');
 
   // Soft atmospheric starfield canvas background
   const cv = document.getElementById('gallery-canvas');
@@ -2435,124 +2482,192 @@ function startMomentsGallery() {
       const g = ctx.createLinearGradient(0, 0, 0, H);
       g.addColorStop(0, '#0a0018'); g.addColorStop(0.5, '#180033'); g.addColorStop(1, '#060010');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
-      // Twinkling soft motes
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         const sx = ((i * 187.3) % W);
         const sy = ((i * 123.7) % H);
-        const a = 0.2 + 0.45 * Math.abs(Math.sin((ts || 0) * 0.001 + i));
+        const a = 0.15 + 0.45 * Math.abs(Math.sin((ts || 0) * 0.001 + i));
         ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 180, 220, ${a})`; ctx.fill();
       }
-
       requestAnimationFrame(renderGalleryBg);
     })(performance.now());
   }
 
-  function goToCard(idx) {
-    const cardEls = container.querySelectorAll('.polaroid-card');
-    const dotEls = dotsEl ? dotsEl.querySelectorAll('.gallery-dot') : [];
-    cardEls.forEach((c, i) => {
-      const rot = ((i % 5) - 2) * 1.2;
-      c.classList.toggle('gallery-card-active', i === idx);
-      c.classList.toggle('gallery-card-prev', i < idx);
-      if (i === idx) c.style.transform = `rotate(${rot}deg) scale(1)`;
+  // ── PHASE 1: Build Album Picker ──────────────────────────────────
+  function showPicker() {
+    viewer.classList.add('ui-hidden');
+    picker.classList.remove('ui-hidden');
+
+    const grid = document.getElementById('gallery-album-grid');
+    grid.innerHTML = '';
+
+    categories.forEach(cat => {
+      const photos = allPhotos.filter(p => p.cat === cat.id);
+      if (photos.length === 0) return;
+
+      const isDone = completedAlbums.has(cat.id);
+      const tile = document.createElement('div');
+      tile.className = 'album-tile' + (isDone ? ' album-tile-done' : '');
+      tile.dataset.catId = cat.id;
+
+      // Thumbnail: first photo of this album
+      const thumb = photos[0].src;
+
+      tile.innerHTML = `
+        <div class="album-tile-img-wrap">
+          <img src="${thumb}" alt="${cat.name}" loading="lazy" />
+          <div class="album-tile-overlay"></div>
+          ${isDone ? '<div class="album-done-badge">✅</div>' : ''}
+        </div>
+        <div class="album-tile-footer">
+          <span class="album-tile-icon">${cat.icon}</span>
+          <span class="album-tile-name">${cat.name}</span>
+          <span class="album-tile-count">${photos.length} photos</span>
+        </div>
+      `;
+
+      tile.addEventListener('click', () => openViewer(cat, photos));
+      grid.appendChild(tile);
     });
-    dotEls.forEach((d, i) => d.classList.toggle('gallery-dot-active', i === idx));
-    currentCard = idx;
+  }
 
-    // Scroll active dot into view
-    if (dotEls[idx]) {
-      dotEls[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+  // ── PHASE 2: Open Full-Screen Viewer for a category ─────────────
+  let viewerAutoTimer = null;
+  let viewerPhotoIdx = 0;
+  let viewerPhotos = [];
+  let viewerCat = null;
 
-    // When last card is reached -> show Kiss Reveal Overlay Screen
-    if (idx === photos.length - 1) {
-      stopGalleryAutoPlay();
-      setTimeout(() => {
-        if (kissOverlay) kissOverlay.classList.remove('ui-hidden');
-      }, 1500);
+  function openViewer(cat, photos) {
+    viewerCat = cat;
+    viewerPhotos = photos;
+    viewerPhotoIdx = 0;
+
+    picker.classList.add('ui-hidden');
+    viewer.classList.remove('ui-hidden');
+
+    buildViewerDots(photos.length);
+    showViewerPhoto(0);
+    startViewerAutoPlay();
+  }
+
+  function buildViewerDots(count) {
+    const dotsEl = document.getElementById('gallery-viewer-dots');
+    dotsEl.innerHTML = '';
+    const maxDots = Math.min(count, 12);
+    for (let i = 0; i < maxDots; i++) {
+      const d = document.createElement('div');
+      d.className = 'viewer-dot' + (i === 0 ? ' viewer-dot-active' : '');
+      dotsEl.appendChild(d);
     }
   }
 
-  // Auto-Play Slideshow logic
-  function startGalleryAutoPlay() {
-    stopGalleryAutoPlay();
-    isGalleryAutoPlaying = true;
-    galleryAutoPlayTimer = setInterval(() => {
-      if (document.getElementById('act-moments-gallery').classList.contains('ui-hidden')) {
-        stopGalleryAutoPlay();
-        return;
-      }
-      if (currentCard < photos.length - 1) {
-        goToCard(currentCard + 1);
+  function showViewerPhoto(idx) {
+    const img = document.getElementById('gallery-viewer-img');
+    const captionEl = document.getElementById('gallery-viewer-caption');
+    const albumEl = document.getElementById('gallery-viewer-album');
+    const counterEl = document.getElementById('gallery-viewer-counter');
+    const dotsEl = document.getElementById('gallery-viewer-dots');
+
+    const p = viewerPhotos[idx];
+    if (!p) return;
+
+    // Smooth fade transition
+    img.style.opacity = '0';
+    img.style.transform = 'scale(1.04)';
+    setTimeout(() => {
+      img.src = p.src;
+      img.style.opacity = '1';
+      img.style.transform = 'scale(1)';
+    }, 180);
+
+    if (captionEl) captionEl.textContent = p.caption || '';
+    if (albumEl && viewerCat) albumEl.textContent = `${viewerCat.icon} ${viewerCat.name}`;
+    if (counterEl) counterEl.textContent = `${idx + 1} / ${viewerPhotos.length}`;
+
+    // Update dots (show up to 12, map position proportionally)
+    const dots = dotsEl.querySelectorAll('.viewer-dot');
+    const total = viewerPhotos.length;
+    dots.forEach((d, i) => {
+      const mappedIdx = Math.round((i / (dots.length - 1 || 1)) * (total - 1));
+      d.classList.toggle('viewer-dot-active', mappedIdx === idx || (dots.length === 1 && idx === 0));
+    });
+
+    viewerPhotoIdx = idx;
+  }
+
+  function nextViewerPhoto() {
+    if (viewerPhotoIdx < viewerPhotos.length - 1) {
+      showViewerPhoto(viewerPhotoIdx + 1);
+    } else {
+      // Album finished!
+      stopViewerAutoPlay();
+      completedAlbums.add(viewerCat.id);
+
+      // Check if all albums are done
+      const nonEmptyAlbums = categories.filter(c => allPhotos.some(p => p.cat === c.id));
+      if (completedAlbums.size >= nonEmptyAlbums.length) {
+        // All albums seen → Kiss Reveal
+        viewer.classList.add('ui-hidden');
+        picker.classList.add('ui-hidden');
+        if (kissOverlay) kissOverlay.classList.remove('ui-hidden');
       } else {
-        stopGalleryAutoPlay();
+        // Return to picker with this album marked done
+        showPicker();
       }
+    }
+  }
+
+  function startViewerAutoPlay() {
+    stopViewerAutoPlay();
+    viewerAutoTimer = setInterval(() => {
+      if (document.getElementById('act-moments-gallery').classList.contains('ui-hidden')) {
+        stopViewerAutoPlay(); return;
+      }
+      nextViewerPhoto();
     }, 3200);
   }
 
-  function stopGalleryAutoPlay() {
-    if (galleryAutoPlayTimer) {
-      clearInterval(galleryAutoPlayTimer);
-      galleryAutoPlayTimer = null;
-    }
-    isGalleryAutoPlaying = false;
+  function stopViewerAutoPlay() {
+    if (viewerAutoTimer) { clearInterval(viewerAutoTimer); viewerAutoTimer = null; }
   }
 
-  function resetGalleryAutoPlay() {
-    startGalleryAutoPlay();
+  // Tap anywhere on the viewer → next photo
+  const tapZone = document.getElementById('gallery-viewer-tap');
+  if (tapZone) {
+    tapZone.onclick = () => {
+      stopViewerAutoPlay();
+      nextViewerPhoto();
+      startViewerAutoPlay();
+    };
   }
 
-  // Touch / swipe support
-  container.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    isDragging = false;
-  }, { passive: true });
+  // Back button → return to picker
+  const backBtn = document.getElementById('gallery-viewer-back');
+  if (backBtn) {
+    backBtn.onclick = () => {
+      stopViewerAutoPlay();
+      completedAlbums.add(viewerCat.id); // mark partial as done too
+      showPicker();
+    };
+  }
 
-  container.addEventListener('touchmove', e => {
-    if (Math.abs(e.touches[0].clientX - startX) > 10) {
-      isDragging = true;
-    }
-  }, { passive: true });
-
-  container.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 35) {
-      if (dx < 0 && currentCard < photos.length - 1) {
-        goToCard(currentCard + 1);
-        resetGalleryAutoPlay();
-      }
-      if (dx > 0 && currentCard > 0) {
-        goToCard(currentCard - 1);
-        resetGalleryAutoPlay();
-      }
-    }
-    setTimeout(() => { isDragging = false; }, 100);
-  });
-
-  // Navigation buttons
-  const prevBtn = document.getElementById('gallery-prev');
-  const nextBtn = document.getElementById('gallery-next');
-  if (prevBtn) prevBtn.onclick = () => { if (currentCard > 0) { goToCard(currentCard - 1); resetGalleryAutoPlay(); } };
-  if (nextBtn) nextBtn.onclick = () => { if (currentCard < photos.length - 1) { goToCard(currentCard + 1); resetGalleryAutoPlay(); } };
-
-  // Kiss Continue button -> Act 6 Finale
+  // Kiss continue → Finale
   if (kissContinueBtn) {
     kissContinueBtn.onclick = () => {
-      stopGalleryAutoPlay();
+      stopViewerAutoPlay();
       if (kissOverlay) kissOverlay.classList.add('ui-hidden');
       switchAct('act-moments-gallery', 'act-finale', startFinale);
     };
   }
 
-  // Start auto-play automatically when gallery opens
-  startGalleryAutoPlay();
+  // Start with the picker
+  showPicker();
 }
 
 // ══════════════════════════════════════════════════════════════════
 // ACT 6 — FINALE (Blooming Heart Tree + Photo Player + 3 Words + Hearts Rain)
 // ══════════════════════════════════════════════════════════════════
+
 let finaleTreeRunning = false;
 let photoPlayerTimer = null;
 let currentPhotoIdx = 0;
