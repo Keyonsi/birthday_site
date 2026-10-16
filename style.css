@@ -3341,6 +3341,51 @@ body {
   transform: scale(0.94);
 }
 
+/* Active scene button — green highlight so you always know what you're testing */
+.quick-testing-bar button.nav-btn-active {
+  background: rgba(52, 211, 153, 0.22) !important;
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+  box-shadow: 0 0 7px rgba(52, 211, 153, 0.45);
+  font-weight: 700;
+}
+
+/* Quick-bar divider between scene nav and mobile toggle */
+.quick-bar-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.18);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* Mobile Preview Toggle button */
+.mobile-preview-btn {
+  background: rgba(52, 211, 153, 0.12) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+  color: #6ee7b7 !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.mobile-preview-btn:hover {
+  background: rgba(52, 211, 153, 0.28) !important;
+}
+
+/* Active state: green glow + pulse */
+.mobile-preview-btn.mobile-preview-active {
+  background: rgba(52, 211, 153, 0.25) !important;
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+  animation: mobilePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes mobilePulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(52, 211, 153, 0.4); }
+  50%       { box-shadow: 0 0 14px rgba(52, 211, 153, 0.75); }
+}
+
 /* ══════════════════════════════════════════════════════════════════
    GRAND FINALE SPLIT VIEW & BLOOMING TREE STYLES
    ================================================================== */

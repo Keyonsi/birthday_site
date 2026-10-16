@@ -2955,8 +2955,28 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
+// ── DEV HELPER: highlight the active scene button green ──────────────
+function setActiveNavBtn(targetId) {
+  const bar = document.getElementById('quick-testing-bar');
+  if (!bar) return;
+  // Reset all scene buttons (skip the mobile-preview-btn)
+  bar.querySelectorAll('button:not(.mobile-preview-btn)').forEach(btn => {
+    btn.classList.remove('nav-btn-active');
+  });
+  // Find and highlight the matching button by its onclick attr / title
+  bar.querySelectorAll('button:not(.mobile-preview-btn)').forEach(btn => {
+    const onclk = btn.getAttribute('onclick') || '';
+    if (onclk.includes("'" + targetId + "'")) {
+      btn.classList.add('nav-btn-active');
+    }
+  });
+}
+
 // Universal Quick Testing Navigation Function
 function skipToAct(targetId) {
+  // Highlight the active button in the nav bar
+  setActiveNavBtn(targetId);
+
   // Unhide main experience container so acts are visible immediately
   const exp = document.getElementById('experience');
   if (exp) {
@@ -2984,6 +3004,16 @@ function skipToAct(targetId) {
   // Stop current sounds
   try { stopCricketsSound(); } catch (e) { }
   try { stopRainSound(); } catch (e) { }
+
+  // ── MUSIC: keep off when using the dev nav bar ──
+  // Stop any playing track without toggling bgMusicPlaying state visually.
+  // The user can manually press the music FAB if they want audio.
+  if (bgMusicPlaying) {
+    bgMusicPlaying = false;
+    if (currentAudio) fadeVol(currentAudio, 0, 400, true);
+    const icon = document.getElementById('music-icon');
+    if (icon) icon.textContent = '🎵';
+  }
 
   if (targetId === 'decoy') {
     if (decoy) {
