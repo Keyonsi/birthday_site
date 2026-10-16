@@ -24,7 +24,23 @@
   </svg>
   <link rel="stylesheet" href="style.css" />
   <script>
+    // ── DEV HELPER: highlight the active scene button ──────────────────
+    function _setActiveNavBtn(targetId) {
+      var bar = document.getElementById('quick-testing-bar');
+      if (!bar) return;
+      bar.querySelectorAll('button:not(.mobile-preview-btn)').forEach(function (btn) {
+        btn.classList.remove('nav-btn-active');
+        var onclk = btn.getAttribute('onclick') || '';
+        if (onclk.indexOf("'" + targetId + "'") !== -1) {
+          btn.classList.add('nav-btn-active');
+        }
+      });
+    }
+
     window.skipToAct = function (targetId) {
+      // Highlight the active nav button
+      _setActiveNavBtn(targetId);
+
       // Unhide main experience container so acts are visible immediately
       var exp = document.getElementById('experience');
       if (exp) {
@@ -79,7 +95,9 @@
         'moments': { id: 'act-moments', fnName: 'startMoments' },
         'hearts': { id: 'act-hearts', fnName: 'startHearts' },
         'proposal': { id: 'act-proposal', fnName: 'startProposal' },
-        'candles': { id: 'act-candles', fnName: 'startCandles' }
+        'candles': { id: 'act-candles', fnName: 'startCandles' },
+        'moments-gallery': { id: 'act-moments-gallery', fnName: 'startMomentsGallery' },
+        'finale': { id: 'act-finale', fnName: 'startFinale' }
       };
 
       var target = actMap[targetId];
@@ -122,7 +140,59 @@
     <button onclick="skipToAct('candles')" title="Birthday Candles">🎂 Candles</button>
     <button onclick="skipToAct('moments-gallery')" title="Saath Ke Pal">📸 Pal</button>
     <button onclick="skipToAct('finale')" title="Finale End Screen">🌸 Finale</button>
+    <!-- Mobile Preview Toggle -->
+    <div class="quick-bar-divider"></div>
+    <button id="mobile-preview-btn" class="mobile-preview-btn" onclick="toggleMobilePreview()" title="Toggle Mobile Preview (390×844)">📱 Mobile</button>
   </div>
+
+  <script>
+    // ── MOBILE PREVIEW TOGGLE ──────────────────────────────────────────
+    var _mobileWin = null;
+    var _mobileCheckInterval = null;
+
+    function toggleMobilePreview() {
+      var btn = document.getElementById('mobile-preview-btn');
+
+      // If window is open and alive, close it
+      if (_mobileWin && !_mobileWin.closed) {
+        _mobileWin.close();
+        _mobileWin = null;
+        clearInterval(_mobileCheckInterval);
+        btn.classList.remove('mobile-preview-active');
+        btn.textContent = '📱 Mobile';
+        return;
+      }
+
+      // Calculate position: open next to current window
+      var popW = 390, popH = 844;
+      var left = window.screenX + window.outerWidth + 10;
+      var top = window.screenY + Math.round((window.outerHeight - popH) / 2);
+      // Clamp to screen
+      if (left + popW > screen.width) left = Math.max(0, window.screenX - popW - 10);
+
+      _mobileWin = window.open(
+        window.location.href,
+        'mobile_preview_window',
+        'width=' + popW + ',height=' + popH + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no'
+      );
+
+      if (_mobileWin) {
+        btn.classList.add('mobile-preview-active');
+        btn.textContent = '📱 Close';
+
+        // Watch for the popup being closed manually
+        clearInterval(_mobileCheckInterval);
+        _mobileCheckInterval = setInterval(function () {
+          if (_mobileWin && _mobileWin.closed) {
+            _mobileWin = null;
+            clearInterval(_mobileCheckInterval);
+            btn.classList.remove('mobile-preview-active');
+            btn.textContent = '📱 Mobile';
+          }
+        }, 500);
+      }
+    }
+  </script>
 
   <!-- ══ DECOY ══════════════════════════════════════════════════════ -->
   <div id="decoy-site">
